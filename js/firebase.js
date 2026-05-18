@@ -6,6 +6,5 @@ const firebaseConfig = {
   authDomain: "amigos-a993b.firebaseapp.com",
   projectId: "amigos-a993b"
 };
-
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
