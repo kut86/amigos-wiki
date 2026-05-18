@@ -10,12 +10,12 @@ export function startRealtime(callback) {
     weapons = {};
     snap.forEach(doc => weapons[doc.id] = doc.data());
     callback();
-  });
+   });
 
   onSnapshot(collection(db, "targets"), (snap) => {
     targets = {};
     snap.forEach(doc => targets[doc.id] = doc.data());
     callback();
-  });
+   });
 
 }
