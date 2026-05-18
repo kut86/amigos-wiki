@@ -1,0 +1,22 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import {
+  getFirestore
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔥 Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCaduHQdeknkestReV2lgMsxYF_cluBHDE",
+  authDomain: "amigos-a993b.firebaseapp.com",
+  projectId: "amigos-a993b",
+  storageBucket: "amigos-a993b.firebasestorage.app",
+  messagingSenderId: "135769161234",
+  appId: "1:135769161234:web:8ccda57261b89d9e9be2cb",
+  measurementId: "G-GH9EZLPVKG"
+};
+
+// 🚀 Init Firebase
+const app = initializeApp(firebaseConfig);
+
+// 📦 Firestore DB
+export const db = getFirestore(app);

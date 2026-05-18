@@ -1,0 +1,56 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b0b0b;
+  color: white;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #ff3b3b;
+}
+
+select,
+button,
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+button {
+  background: linear-gradient(90deg,#ff3b3b,#ff7a18);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #333;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background: #222;
+}
+
+.best {
+  background: rgba(0,255,100,0.15);
+}
