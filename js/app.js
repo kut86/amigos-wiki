@@ -7,7 +7,7 @@ const calcBtn = document.getElementById("calcBtn");
 const output = document.getElementById("output");
 const categorySelect = document.getElementById("category");
 
-// Получаем класс цвета для tier
+// Получаем класс цвета для tier структуры
 function getTierClass(tier) {
     switch(tier){
         case "wood": return "tier-wood";
@@ -22,9 +22,9 @@ function getTierClass(tier) {
 function renderTargets() {
     targetSelect.innerHTML = "";
 
-    const selectedCategory = categorySelect.value;
+    const selectedCategory = categorySelect.value || "all";
 
-    Object.entries(targets).forEach(([id,target]) => {
+    Object.entries(targets).forEach(([id, target]) => {
         if(selectedCategory !== "all" && target.category !== selectedCategory){
             return;
         }
@@ -34,6 +34,11 @@ function renderTargets() {
         option.textContent = target.name_ru || target.name_en || target.name || id;
         targetSelect.appendChild(option);
     });
+
+    // Сбрасываем выбор на первую структуру в списке
+    if(targetSelect.options.length > 0){
+        targetSelect.selectedIndex = 0;
+    }
 }
 
 // Основная функция расчета
@@ -42,11 +47,14 @@ function calculate() {
     const mode = modeSelect.value;
 
     const target = targets[targetId];
-    if(!target) return;
+    if(!target) {
+        output.innerHTML = "<p>Нет выбранной структуры</p>";
+        return;
+    }
 
     let results = [];
 
-    Object.entries(weapons).forEach(([id,weapon]) => {
+    Object.entries(weapons).forEach(([id, weapon]) => {
         const damage = weapon.damage || 1; // защита от нуля
         const amount = Math.ceil(target.hp / damage);
         const totalCost = amount * (weapon.cost || 0);
@@ -61,7 +69,7 @@ function calculate() {
         });
     });
 
-    // сортировка
+    // Сортировка по выбранному режиму
     if(mode === "cost"){
         results.sort((a,b)=> a.totalCost - b.totalCost);
     } else {
@@ -71,11 +79,11 @@ function calculate() {
     renderResults(target, results);
 }
 
-// Отрисовка карточек
+// Отрисовка карточек с подсветкой BEST оружия
 function renderResults(target, results) {
     output.innerHTML = "";
 
-    results.forEach((weapon,index)=>{
+    results.forEach((weapon, index) => {
         const card = document.createElement("div");
         card.className = "card";
 
@@ -97,7 +105,7 @@ function renderResults(target, results) {
                     <div class="hp">Нужно: ${weapon.amount} шт.</div>
                 </div>
                 <div>
-                    ${index === 0 ? `<div class="best ${bestClass}">BEST</div>` : ``}
+                    ${index === 0 ? `<div class="best ${bestClass}">BEST</div>` : ""}
                 </div>
             </div>
 
@@ -115,13 +123,17 @@ function renderResults(target, results) {
 
 // События
 calcBtn.addEventListener("click", calculate);
-categorySelect.addEventListener("change", ()=>{
+categorySelect.addEventListener("change", () => {
     renderTargets();
     calculate();
 });
 
 // Realtime обновление
-startRealtime(()=>{
+startRealtime(() => {
     renderTargets();
     calculate();
 });
+
+// Инициализация страницы при загрузке
+renderTargets();
+calculate();
