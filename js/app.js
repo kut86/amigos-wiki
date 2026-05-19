@@ -25,7 +25,6 @@ function renderTargets() {
     const selectedCategory = categorySelect.value;
 
     Object.entries(targets).forEach(([id,target]) => {
-        // фильтруем по категории
         if(selectedCategory !== "all" && target.category !== selectedCategory){
             return;
         }
@@ -48,7 +47,8 @@ function calculate() {
     let results = [];
 
     Object.entries(weapons).forEach(([id,weapon]) => {
-        const amount = Math.ceil(target.hp / (weapon.damage || 1)); // защита от нуля
+        const damage = weapon.damage || 1; // защита от нуля
+        const amount = Math.ceil(target.hp / damage);
         const totalCost = amount * (weapon.cost || 0);
         const totalTime = amount * (weapon.time || 0);
 
@@ -79,6 +79,9 @@ function renderResults(target, results) {
         const card = document.createElement("div");
         card.className = "card";
 
+        // Цвет BEST оружия = tier структуры
+        const bestClass = index === 0 ? getTierClass(target.tier) : "";
+
         card.innerHTML = `
             <div class="badge ${getTierClass(target.tier)}">
                 ${target.category || "structure"}
@@ -94,7 +97,7 @@ function renderResults(target, results) {
                     <div class="hp">Нужно: ${weapon.amount} шт.</div>
                 </div>
                 <div>
-                    ${index === 0 ? `<div class="best">BEST</div>` : ``}
+                    ${index === 0 ? `<div class="best ${bestClass}">BEST</div>` : ``}
                 </div>
             </div>
 
@@ -117,83 +120,8 @@ categorySelect.addEventListener("change", ()=>{
     calculate();
 });
 
-// realtime обновление
+// Realtime обновление
 startRealtime(()=>{
     renderTargets();
     calculate();
-});function renderResults(target,results){
-
-    output.innerHTML = "";
-
-    results.forEach((weapon,index)=>{
-
-        const card = document.createElement("div");
-
-        card.className = "card";
-
-        card.innerHTML = `
-
-            <div class="badge ${getTierClass(target.tier)}">
-                ${target.category || "structure"}
-            </div>
-
-            <h2>
-                ${target.name_ru || target.name_en}
-            </h2>
-
-            <div class="weapon-row">
-
-                <div>
-                    <div class="weapon-name">
-                        ${weapon.name_ru || weapon.name_en}
-                    </div>
-
-                    <div class="hp">
-                        Нужно: ${weapon.amount} шт.
-                    </div>
-                </div>
-
-                <div>
-
-                    ${
-                        index === 0
-                        ? `<div class="best">BEST</div>`
-                        : ``
-                    }
-
-                </div>
-
-            </div>
-
-            <div class="weapon-row">
-
-                <span class="cost">
-                    💰 ${weapon.totalCost} sulfur
-                </span>
-
-                <span class="fast">
-                    ⚡ ${weapon.totalTime.toFixed(1)} sec
-                </span>
-
-            </div>
-
-            <div class="hp">
-                HP структуры: ${target.hp}
-            </div>
-
-        `;
-
-        output.appendChild(card);
-
-    });
-
-}
-
-calcBtn.addEventListener("click",calculate);
-
-startRealtime(()=>{
-
-    renderTargets();
-    calculate();
-
 });
