@@ -99,7 +99,7 @@ function renderResults(target, results) {
 
             <div class="weapon-row">
                 <div>
-                    <div class="weapon_name">
+                    <div class="weapon-name">
                         ${weapon.name_ru || weapon.name_en || weapon.name || "Unknown"}
                     </div>
                     <div class="hp">Нужно: ${weapon.amount} шт.</div>
