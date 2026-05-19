@@ -1,56 +1,133 @@
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b0b0b;
-  color: white;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter,sans-serif;
 }
 
-.container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
+body{
+  background:#0f1419;
+  color:#fff;
+  padding:20px;
 }
 
-h1 {
-  text-align: center;
-  color: #ff3b3b;
+.container{
+  max-width:1400px;
+  margin:auto;
 }
 
-select,
-button,
-input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: #222;
-  color: white;
-  border: none;
-  border-radius: 8px;
+header{
+  margin-bottom:25px;
 }
 
-button {
-  background: linear-gradient(90deg,#ff3b3b,#ff7a18);
-  font-weight: bold;
-  cursor: pointer;
+h1{
+  font-size:34px;
+  font-weight:800;
+  margin-bottom:10px;
 }
 
-table {
-  width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
+.subtitle{
+  color:#8b98a5;
 }
 
-th,
-td {
-  border: 1px solid #333;
-  padding: 10px;
-  text-align: center;
+.topbar{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:25px;
 }
 
-th {
-  background: #222;
+.select-box{
+  background:#1b2430;
+  border:1px solid #2e3b4e;
+  padding:12px;
+  border-radius:12px;
+  color:white;
+  min-width:220px;
 }
 
-.best {
-  background: rgba(0,255,100,0.15);
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#1b2430;
+  border:1px solid #2e3b4e;
+  border-radius:18px;
+  padding:20px;
+  transition:.2s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  border-color:#4da3ff;
+}
+
+.card h2{
+  margin-bottom:15px;
+  font-size:22px;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.tier-wood{
+  background:#5c3b1e;
+}
+
+.tier-stone{
+  background:#555;
+}
+
+.tier-metal{
+  background:#355c7d;
+}
+
+.tier-armored{
+  background:#7d3535;
+}
+
+.weapon-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid #2e3b4e;
+}
+
+.weapon-row:last-child{
+  border-bottom:none;
+}
+
+.best{
+  color:#4dff88;
+  font-weight:700;
+}
+
+.cost{
+  color:#ffd24d;
+}
+
+@media(max-width:768px){
+
+  body{
+    padding:12px;
+  }
+
+  h1{
+    font-size:26px;
+  }
+
+  .card{
+    padding:15px;
+  }
+
 }
