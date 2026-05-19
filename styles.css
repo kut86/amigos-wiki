@@ -61,7 +61,13 @@ label {
 
 .select-box:focus {
     outline: none;
-    border: 1px solid #ff6b00;
+   /* border: 1px solid #ff6b00;*/
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #2e3b4e;
+    background:#1b2430;
+    color:white;
+    font-size:0.9rem;
 }
 
 /* Кнопка */
