@@ -10,10 +10,10 @@ const categorySelect = document.getElementById("category");
 // Получаем класс цвета для tier структуры
 function getTierClass(tier) {
     switch(tier){
-        case "wood": return "tier_wood";
-        case "stone": return "tier_stone";
-        case "metal": return "tier_metal";
-        case "armored": return "tier_armored";
+        case "wood": return "tier-wood";
+        case "stone": return "tier-stone";
+        case "metal": return "tier-metal";
+        case "armored": return "tier-armored";
         default: return "";
     }
 }
