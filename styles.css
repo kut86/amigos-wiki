@@ -1,212 +1,170 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+/* styles.css */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* Базовые стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #12151c;
+    color: #fff;
+    margin: 0;
+    padding: 0;
 }
 
-body{
-    background:
-    radial-gradient(circle at top,#1f2a36 0%,#0f1419 60%);
-    color:white;
-    font-family:'Inter',sans-serif;
-    min-height:100vh;
-    padding:25px;
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
 }
 
-.container{
-    max-width:1200px;
-    margin:auto;
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 5px;
 }
 
-.header{
-    margin-bottom:30px;
+.subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
 }
 
-h1{
-    font-size:42px;
-    font-weight:800;
-    margin-bottom:10px;
-    color:#ffb347;
-    text-shadow:0 0 20px rgba(255,179,71,.25);
-}
-
-.subtitle{
-    color:#8b98a5;
-    font-size:15px;
-}
-
+/* TOPBAR */
 .topbar{
     display:flex;
-    gap:20px;
+    gap:15px;
     flex-wrap:wrap;
-    margin-bottom:25px;
+    margin-bottom:20px;
 }
 
 .select-wrapper{
-    flex:1;
-    min-width:250px;
+    display:flex;
+    flex-direction:column;
+    min-width:150px;
 }
 
 label{
-    display:block;
-    margin-bottom:8px;
-    font-size:14px;
-    color:#9aa4af;
+    font-size:12px;
+    color:#aaa;
+    margin-bottom:5px;
 }
 
 .select-box{
-    width:100%;
-    background:#1b2430;
-    border:1px solid #2f3c4d;
-    border-radius:14px;
-    padding:14px;
-    color:white;
-    font-size:15px;
-    transition:.2s;
-}
-
-.select-box:focus{
-    border-color:#ffb347;
-    outline:none;
-    box-shadow:0 0 12px rgba(255,179,71,.2);
-}
-
-.actions{
-    margin-bottom:30px;
-}
-
-button{
-    background:linear-gradient(135deg,#ffb347,#ff7b00);
-    border:none;
-    color:white;
-    padding:15px 28px;
-    border-radius:14px;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.2s;
-    box-shadow:0 6px 20px rgba(255,123,0,.25);
-}
-
-button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 25px rgba(255,123,0,.35);
-}
-
-.results-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:linear-gradient(180deg,#1b2430,#161d27);
+    padding:10px;
+    border-radius:8px;
     border:1px solid #2e3b4e;
-    border-radius:18px;
-    padding:22px;
-    transition:.25s;
-    position:relative;
-    overflow:hidden;
+    background:#1b2430;
+    color:white;
+    font-size:0.9rem;
 }
 
-.card:hover{
-    transform:translateY(-4px);
-    border-color:#ffb347;
+/* Кнопка */
+.actions {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.card::before{
-    content:'';
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:4px;
-    background:linear-gradient(90deg,#ffb347,#ff7b00);
+button#calcBtn {
+    background: #ff6b00;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.card h2{
-    font-size:22px;
-    margin-bottom:12px;
+button#calcBtn:hover {
+    background: #ff7f33;
 }
 
-.badge{
-    display:inline-block;
-    padding:6px 12px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:700;
-    margin-bottom:15px;
+/* Карточки */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
 }
 
-.tier-wood{
-    background:#5c3b1e;
+.card {
+    background: #1b2430;
+    border-radius: 15px;
+    padding: 15px;
+    border: 1px solid #2e3b4e;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s;
 }
 
-.tier-stone{
-    background:#5b5b5b;
+.card:hover {
+    transform: translateY(-5px);
 }
 
-.tier-metal{
-    background:#355c7d;
+.card h2 {
+    font-size: 1.2rem;
+    margin: 10px 0 5px 0;
 }
 
-.tier-armored{
-    background:#7d3535;
+/* Бейдж категории */
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
 }
 
-.weapon-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 0;
-    border-bottom:1px solid #2f3c4d;
+/* Цвета tiers */
+.tier-wood { background: #6b4f2f; color: #fff; }
+.tier-stone { background: #555; color: #fff; }
+.tier-metal { background: #888; color: #fff; }
+.tier-armored { background: #e5b84c; color: #000; }
+
+/* Строка оружия */
+.weapon-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0;
 }
 
-.weapon-row:last-child{
-    border-bottom:none;
+.weapon-name {
+    font-weight: bold;
+    font-size: 1rem;
 }
 
-.weapon-name{
-    font-weight:600;
+.hp {
+    font-size: 0.8rem;
+    color: #ccc;
+    margin-top: 3px;
 }
 
-.best{
-    color:#4dff88;
-    font-weight:700;
+/* BEST оружие */
+.best {
+    background: #ff6b00;
+    color: #fff;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8rem;
 }
 
-.cost{
-    color:#ffd24d;
+/* Стоимость и скорость */
+.cost, .fast {
+    font-size: 0.85rem;
+    margin-right: 10px;
 }
 
-.fast{
-    color:#4db8ff;
-}
-
-.hp{
-    margin-top:12px;
-    color:#8b98a5;
-    font-size:14px;
-}
-
-@media(max-width:768px){
-
-    body{
-        padding:15px;
+/* Адаптив */
+@media screen and (max-width: 768px){
+    .topbar {
+        flex-direction: column;
+        gap: 10px;
     }
 
-    h1{
-        font-size:30px;
+    .select-wrapper {
+        min-width: 100%;
     }
 
-    .topbar{
-        flex-direction:column;
+    .results-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-
-    button{
-        width:100%;
-    }
-
 }
