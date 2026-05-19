@@ -11,13 +11,27 @@ const categorySelect = document.getElementById("category");
 // НОРМАЛИЗАЦИЯ (ВАЖНО)
 // =========================
 function normalize(str){
-    return (str || "")
-        .toString()
-        .trim()
-        .toLowerCase();
+    return safeString(str).toLowerCase();
 }
+//==========================
+// УМНЫЕ КАТЕГОРИИ (FALLBACK СИСТЕМА)
+//==========================
+function fixCategory(cat){
+    cat = normalize(cat);
 
+    if(cat.includes("door")) return "door";
+    if(cat.includes("wall")) return "wall";
+    if(cat.includes("window")) return "window";
+    if(cat.includes("deploy")) return "deployable";
 
+    return cat;
+}
+// =========================
+//защита от кривых данных
+// =========================
+function safeString(v){
+    return (v ?? "").toString().trim();
+}
 // =========================
 // TIER ЦВЕТ
 // =========================
@@ -46,7 +60,8 @@ function renderTargets() {
 
     Object.entries(targets).forEach(([id, target]) => {
 
-        const cat = normalize(target.category);
+        // ВОТ ЗДЕСЬ ПРАВИЛЬНО
+        const cat = fixCategory(target.category);
 
         // фильтр категорий
         if(selectedCategory !== "all" && cat !== selectedCategory){
@@ -54,7 +69,9 @@ function renderTargets() {
         }
 
         const option = document.createElement("option");
+
         option.value = id;
+
         option.textContent =
             target.name_ru ||
             target.name_en ||
@@ -72,9 +89,13 @@ function renderTargets() {
 
     // если ничего не найдено
     if(found === 0){
+
         const option = document.createElement("option");
+
         option.value = "";
+
         option.textContent = "Нет структур в этой категории";
+
         targetSelect.appendChild(option);
 
         return;
@@ -83,7 +104,6 @@ function renderTargets() {
     // выбрать первую структуру
     targetSelect.value = firstKey;
 }
-
 
 // =========================
 // РАСЧЁТ
