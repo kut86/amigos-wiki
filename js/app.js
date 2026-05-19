@@ -8,7 +8,7 @@ const categorySelect = document.getElementById("category");
 
 
 // =========================
-// НОРМАЛИЗАЦИЯ ТЕКСТА
+// НОРМАЛИЗАЦИЯ (ВАЖНО)
 // =========================
 function normalize(str){
     return (str || "")
@@ -19,7 +19,7 @@ function normalize(str){
 
 
 // =========================
-// TIER ЦВЕТА
+// TIER ЦВЕТ
 // =========================
 function getTierClass(tier) {
     switch(normalize(tier)){
@@ -33,15 +33,16 @@ function getTierClass(tier) {
 
 
 // =========================
-// ОТРИСОВКА СТРУКТУР
+// СТРУКТУРЫ (FILTER)
 // =========================
 function renderTargets() {
+
     targetSelect.innerHTML = "";
 
     const selectedCategory = normalize(categorySelect.value);
 
-    let firstKey = null;
     let found = 0;
+    let firstKey = null;
 
     Object.entries(targets).forEach(([id, target]) => {
 
@@ -75,10 +76,11 @@ function renderTargets() {
         option.value = "";
         option.textContent = "Нет структур в этой категории";
         targetSelect.appendChild(option);
+
         return;
     }
 
-    // выбираем первую структуру
+    // выбрать первую структуру
     targetSelect.value = firstKey;
 }
 
@@ -186,13 +188,13 @@ function renderResults(target, results) {
 
 
 // =========================
-// СОБЫТИЯ
+// EVENTS
 // =========================
 
 // кнопка
 calcBtn.addEventListener("click", calculate);
 
-// категории
+// фильтр категорий
 categorySelect.addEventListener("change", () => {
     renderTargets();
     calculate();
@@ -207,7 +209,7 @@ startRealtime(() => {
 
 
 // =========================
-// ИНИЦИАЛИЗАЦИЯ
+// INIT
 // =========================
 renderTargets();
 calculate();
