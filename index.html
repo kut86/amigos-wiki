@@ -1,33 +1,89 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amigos pve</title>
 
-<link rel="stylesheet" href="styles.css?v=1">
+<title>Amigos PVE — Raid Calculator</title>
+
+<meta name="theme-color" content="#0f1419">
+
+<link rel="stylesheet" href="styles.css?v=2">
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>🔥 Amigos калькулятор </h1>
+    <header class="header">
 
-<select id="target"></select>
+        <div>
+            <h1>🔥 Amigos калькулятор</h1>
 
-<select id="mode">
-<option value="cost">💰 Самый дешевый</option>
-<option value="speed">⚡ Самый быстрый</option>
-</select>
+            <p class="subtitle">
+                Лучший рейд калькулятор для сервера Amigos PVE
+            </p>
+        </div>
 
-<button id="calcBtn">Вычислять</button>
+    </header>
 
-<div id="output"></div>
+    <div class="topbar">
+
+        <div class="select-wrapper">
+
+            <label>
+                🧱 Выберите структуру
+            </label>
+
+            <select id="target" class="select-box">
+                <option>Загрузка структур...</option>
+            </select>
+
+        </div>
+
+        <div class="select-wrapper">
+
+            <label>
+                ⚙️ Режим расчета
+            </label>
+
+            <select id="mode" class="select-box">
+
+                <option value="cost">
+                    💰 Самый дешевый
+                </option>
+
+                <option value="speed">
+                    ⚡ Самый быстрый
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <button id="calcBtn">
+            🔥 Вычислить рейд
+        </button>
+
+    </div>
+
+    <div id="output" class="results-grid">
+
+        <!-- Карточки оружия -->
+
+    </div>
 
 </div>
 
-<script type="module" src="js/app.js?v=1"></script>
+<script type="module" src="js/app.js?v=2"></script>
 
 </body>
+
 </html>
