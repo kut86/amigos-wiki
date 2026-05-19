@@ -10,10 +10,10 @@ const categorySelect = document.getElementById("category");
 // Получаем класс цвета для tier структуры
 function getTierClass(tier) {
     switch(tier){
-        case "wood": return "tier-wood";
-        case "stone": return "tier-stone";
-        case "metal": return "tier-metal";
-        case "armored": return "tier-armored";
+        case "wood": return "tier_wood";
+        case "stone": return "tier_stone";
+        case "metal": return "tier_metal";
+        case "armored": return "tier_armored";
         default: return "";
     }
 }
@@ -99,7 +99,7 @@ function renderResults(target, results) {
 
             <div class="weapon-row">
                 <div>
-                    <div class="weapon-name">
+                    <div class="weapon_name">
                         ${weapon.name_ru || weapon.name_en || weapon.name || "Unknown"}
                     </div>
                     <div class="hp">Нужно: ${weapon.amount} шт.</div>
