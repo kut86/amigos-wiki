@@ -5,6 +5,7 @@ const modeSelect = document.getElementById("mode");
 const calcBtn = document.getElementById("calcBtn");
 const output = document.getElementById("output");
 const categorySelect = document.getElementById("category");
+const searchInput = document.getElementById("search");
 
 
 // =========================
@@ -54,6 +55,7 @@ function renderTargets() {
     targetSelect.innerHTML = "";
 
     const selectedCategory = normalize(categorySelect.value);
+    const search = normalize(searchInput.value);
 
     let found = 0;
     let firstKey = null;
@@ -62,10 +64,19 @@ function renderTargets() {
 
         // ВОТ ЗДЕСЬ ПРАВИЛЬНО
         const cat = fixCategory(target.category);
+        const name =
+    normalize(target.name_ru) +
+    " " +
+    normalize(target.name_en);
 
         // фильтр категорий
         if(selectedCategory !== "all" && cat !== selectedCategory){
-            return;
+    return;
+}
+
+if(search && !name.includes(search)){
+    return;
+}
         }
 
         const option = document.createElement("option");
@@ -216,6 +227,10 @@ calcBtn.addEventListener("click", calculate);
 
 // фильтр категорий
 categorySelect.addEventListener("change", () => {
+    searchInput.addEventListener("input", () => {
+    renderTargets();
+    calculate();
+});
     renderTargets();
     calculate();
 });
