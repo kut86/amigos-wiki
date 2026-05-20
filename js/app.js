@@ -111,7 +111,7 @@ function renderTargets(){
 
         targetSelect.appendChild(option);
 
-        // сохранить первый
+        // FIRST ITEM
         if(firstKey === null){
             firstKey = id;
         }
@@ -139,7 +139,7 @@ function renderTargets(){
         return;
     }
 
-    // восстановить выбранное
+    // RESTORE SELECT
     if(targets[currentValue]){
         targetSelect.value = currentValue;
     } else {
@@ -149,7 +149,7 @@ function renderTargets(){
 
 
 // =========================
-// CALCULATE
+// CALCULATE REAL DAMAGE
 // =========================
 function calculate(){
 
@@ -174,7 +174,13 @@ function calculate(){
 
     Object.entries(weapons).forEach(([id, weapon]) => {
 
-        const damage = weapon.damage || 1;
+        // REAL DAMAGE SYSTEM
+        const damage = weapon.damage?.[targetId] || 0;
+
+        // если оружие не дамажит объект
+        if(damage <= 0){
+            return;
+        }
 
         const amount = Math.ceil(target.hp / damage);
 
@@ -185,6 +191,7 @@ function calculate(){
         results.push({
             id,
             ...weapon,
+            damage,
             amount,
             totalCost,
             totalTime
@@ -208,6 +215,18 @@ function calculate(){
 function renderResults(target, results){
 
     output.innerHTML = "";
+
+    // NOTHING FOUND
+    if(results.length === 0){
+
+        output.innerHTML = `
+            <div style="padding:20px;color:#999">
+                Нет оружия для этой структуры
+            </div>
+        `;
+
+        return;
+    }
 
     results.forEach((weapon, index) => {
 
@@ -262,6 +281,14 @@ function renderResults(target, results){
 
             </div>
 
+            <div class="weapon-row">
+
+                <span class="hp">
+                    💥 Урон: ${weapon.damage}
+                </span>
+
+            </div>
+
             <div class="hp">
                 HP структуры: ${target.hp}
             </div>
@@ -304,7 +331,7 @@ targetSelect.addEventListener("change", () => {
 
 
 // =========================
-// REALTIME
+// REALTIME FIREBASE
 // =========================
 startRealtime(() => {
 
