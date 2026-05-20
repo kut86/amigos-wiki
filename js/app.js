@@ -9,15 +9,26 @@ const searchInput = document.getElementById("search");
 
 
 // =========================
-// НОРМАЛИЗАЦИЯ (ВАЖНО)
+// SAFE STRING
+// =========================
+function safeString(v){
+    return (v ?? "").toString().trim();
+}
+
+
+// =========================
+// NORMALIZE
 // =========================
 function normalize(str){
     return safeString(str).toLowerCase();
 }
-//==========================
-// УМНЫЕ КАТЕГОРИИ (FALLBACK СИСТЕМА)
-//==========================
+
+
+// =========================
+// FIX CATEGORY
+// =========================
 function fixCategory(cat){
+
     cat = normalize(cat);
 
     if(cat.includes("door")) return "door";
@@ -27,30 +38,39 @@ function fixCategory(cat){
 
     return cat;
 }
+
+
 // =========================
-//защита от кривых данных
+// TIER COLORS
 // =========================
-function safeString(v){
-    return (v ?? "").toString().trim();
-}
-// =========================
-// TIER ЦВЕТ
-// =========================
-function getTierClass(tier) {
+function getTierClass(tier){
+
     switch(normalize(tier)){
-        case "wood": return "tier-wood";
-        case "stone": return "tier-stone";
-        case "metal": return "tier-metal";
-        case "armored": return "tier-armored";
-        default: return "";
+
+        case "wood":
+            return "tier-wood";
+
+        case "stone":
+            return "tier-stone";
+
+        case "metal":
+            return "tier-metal";
+
+        case "armored":
+            return "tier-armored";
+
+        default:
+            return "";
     }
 }
 
 
 // =========================
-// СТРУКТУРЫ (FILTER)
+// RENDER TARGETS
 // =========================
-function renderTargets() {
+function renderTargets(){
+
+    const currentValue = targetSelect.value;
 
     targetSelect.innerHTML = "";
 
@@ -62,21 +82,21 @@ function renderTargets() {
 
     Object.entries(targets).forEach(([id, target]) => {
 
-        // ВОТ ЗДЕСЬ ПРАВИЛЬНО
         const cat = fixCategory(target.category);
+
         const name =
-    normalize(target.name_ru) +
-    " " +
-    normalize(target.name_en);
+            normalize(target.name_ru) +
+            " " +
+            normalize(target.name_en);
 
-        // фильтр категорий
+        // CATEGORY FILTER
         if(selectedCategory !== "all" && cat !== selectedCategory){
-    return;
-}
+            return;
+        }
 
-if(search && !name.includes(search)){
-    return;
-}
+        // SEARCH FILTER
+        if(search && !name.includes(search)){
+            return;
         }
 
         const option = document.createElement("option");
@@ -91,6 +111,7 @@ if(search && !name.includes(search)){
 
         targetSelect.appendChild(option);
 
+        // сохранить первый
         if(firstKey === null){
             firstKey = id;
         }
@@ -98,36 +119,54 @@ if(search && !name.includes(search)){
         found++;
     });
 
-    // если ничего не найдено
+    // EMPTY
     if(found === 0){
 
         const option = document.createElement("option");
 
         option.value = "";
 
-        option.textContent = "Нет структур в этой категории";
+        option.textContent = "Нет структур";
 
         targetSelect.appendChild(option);
+
+        output.innerHTML = `
+            <div style="padding:20px;color:#999">
+                Ничего не найдено
+            </div>
+        `;
 
         return;
     }
 
-    // выбрать первую структуру
-    targetSelect.value = firstKey;
+    // восстановить выбранное
+    if(targets[currentValue]){
+        targetSelect.value = currentValue;
+    } else {
+        targetSelect.value = firstKey;
+    }
 }
 
+
 // =========================
-// РАСЧЁТ
+// CALCULATE
 // =========================
-function calculate() {
+function calculate(){
 
     const targetId = targetSelect.value;
+
     const mode = modeSelect.value;
 
     const target = targets[targetId];
 
     if(!target){
-        output.innerHTML = "<p style='color:#aaa'>Нет выбранной структуры</p>";
+
+        output.innerHTML = `
+            <div style="padding:20px;color:#999">
+                Нет выбранной структуры
+            </div>
+        `;
+
         return;
     }
 
@@ -140,6 +179,7 @@ function calculate() {
         const amount = Math.ceil(target.hp / damage);
 
         const totalCost = amount * (weapon.cost || 0);
+
         const totalTime = amount * (weapon.time || 0);
 
         results.push({
@@ -151,7 +191,7 @@ function calculate() {
         });
     });
 
-    // сортировка
+    // SORT
     if(mode === "cost"){
         results.sort((a,b)=> a.totalCost - b.totalCost);
     } else {
@@ -163,18 +203,17 @@ function calculate() {
 
 
 // =========================
-// ОТРИСОВКА КАРТОЧЕК
+// RENDER RESULTS
 // =========================
-function renderResults(target, results) {
+function renderResults(target, results){
 
     output.innerHTML = "";
 
     results.forEach((weapon, index) => {
 
         const card = document.createElement("div");
-        card.className = "card";
 
-        const bestClass = index === 0 ? getTierClass(target.tier) : "";
+        card.className = "card";
 
         card.innerHTML = `
             <div class="badge ${getTierClass(target.tier)}">
@@ -182,30 +221,45 @@ function renderResults(target, results) {
             </div>
 
             <h2>
-                ${target.name_ru || target.name_en || target.name || "Unknown"}
+                ${target.name_ru || target.name_en || "Unknown"}
             </h2>
 
             <div class="weapon-row">
 
                 <div>
+
                     <div class="weapon-name">
-                        ${weapon.name_ru || weapon.name_en || weapon.name || "Unknown"}
+                        ${weapon.name_ru || weapon.name_en || "Unknown"}
                     </div>
 
                     <div class="hp">
                         Нужно: ${weapon.amount} шт.
                     </div>
+
                 </div>
 
                 <div>
-                    ${index === 0 ? `<div class="best ${bestClass}">BEST</div>` : ""}
+
+                    ${
+                        index === 0
+                        ? `<div class="best">BEST</div>`
+                        : ``
+                    }
+
                 </div>
 
             </div>
 
             <div class="weapon-row">
-                <span class="cost">💰 ${weapon.totalCost} sulfur</span>
-                <span class="fast">⚡ ${weapon.totalTime.toFixed(1)} sec</span>
+
+                <span class="cost">
+                    💰 ${weapon.totalCost} sulfur
+                </span>
+
+                <span class="fast">
+                    ⚡ ${weapon.totalTime.toFixed(1)} sec
+                </span>
+
             </div>
 
             <div class="hp">
@@ -222,24 +276,41 @@ function renderResults(target, results) {
 // EVENTS
 // =========================
 
-// кнопка
+// BUTTON
 calcBtn.addEventListener("click", calculate);
 
-// фильтр категорий
+// CATEGORY
 categorySelect.addEventListener("change", () => {
-    searchInput.addEventListener("input", () => {
+
     renderTargets();
     calculate();
+
 });
+
+// SEARCH
+searchInput.addEventListener("input", () => {
+
     renderTargets();
     calculate();
+
+});
+
+// MANUAL SELECT
+targetSelect.addEventListener("change", () => {
+
+    calculate();
+
 });
 
 
-// realtime Firebase
+// =========================
+// REALTIME
+// =========================
 startRealtime(() => {
+
     renderTargets();
     calculate();
+
 });
 
 
