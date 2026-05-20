@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amigos PVE — Raid Calculator</title>
 
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
 </head>
 
 <body>
@@ -14,56 +14,103 @@
 <div class="container">
 
     <h1>🔥 Amigos калькулятор</h1>
-    <p class="subtitle">Лучший рейд-калькулятор для сервера Amigos PVE</p>
+
+    <p class="subtitle">
+        Лучший рейд-калькулятор для сервера Amigos PVE
+    </p>
 
     <!-- TOPBAR -->
     <div class="topbar">
 
         <!-- Категория -->
         <div class="select-wrapper">
+
             <label>📂 Категория</label>
+
             <select id="category" class="select-box">
+
                 <option value="all">Все</option>
-                <option value="wall">🧱 Стены</option>
-                <option value="door">🚪 Двери</option>
-                <option value="window">🪟 Окна</option>
-                <option value="deployable">🏠 Deployables</option>
+
+                <option value="wall">
+                    🧱 Стены
+                </option>
+
+                <option value="door">
+                    🚪 Двери
+                </option>
+
+                <option value="window">
+                    🪟 Окна
+                </option>
+
+                <option value="deployable">
+                    🏠 Deployables
+                </option>
+
             </select>
+
         </div>
 
         <!-- Структура -->
         <div class="select-wrapper">
+
             <label>🧱 Структура</label>
+
+            <!-- Поиск -->
             <input
-          type="text"
-          id="search"
-          placeholder="🔍 Поиск структуры..."
-                >
-            <select id="target"></select>
+                type="text"
+                id="search"
+                class="select-box"
+                placeholder="🔍 Поиск структуры..."
+            >
+
+            <!-- Выбор структуры -->
+            <select
+                id="target"
+                class="select-box"
+            ></select>
+
         </div>
 
-        <!-- Режим расчета -->
+        <!-- Режим -->
         <div class="select-wrapper">
-            <label>⚙️ Режим</label>
-            <select id="mode">
-                <option value="cost">💰 Самый дешевый</option>
-                <option value="speed">⚡ Самый быстрый</option>
+
+            <label>⚙️ Режим расчета</label>
+
+            <select id="mode" class="select-box">
+
+                <option value="cost">
+                    💰 Самый дешевый
+                </option>
+
+                <option value="speed">
+                    ⚡ Самый быстрый
+                </option>
+
             </select>
+
         </div>
 
     </div>
 
-    <!-- Кнопка расчета -->
+    <!-- Кнопка -->
     <div class="actions">
-        <button id="calcBtn">🔥 Вычислить</button>
+
+        <button id="calcBtn">
+            🔥 Вычислить
+        </button>
+
     </div>
 
     <!-- Результаты -->
-    <div id="output" class="results-grid"></div>
+    <div
+        id="output"
+        class="results-grid"
+    ></div>
 
 </div>
 
-<script type="module" src="js/app.js?v=3"></script>
+<script type="module" src="js/app.js?v=5"></script>
 
 </body>
 </html>
