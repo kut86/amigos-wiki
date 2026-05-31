@@ -272,7 +272,7 @@ function renderResults(target, results){
             <div class="weapon-row">
 
                 <span class="cost">
-                    💰 ${weapon.totalCost} sulfur
+                    💰 ${weapon.totalCost} Серная руда
                 </span>
 
                 <span class="fast">
