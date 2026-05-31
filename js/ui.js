@@ -7,7 +7,7 @@ export function renderTable(results) {
       <tr>
         <th>Weapon</th>
         <th>Hits</th>
-        <th>Sulfur</th>
+        <th>Сера</th>
         <th>Time</th>
       </tr>
   `;
