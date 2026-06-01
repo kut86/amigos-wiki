@@ -4,9 +4,9 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #12151c;
-    color: #fff;
-    margin: 0;
-    padding: 0;
+    color: #c26d0b;
+    margin: 50px;
+    padding: 10px;
 }
 
 .container {
@@ -17,37 +17,30 @@ body {
 
 h1 {
     text-align: center;
-    font-size: 2rem;
-    margin-bottom: 5px;
+    font-size: 4rem;
+    margin-bottom: 11px;
 }
 
 .subtitle {
     text-align: center;
-    font-size: 0.9rem;
-    color: #aaa;
-    margin-bottom: 20px;
+    font-size: 1.9rem;
+    color: #ec590a;
+    margin-bottom: 100px;
 }
 
-/*.connectcode {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+
+button#code {
+    margin: 100%;
 }
-
-/*#code {
-    margin: 0;
-}*/
-/*.copyBtn {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 16px;
-    border-radius: 10px;
-    cursor: pointer;
-
-    transition: all 0.2s ease;
-}*/
+.copyBtn {
+    background: #171b21;
+    border-radius: 25px;
+    padding: 30px;
+    border: 2px solid #2e3b4e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
 
 /* TOPBAR */
 .topbar {
@@ -60,14 +53,14 @@ h1 {
 
 .select-wrapper {
     display: flex;
-    flex-direction: column;
-    min-width: 150px; 
-    outline: none;
+    flex-direction:column;
+    min-width: 120px; 
+    outline: #a87510;
     padding:10px;
     border-radius:8px;
     border:1px solid #2e3b4e;
     background:#1b2430;
-    color:white;
+    color:#be7111;
     font-size:0.9rem;
 }
 
@@ -129,10 +122,10 @@ button#calcBtn:hover {
 }
 
 .card {
-    background: #1b2430;
-    border-radius: 15px;
-    padding: 15px;
-    border: 1px solid #2e3b4e;
+    background: #171b21;
+    border-radius: 25px;
+    padding: 30px;
+    border: 2px solid #2e3b4e;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
@@ -158,10 +151,10 @@ button#calcBtn:hover {
 }
 
 /* Цвета tiers */
-.tier-wood { background: #6b4f2f; color: #fff; }
-.tier-stone { background: #555; color: #fff; }
-.tier-metal { background: #888; color: #fff; }
-.tier-armored { background: #e5b84c; color: #000; }
+.tier-wood { background: #c5771f; color: #c5c5c5; }
+.tier-stone { background: #678998; color: #bcbaba; }
+.tier-metal { background: #ac2525; color: #a69f9f; }
+.tier-armored { background: #9d0202; color: #111111; }
 
 /* Строка оружия */
 .weapon-row {
@@ -175,7 +168,7 @@ button#calcBtn:hover {
 }
 
 .weapon-row:hover {
-    background: rgba(255, 107, 0, 0.1);
+    background: rgb(111 75 49 / 10%);
 }
 
 .weapon-name {
@@ -185,7 +178,7 @@ button#calcBtn:hover {
 
 .hp {
     font-size: 0.8rem;
-    color: #ccc;
+    color: #21ca32;
     margin-top: 3px;
 }
 
@@ -246,19 +239,4 @@ button#calcBtn:hover {
     .results-grid {
         grid-template-columns: repeat(3, 1fr); /* например, 3 колонки */
     }
-    .copyBtn {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-     border: 1px solid #2e3b4e;
-    padding: 12px 20px;
-    font-size: 16px;
-    border-radius: 10px;
-    cursor: pointer;
-
-    transition: all 0.2s ease; 
-  }
-    .connectcode {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
+    
