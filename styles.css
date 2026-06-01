@@ -90,7 +90,7 @@ button#calcBtn:hover {
 ───────────────────────────────────────── */
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
     transition: all 0.3s ease;
 }
@@ -181,13 +181,9 @@ button#calcBtn:hover {
     font-weight: bold;
 }
 
-/* ─────────────────────────────────────────
-   FIX #2: .select-wrapper и .connectcode
-   вынесены ЗА пределы медиа-запросов,
-   т.к. display:center не существует в CSS
-───────────────────────────────────────── */
+
 .select-wrapper {
-    display: flex;           /* FIX #2: было display:center — невалидное значение */
+    display: flex;           
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -242,7 +238,7 @@ button#calcBtn:hover {
     }
 
     .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 0.5fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px, 0.5fr));
     }
 }
 
