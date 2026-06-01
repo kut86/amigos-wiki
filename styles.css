@@ -37,6 +37,17 @@ h1 {
 #code {
     margin: 0;
 }
+.copybtn {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
 
 /* TOPBAR */
 .topbar {
