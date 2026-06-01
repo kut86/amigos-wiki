@@ -37,7 +37,7 @@ h1 {
 #code {
     margin: 0;
 }
-.copybtn {
+.copyBtn {
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     color: white;
     border: none;
