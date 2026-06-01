@@ -221,7 +221,7 @@ button#calcBtn:hover {
 }
 
 /* FIX #3: было connectcode#code без точки — неверный селектор */
-.connectcode#code {
+#code {
     margin: 0;
 }
 
@@ -242,7 +242,7 @@ button#calcBtn:hover {
     }
 
     .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }
 
