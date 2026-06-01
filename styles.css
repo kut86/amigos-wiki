@@ -28,11 +28,14 @@ h1 {
     margin-bottom: 20px;
 }
 
-. connectcode {
-    text-align: center;
-    font-size: 0.9rem;
-    color: #aaa;
-    margin-bottom: 20px;
+.connectcode {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#code {
+    margin: 0;
 }
 
 /* TOPBAR */
