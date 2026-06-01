@@ -145,10 +145,10 @@ button#calcBtn:hover {
     margin-bottom: 8px;
 }
 
-.tier-wood    { background: #c5771f; color: #c5c5c5; }
-.tier-stone   { background: #678998; color: #bcbaba; }
-.tier-metal   { background: #ac2525; color: #a69f9f; }
-.tier-armored { background: #9d0202; color: #111111; }
+.tier-wood    { background: #c5621f; color: #ffffff; }
+.tier-stone   { background: #6c92a3; color: #ffffff; }
+.tier-metal   { background: #7e260e; color: #ffffff; }
+.tier-armored { background: #9d0244; color: #ffffff; }
 
 /* ─────────────────────────────────────────
    Строка оружия
@@ -181,10 +181,10 @@ button#calcBtn:hover {
 .best {
     background: #ff6b00;
     color: #fff;
-    padding: 3px 6px;
-    border-radius: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     animation: pulse 1s infinite alternate;
 }
 
@@ -194,8 +194,8 @@ button#calcBtn:hover {
 }
 
 .cost, .fast {
-    font-size: 0.85rem;
-    margin-right: 10px;
+    font-size: 0.75rem;
+    margin-right: 1px;
     font-weight: bold;
 }
  
@@ -357,6 +357,6 @@ button#calcBtn:hover {
 
     .cost, .fast {
         font-size: 0.55rem;
-        margin-right: 5px;
+        margin-right: 1px;
     }
 }
