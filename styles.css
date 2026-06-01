@@ -211,7 +211,7 @@ button#calcBtn:hover {
     }
 
     .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     }
 }
 @media screen and (min-width: 701px){
@@ -238,9 +238,7 @@ button#calcBtn:hover {
         position: relative;
         min-width: auto;
     }
-    .results-grid {
-        grid-template-columns: repeat(3, 1fr); /* например, 3 колонки */
-    }
+    
     .connectcode {
     display: center;
     text-align: center;
@@ -258,3 +256,6 @@ button#calcBtn:hover {
 connectcode#code {
     margin: 0;
 }
+  .results-grid {
+        grid-template-columns: repeat(3, 1fr); /* например, 3 колонки */
+    }  
