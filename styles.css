@@ -44,12 +44,12 @@ label {
 }
 
 .select-box {
-    padding: 5px;
+    padding: 10px;
     border-radius: 8px;
-    border: 1px solid #2c3b50;
+    border: 1px solid #2e3b4e;
     background: #1b2430;
     color: white;
-    font-size: 1rem;
+    font-size: 0.9rem;
     transition: border 0.2s;
 }
 
@@ -57,7 +57,29 @@ label {
     outline: none;
     border-color: #ff6b00;
 }
+/* ─────────────────────────────────────────
+   Кнопка
+───────────────────────────────────────── */
+.actions {
+    text-align: left;
+    margin-bottom: 20px;
+}
 
+button#copyBtn {
+    background: #ff6b0000;
+    border: none;
+    color: #ffffff;
+    font-size: 0.8rem;
+    padding: 9px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.37, 0.66);
+}
+
+button#copyBtn:hover {
+    background: #df4c0c;
+    transform: scale(1.05);
+}
 /* ─────────────────────────────────────────
    Кнопка
 ───────────────────────────────────────── */
@@ -71,10 +93,10 @@ button#calcBtn {
     border: none;
     color: #fff;
     font-size: 1rem;
-    padding: 12px 25px;
+    padding:  12px 25px;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.8s ease;
 }
 
 button#calcBtn:hover {
@@ -85,7 +107,6 @@ button#calcBtn:hover {
 /* ─────────────────────────────────────────
    Карточки
 ───────────────────────────────────────── */
-
 .results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -127,7 +148,7 @@ button#calcBtn:hover {
 .tier-wood    { background: #c5771f; color: #c5c5c5; }
 .tier-stone   { background: #678998; color: #bcbaba; }
 .tier-metal   { background: #ac2525; color: #a69f9f; }
-.tier-armored { background: #9d0202; color: #f9fbf8; }
+.tier-armored { background: #9d0202; color: #111111; }
 
 /* ─────────────────────────────────────────
    Строка оружия
@@ -229,7 +250,7 @@ button#calcBtn:hover {
 
     /* FIX: было repeat(5) — пропущен второй аргумент */
     .results-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
     }
 }
 
@@ -301,20 +322,15 @@ button#calcBtn:hover {
         align-items: center;
         gap: 10px;
     }
-    .category.select-box {
-        font-size: 2rem;
-        margin-bottom: 8px;
-    }
-    
     .select-box,
     .select-wrapper,
     .connectcode {
         width: 100%;
-        font-size: 0.9rem;
+        font-size: 1.0rem;
         box-sizing: border-box;
     }
 
-     
+    /* FIX: было minmax(400px) — один аргумент невалиден + 400px шире телефона */
     .results-grid {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -340,7 +356,7 @@ button#calcBtn:hover {
     }
 
     .cost, .fast {
-        font-size: 0.55rem;
+        font-size: 0.75rem;
         margin-right: 5px;
     }
 }
