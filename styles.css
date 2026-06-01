@@ -1,4 +1,4 @@
-/* styles.css — исправленный */
+ 
 
 /* Базовые стили */
 body {
@@ -45,7 +45,7 @@ label {
     margin-bottom: 5px;
 }
 
- 
+
 .select-box {
     padding: 10px;
     border-radius: 8px;
@@ -200,7 +200,7 @@ button#calcBtn:hover {
 }
 
 .connectcode {
-    display: flex;           /* FIX #2: было display:center */
+    display: flex;           
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -232,13 +232,13 @@ button#calcBtn:hover {
         gap: 10px;
     }
 
-    /* FIX #4: убран дублирующий min-width, растягиваем на 100% */
+    
     .select-wrapper {
         width: 100%;
     }
 
     .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 0.5fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px));
     }
 }
 
@@ -254,6 +254,7 @@ button#calcBtn:hover {
     }
 
     .results-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(5);
     }
-} /* FIX #5: закрывающая скобка медиа-запроса отсутствовала в оригинале */
+} 
+
