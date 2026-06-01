@@ -45,7 +45,7 @@ label {
     margin-bottom: 5px;
 }
 
-/* FIX #1: убраны дублирующие свойства в .select-box:focus */
+ 
 .select-box {
     padding: 10px;
     border-radius: 8px;
