@@ -1,4 +1,4 @@
-/* styles.css —  улучшенный */
+/* styles.css — исправленный */
 
 /* Базовые стили */
 body {
@@ -28,10 +28,9 @@ h1 {
     margin-bottom: 100px;
 }
 
-
-
-
-/* TOPBAR */
+/* ─────────────────────────────────────────
+   TOPBAR
+───────────────────────────────────────── */
 .topbar {
     display: flex;
     gap: 15px;
@@ -40,13 +39,13 @@ h1 {
     transition: all 0.3s ease;
 }
 
-
 label {
     font-size: 12px;
     color: #aaa;
     margin-bottom: 5px;
 }
 
+/* FIX #1: убраны дублирующие свойства в .select-box:focus */
 .select-box {
     padding: 10px;
     border-radius: 8px;
@@ -59,16 +58,12 @@ label {
 
 .select-box:focus {
     outline: none;
-   /* border: 1px solid #ff6b00;*/
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #2e3b4e;
-    background:#1b2430;
-    color:white;
-    font-size:0.9rem;
+    border-color: #ff6b00;
 }
 
-/* Кнопка */
+/* ─────────────────────────────────────────
+   Кнопка
+───────────────────────────────────────── */
 .actions {
     text-align: center;
     margin-bottom: 20px;
@@ -90,7 +85,9 @@ button#calcBtn:hover {
     transform: scale(1.05);
 }
 
-/* Карточки */
+/* ─────────────────────────────────────────
+   Карточки
+───────────────────────────────────────── */
 .results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -118,7 +115,9 @@ button#calcBtn:hover {
     margin: 10px 0 5px 0;
 }
 
-/* Бейдж категории */
+/* ─────────────────────────────────────────
+   Бейдж категории
+───────────────────────────────────────── */
 .badge {
     display: inline-block;
     padding: 3px 8px;
@@ -127,21 +126,22 @@ button#calcBtn:hover {
     margin-bottom: 8px;
 }
 
-/* Цвета tiers */
-.tier-wood { background: #c5771f; color: #c5c5c5; }
-.tier-stone { background: #678998; color: #bcbaba; }
-.tier-metal { background: #ac2525; color: #a69f9f; }
+.tier-wood    { background: #c5771f; color: #c5c5c5; }
+.tier-stone   { background: #678998; color: #bcbaba; }
+.tier-metal   { background: #ac2525; color: #a69f9f; }
 .tier-armored { background: #9d0202; color: #111111; }
 
-/* Строка оружия */
+/* ─────────────────────────────────────────
+   Строка оружия
+───────────────────────────────────────── */
 .weapon-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 5px 0;
-    transition: background 0.2s;
     padding: 5px;
     border-radius: 8px;
+    transition: background 0.2s;
 }
 
 .weapon-row:hover {
@@ -170,77 +170,43 @@ button#calcBtn:hover {
     animation: pulse 1s infinite alternate;
 }
 
-/* Анимация пульсации для лучшего оружия */
 @keyframes pulse {
     from { box-shadow: 0 0 5px #ff6b00; }
-    to { box-shadow: 0 0 25px #ff7f33; }
+    to   { box-shadow: 0 0 25px #ff7f33; }
 }
 
-/* Стоимость и скорость */
 .cost, .fast {
     font-size: 0.85rem;
     margin-right: 10px;
     font-weight: bold;
 }
 
-/* Адаптив */
-@media screen and (max-width: 700px){
-    .topbar {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .select-wrapper {
-        min-width: 100%;
-        min-width: auto; /* не растягивается */
-        display: center;
-        text-align: center;
-        font-size: 1.9rem;
-        background: #171b21;
-        border-radius: 10px;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 2px solid #c26d0b;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-        transition: transform 0.3s cubic-bezier(0.67, -0.17, 0.22, 1.06), box-shadow 0.3s cubic-bezier(0, 0.47, 0.85, 0.49);
-        position: relative;
-        min-width: auto;
-    }
-
-    .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    }
+/* ─────────────────────────────────────────
+   FIX #2: .select-wrapper и .connectcode
+   вынесены ЗА пределы медиа-запросов,
+   т.к. display:center не существует в CSS
+───────────────────────────────────────── */
+.select-wrapper {
+    display: flex;           /* FIX #2: было display:center — невалидное значение */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.9rem;
+    background: #171b21;
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 2px solid #c26d0b;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s cubic-bezier(0.67, -0.17, 0.22, 1.06),
+                box-shadow 0.3s cubic-bezier(0, 0.47, 0.85, 0.49);
+    position: relative;
 }
-@media screen and (min-width: 701px){
-    .topbar {
-        display: flex;
-        justify-content: space-between; /* равномерно по ширине */
-        align-items: flex-start;        /* сверху */
-        flex-direction: row;            /* горизонтально */
-        gap: 20px;
-    }
 
-    .select-wrapper {
-        min-width: auto; /* не растягивается */
-        display: center;
-        text-align: center;
-        font-size: 1.9rem;
-        background: #171b21;
-        border-radius: 10px;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 2px solid #c26d0b;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-        transition: transform 0.3s cubic-bezier(0.67, -0.17, 0.22, 1.06), box-shadow 0.3s cubic-bezier(0, 0.47, 0.85, 0.49);
-        position: relative;
-        min-width: auto;
-    }
-    
-    .connectcode {
-    display: center;
+.connectcode {
+    display: flex;           /* FIX #2: было display:center */
+    justify-content: center;
+    align-items: center;
     text-align: center;
     font-size: 1.9rem;
     background: #171b21;
@@ -249,13 +215,49 @@ button#calcBtn:hover {
     margin-bottom: 10px;
     border: 2px solid #c26d0b;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-    transition: transform 0.3s cubic-bezier(0.67, -0.17, 0.22, 1.06), box-shadow 0.3s cubic-bezier(0, 0.47, 0.85, 0.49);
+    transition: transform 0.3s cubic-bezier(0.67, -0.17, 0.22, 1.06),
+                box-shadow 0.3s cubic-bezier(0, 0.47, 0.85, 0.49);
     position: relative;
-    min-width: auto;
 }
-connectcode#code {
+
+/* FIX #3: было connectcode#code без точки — неверный селектор */
+.connectcode#code {
     margin: 0;
 }
-  .results-grid {
-        grid-template-columns: repeat(3, 1fr); /* например, 3 колонки */
-    }  
+
+/* ─────────────────────────────────────────
+   ТЕЛЕФОН (≤ 700px)
+───────────────────────────────────────── */
+@media screen and (max-width: 700px) {
+    .topbar {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* FIX #4: убран дублирующий min-width, растягиваем на 100% */
+    .select-wrapper {
+        width: 100%;
+    }
+
+    .results-grid {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+}
+
+/* ─────────────────────────────────────────
+   ПК (≥ 701px)
+───────────────────────────────────────── */
+@media screen and (min-width: 701px) {
+    .topbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .results-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+} /* FIX #5: закрывающая скобка медиа-запроса отсутствовала в оригинале */
