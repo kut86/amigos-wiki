@@ -243,7 +243,18 @@ button#calcBtn:hover {
     .select-wrapper {
         min-width: auto; /* не растягивается */
     }
+  .copyBtn {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
 
+    transition: all 0.2s ease; 
+  }
+      
     .results-grid {
         grid-template-columns: repeat(3, 1fr); /* например, 3 колонки */
     }
