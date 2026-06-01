@@ -44,12 +44,12 @@ label {
 }
 
 .select-box {
-    padding: 10px;
+    padding: 5px;
     border-radius: 8px;
     border: 1px solid #2e3b4e;
     background: #1b2430;
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: border 0.2s;
 }
 
@@ -250,7 +250,7 @@ button#calcBtn:hover {
 
     /* FIX: было repeat(5) — пропущен второй аргумент */
     .results-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
@@ -267,7 +267,7 @@ button#calcBtn:hover {
     }
 
     .subtitle {
-        font-size: 1.4rem;
+        font-size: 1.1rem;
         margin-bottom: 50px;
     }
 
@@ -298,21 +298,21 @@ button#calcBtn:hover {
    ТЕЛЕФОН (≤ 767px)
 ───────────────────────────────────────── */
 @media screen and (max-width: 767px) {
-    /* FIX: было margin:50px — слишком много на телефоне */
+   
     body {
         margin: 10px;
         padding: 8px;
     }
 
-    /* FIX: 4rem слишком крупно на маленьком экране */
+    
     h1 {
         font-size: 2rem;
         margin-bottom: 8px;
     }
 
-    /* FIX: margin-bottom:100px обрезал контент снизу */
+    
     .subtitle {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         margin-bottom: 30px;
     }
 
@@ -326,11 +326,11 @@ button#calcBtn:hover {
     .select-wrapper,
     .connectcode {
         width: 100%;
-        font-size: 1.0rem;
+        font-size: 0.8rem;
         box-sizing: border-box;
     }
 
-    /* FIX: было minmax(400px) — один аргумент невалиден + 400px шире телефона */
+    
     .results-grid {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -348,7 +348,7 @@ button#calcBtn:hover {
     button#calcBtn {
         width: 100%;
         padding: 14px;
-        font-size: 1.1rem;
+        font-size: 1.0rem;
     }
     
     .weapon-name {
@@ -356,7 +356,7 @@ button#calcBtn:hover {
     }
 
     .cost, .fast {
-        font-size: 0.75rem;
+        font-size: 0.55rem;
         margin-right: 5px;
     }
 }
