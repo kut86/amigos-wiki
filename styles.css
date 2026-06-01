@@ -89,7 +89,7 @@ button#copyBtn:hover {
 }
 
 button#calcBtn {
-    background: #ff6b00;
+    background: #f67c2554;
     border: none;
     color: #fff;
     font-size: 1rem;
@@ -100,7 +100,7 @@ button#calcBtn {
 }
 
 button#calcBtn:hover {
-    background: #ff7f33;
+    background: #69ff33bd;
     transform: scale(1.05);
 }
 
