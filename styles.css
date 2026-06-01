@@ -1,5 +1,3 @@
- 
-
 /* Базовые стили */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -44,7 +42,6 @@ label {
     color: #aaa;
     margin-bottom: 5px;
 }
-
 
 .select-box {
     padding: 10px;
@@ -159,7 +156,6 @@ button#calcBtn:hover {
     margin-top: 3px;
 }
 
-/* BEST оружие подсветка */
 .best {
     background: #ff6b00;
     color: #fff;
@@ -181,9 +177,8 @@ button#calcBtn:hover {
     font-weight: bold;
 }
 
-
 .select-wrapper {
-    display: flex;           
+    display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -200,7 +195,7 @@ button#calcBtn:hover {
 }
 
 .connectcode {
-    display: flex;           
+    display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -216,36 +211,14 @@ button#calcBtn:hover {
     position: relative;
 }
 
-/* FIX #3: было connectcode#code без точки — неверный селектор */
 #code {
     margin: 0;
 }
 
 /* ─────────────────────────────────────────
-   ТЕЛЕФОН (≤ 700px)
+   ПК (≥ 1025px)
 ───────────────────────────────────────── */
-@media screen and (max-width: 700px) {
-    .topbar {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-
-    
-    .select-wrapper {
-        width: 100%;
-    }
-
-    .results-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px));
-    }
-}
-
-/* ─────────────────────────────────────────
-   ПК (≥ 701px)
-───────────────────────────────────────── */
-@media screen and (min-width: 701px) {
+@media screen and (min-width: 1025px) {
     .topbar {
         flex-direction: row;
         justify-content: space-between;
@@ -253,8 +226,115 @@ button#calcBtn:hover {
         gap: 20px;
     }
 
+    /* FIX: было repeat(5) — пропущен второй аргумент */
     .results-grid {
-        grid-template-columns: repeat(5);
+        grid-template-columns: repeat(5, 1fr);
     }
-} 
+}
 
+/* ─────────────────────────────────────────
+   ПЛАНШЕТ (768px – 1024px)
+───────────────────────────────────────── */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    body {
+        margin: 25px;
+    }
+
+    h1 {
+        font-size: 2.8rem;
+    }
+
+    .subtitle {
+        font-size: 1.4rem;
+        margin-bottom: 50px;
+    }
+
+    .topbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .select-wrapper,
+    .connectcode {
+        font-size: 1.4rem;
+    }
+
+    /* 3 колонки на планшете */
+    .results-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+}
+
+/* ─────────────────────────────────────────
+   ТЕЛЕФОН (≤ 767px)
+───────────────────────────────────────── */
+@media screen and (max-width: 767px) {
+    /* FIX: было margin:50px — слишком много на телефоне */
+    body {
+        margin: 10px;
+        padding: 8px;
+    }
+
+    /* FIX: 4rem слишком крупно на маленьком экране */
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    /* FIX: margin-bottom:100px обрезал контент снизу */
+    .subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .select-wrapper,
+    .connectcode {
+        width: 100%;
+        font-size: 1.1rem;
+        box-sizing: border-box;
+    }
+
+    /* FIX: было minmax(400px) — один аргумент невалиден + 400px шире телефона */
+    .results-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .card {
+        padding: 15px;
+        border-radius: 15px;
+    }
+
+    .card h2 {
+        font-size: 1rem;
+    }
+
+    button#calcBtn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.1rem;
+    }
+
+    .weapon-name {
+        font-size: 0.9rem;
+    }
+
+    .cost, .fast {
+        font-size: 0.75rem;
+        margin-right: 5px;
+    }
+}
