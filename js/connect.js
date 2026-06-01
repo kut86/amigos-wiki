@@ -1,4 +1,4 @@
-const button = document.getElementById("copybtn");
+const button = document.getElementById("copyBtn");
 
 button.addEventListener("click", async () => {
 
