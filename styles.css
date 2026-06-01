@@ -176,7 +176,7 @@ button#calcBtn:hover {
     margin-right: 10px;
     font-weight: bold;
 }
-.select-box,
+ 
 .select-wrapper {
     display: flex;
     justify-content: center;
@@ -304,7 +304,7 @@ button#calcBtn:hover {
     .select-wrapper,
     .connectcode {
         width: 100%;
-        font-size: 1.1rem;
+        font-size: 1.0rem;
         box-sizing: border-box;
     }
 
