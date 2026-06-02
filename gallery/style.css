@@ -23,6 +23,9 @@
   --boss-color:  #c0392b;
   --quest-color: #2e86c1;
   --custom-color:#9b59b6;
+  --bot-color:       #e67e22;
+  --exit-color:      #27ae60;
+  --structure-color: #8e44ad;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,6 +198,16 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 .marker-icon.boss   { background: var(--boss-color);  }
 .marker-icon.quest  { background: var(--quest-color); }
 .marker-icon.custom { background: var(--custom-color); }
+/*  marker custum*/
+.marker-icon.custom { background: var(--custom-color); }
+.marker-icon.bot       { background: var(--bot-color); }
+.marker-icon.exit      { background: var(--exit-color); }
+.marker-icon.structure { background: var(--structure-color); }
+
+.badge-custom{ background: rgba(155,89,182,.2);  color: var(--custom-color);border: 1px solid rgba(155,89,182,.4); }
+.badge-bot       { background: rgba(230,126,34,.2);  color: var(--bot-color);       border: 1px solid rgba(230,126,34,.4); }
+.badge-exit      { background: rgba(39,174,96,.2);   color: var(--exit-color);      border: 1px solid rgba(39,174,96,.4); }
+.badge-structure { background: rgba(142,68,173,.2);  color: var(--structure-color); border: 1px solid rgba(142,68,173,.4); }
 
 /* Photo marker */
 .marker-photo {
