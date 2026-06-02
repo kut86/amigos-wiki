@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Map Admin Pro</title>
+<title>Interactive Map Pro</title>
 
 <style>
 html, body {
@@ -13,23 +13,22 @@ html, body {
     font-family: Arial;
 }
 
-/* панель */
-#panel {
+/* TOP PANEL */
+#ui {
     position: fixed;
     top: 10px;
     left: 10px;
     z-index: 9999;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.75);
     padding: 10px;
     border-radius: 10px;
     color: white;
     display: flex;
-    gap: 5px;
+    gap: 8px;
     align-items: center;
 }
 
-button {
-    cursor: pointer;
+button, select, input {
     padding: 6px 10px;
     border-radius: 8px;
     border: none;
@@ -38,49 +37,95 @@ button {
 #loginBtn { background: orange; font-weight: bold; }
 #logoutBtn { background: red; color: white; display:none; }
 
-/* карта */
-.map {
+/* MAP */
+#map {
     position: absolute;
     top: 50%;
     left: 50%;
     transform-origin: center;
-    transform: translate(-50%, -50%);
+    cursor: grab;
 }
 
-.map img {
+#map img {
     width: 100%;
+    pointer-events: none;
 }
 
-/* маркеры */
+/* MARKER */
 .marker {
     position: absolute;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 20px;
+    user-select: none;
+}
+
+/* MODAL */
+#modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 250px;
 }
 </style>
 
 </head>
 <body>
 
-<div id="panel">
+<div id="ui">
     <button id="loginBtn">Войти</button>
     <button id="logoutBtn">Выйти</button>
 
-    <select id="type">
-        <option value="loot">💰 Loot</option>
-        <option value="boss">💀 Boss</option>
-        <option value="quest">📜 Quest</option>
+    <select id="filter">
+        <option value="all">Все</option>
+        <option value="loot">Loot</option>
+        <option value="boss">Boss</option>
+        <option value="quest">Quest</option>
     </select>
+
+    <input id="search" placeholder="Поиск...">
 </div>
 
-<div class="map" id="map">
+<div id="map">
     <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+    <div class="modal-box">
+        <h3 id="title">Маркер</h3>
+
+        <input id="text" placeholder="Название">
+
+        <select id="type">
+            <option value="loot">💰 Loot</option>
+            <option value="boss">💀 Boss</option>
+            <option value="quest">📜 Quest</option>
+        </select>
+
+        <button id="save">Сохранить</button>
+        <button id="delete">Удалить</button>
+        <button onclick="closeModal()">Закрыть</button>
+    </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -92,7 +137,7 @@ const firebaseConfig = {
   storageBucket: "tarkovmap-376d0.firebasestorage.app",
   messagingSenderId: "693794844907",
   appId: "1:693794844907:web:bb020ca896ae7b07acceae",
-  databaseURL: "https://tarkovmap-376d0-default-rtdb.firebaseio.com/"
+  databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -106,83 +151,177 @@ const map = document.getElementById("map");
 
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+
+const modal = document.getElementById("modal");
+const textInput = document.getElementById("text");
 const typeSelect = document.getElementById("type");
+const saveBtn = document.getElementById("save");
+const deleteBtn = document.getElementById("delete");
+
+const filter = document.getElementById("filter");
+const search = document.getElementById("search");
 
 let isAdmin = false;
 let scale = 1;
+let drag = false;
+let offset = {x:0,y:0};
+let pos = {x:0,y:0};
+
+let currentMarker = null;
+
+/* DRAG MAP */
+map.addEventListener("mousedown", (e)=>{
+    drag = true;
+    offset.x = e.clientX - pos.x;
+    offset.y = e.clientY - pos.y;
+    map.style.cursor = "grabbing";
+});
+
+document.addEventListener("mouseup", ()=>{
+    drag = false;
+    map.style.cursor = "grab";
+});
+
+document.addEventListener("mousemove", (e)=>{
+    if(!drag) return;
+    pos.x = e.clientX - offset.x;
+    pos.y = e.clientY - offset.y;
+    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+});
 
 /* ZOOM */
-document.addEventListener("wheel", (e) => {
+document.addEventListener("wheel", (e)=>{
     e.preventDefault();
     scale += e.deltaY < 0 ? 0.1 : -0.1;
     scale = Math.min(Math.max(scale, 0.5), 3);
-    map.style.transform = `translate(-50%, -50%) scale(${scale})`;
-}, { passive: false });
+    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+},{passive:false});
 
 /* LOGIN */
-loginBtn.onclick = () => {
-    signInWithPopup(auth, provider)
-        .catch(e => alert(e.message));
+loginBtn.onclick = ()=>{
+    signInWithPopup(auth, provider);
 };
 
-/* LOGOUT */
-logoutBtn.onclick = () => {
+logoutBtn.onclick = ()=>{
     signOut(auth);
 };
 
-/* USER CHECK */
-onAuthStateChanged(auth, (user) => {
-    if (user && user.email === "pinachet160@gmail.com") {
-        isAdmin = true;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-    } else if (user) {
-        isAdmin = false;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
+/* AUTH */
+onAuthStateChanged(auth,(user)=>{
+    if(user && user.email==="pinachet160@gmail.com"){
+        isAdmin=true;
+        loginBtn.style.display="none";
+        logoutBtn.style.display="inline-block";
+    } else if(user){
+        isAdmin=false;
+        loginBtn.style.display="none";
+        logoutBtn.style.display="inline-block";
     } else {
-        isAdmin = false;
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
+        isAdmin=false;
+        loginBtn.style.display="inline-block";
+        logoutBtn.style.display="none";
     }
 });
 
 /* ADD MARKER */
-map.addEventListener("click", (e) => {
-    if (!isAdmin) return;
+map.addEventListener("click",(e)=>{
+    if(!isAdmin) return;
 
     const rect = map.getBoundingClientRect();
 
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = ((e.clientX-rect.left)/rect.width)*100;
+    const y = ((e.clientY-rect.top)/rect.height)*100;
 
-    const type = typeSelect.value;
+    currentMarker = {x,y,id:null};
 
-    push(markersRef, { x, y, type });
+    openModal({
+        text:"",
+        type:"loot",
+        id:null,
+        x,y
+    });
 });
 
-/* LOAD MARKERS */
-onValue(markersRef, (snapshot) => {
+/* OPEN MODAL */
+function openModal(data){
+    modal.style.display="flex";
+    textInput.value=data.text||"";
+    typeSelect.value=data.type||"loot";
 
-    document.querySelectorAll(".marker").forEach(m => m.remove());
+    currentMarker=data;
+}
 
-    snapshot.forEach(item => {
-        const m = item.val();
+/* CLOSE */
+window.closeModal = ()=>{
+    modal.style.display="none";
+    currentMarker=null;
+};
 
-        const div = document.createElement("div");
-        div.className = "marker";
+/* SAVE */
+saveBtn.onclick = ()=>{
+    if(!currentMarker) return;
 
-        div.style.left = m.x + "%";
-        div.style.top = m.y + "%";
+    if(currentMarker.id){
+        set(ref(db,"markers/"+currentMarker.id),{
+            x:currentMarker.x,
+            y:currentMarker.y,
+            text:textInput.value,
+            type:typeSelect.value
+        });
+    } else {
+        push(markersRef,{
+            x:currentMarker.x,
+            y:currentMarker.y,
+            text:textInput.value,
+            type:typeSelect.value
+        });
+    }
 
-        /* иконки */
-        if (m.type === "loot") div.innerHTML = "💰";
-        if (m.type === "boss") div.innerHTML = "💀";
-        if (m.type === "quest") div.innerHTML = "📜";
+    closeModal();
+};
+
+/* DELETE */
+deleteBtn.onclick = ()=>{
+    if(currentMarker?.id){
+        remove(ref(db,"markers/"+currentMarker.id));
+    }
+    closeModal();
+};
+
+/* LOAD */
+onValue(markersRef,(snap)=>{
+    document.querySelectorAll(".marker").forEach(m=>m.remove());
+
+    snap.forEach(i=>{
+        const m=i.val();
+        const id=i.key;
+
+        if(filter.value!=="all" && m.type!==filter.value) return;
+        if(search.value && !m.text?.toLowerCase().includes(search.value.toLowerCase())) return;
+
+        const div=document.createElement("div");
+        div.className="marker";
+        div.style.left=m.x+"%";
+        div.style.top=m.y+"%";
+
+        div.innerHTML =
+            m.type==="loot"?"💰":
+            m.type==="boss"?"💀":"📜";
+
+        div.onclick=(e)=>{
+            e.stopPropagation();
+            if(!isAdmin) return;
+
+            currentMarker={...m,id};
+            openModal({...m,id});
+        };
 
         map.appendChild(div);
     });
 });
+
+filter.onchange=()=>onValue(markersRef,()=>{});
+search.oninput=()=>onValue(markersRef,()=>{});
 </script>
 
 </body>
