@@ -27,16 +27,6 @@ html, body {
 }
 
 /* карта по центру */
-.map-wrapper {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-}
-
 .map {
     position: absolute;
     top: 50%;
@@ -67,10 +57,8 @@ html, body {
 
 <button id="loginBtn">Войти</button>
 
-<div class="map-wrapper">
-    <div class="map" id="map">
-        <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
-    </div>
+<div class="map" id="map">
+    <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
 </div>
 
 <script type="module">
@@ -83,7 +71,7 @@ import {
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* 🔥 FIREBASE CONFIG */
+/* 🔥 FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -97,7 +85,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-
 const provider = new GoogleAuthProvider();
 
 const markersRef = ref(db, "markers");
@@ -107,6 +94,8 @@ const loginBtn = document.getElementById("loginBtn");
 
 let scale = 1;
 let isAdmin = false;
+
+console.log("Firebase loaded ✔");
 
 /* 🔍 ZOOM */
 document.addEventListener("wheel", (e) => {
@@ -118,15 +107,29 @@ document.addEventListener("wheel", (e) => {
     map.style.transform = `translate(-50%, -50%) scale(${scale})`;
 }, { passive: false });
 
-/* 🔐 GOOGLE LOGIN */
-loginBtn.onclick = () => {
-    signInWithPopup(auth, provider)
-        .then(() => alert("Вход выполнен"))
-        .catch((e) => alert(e.message));
+/* 🔐 GOOGLE LOGIN (SAFE VERSION) */
+loginBtn.onclick = async () => {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("LOGIN OK:", result.user.email);
+        alert("Вход выполнен: " + result.user.email);
+
+    } catch (e) {
+        console.error("LOGIN ERROR:", e);
+
+        if (e.code === "auth/unauthorized-domain") {
+            alert("❌ Домен не разрешён в Firebase (Authorized domains)");
+        } else if (e.code === "auth/popup-blocked") {
+            alert("❌ Браузер заблокировал окно входа");
+        } else {
+            alert("❌ Ошибка входа: " + e.message);
+        }
+    }
 };
 
 /* 👤 CHECK ADMIN */
 onAuthStateChanged(auth, (user) => {
+
     if (user && user.email === "pinachet160@gmail.com") {
         isAdmin = true;
         loginBtn.innerText = "Админ";
@@ -139,7 +142,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-/* 📍 CLICK → ADD MARKER */
+/* 📍 ADD MARKER */
 map.addEventListener("click", (e) => {
 
     if (!isAdmin) return;
@@ -152,11 +155,7 @@ map.addEventListener("click", (e) => {
     const text = prompt("Название маркера:");
     if (!text) return;
 
-    push(markersRef, {
-        x,
-        y,
-        text
-    });
+    push(markersRef, { x, y, text });
 });
 
 /* 📥 LOAD MARKERS */
