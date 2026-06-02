@@ -1,250 +1,75 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>Interactive Map Pro</title>
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Amigos Wiki — Tarkov Map</title><link rel="stylesheet" href="map.css"></head><body><!-- ВЕРХНЯЯ ПАНЕЛЬ --><div id="topbar"><div class="left-panel">
 
-<style>
-html, body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
-    background: #111;
-    font-family: Arial;
-}
+    <button id="loginBtn">
+        Войти
+    </button>
 
-/* UI */
-#ui {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 9999;
-    background: rgba(0,0,0,0.75);
-    padding: 10px;
-    border-radius: 10px;
-    color: white;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
+    <button id="logoutBtn">
+        Выйти
+    </button>
 
-button, select {
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: none;
-}
+    <span id="userStatus">
+        Гость
+    </span>
 
-#loginBtn { background: orange; font-weight: bold; }
-#logoutBtn { background: red; color: white; display:none; }
+</div>
 
-/* VIEWPORT */
-#viewport {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
-}
+</div><!-- ОБЛАСТЬ КАРТЫ --><div id="viewport"><div id="map">
 
-/* MAP */
-#map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: 0 0;
-    cursor: grab;
-}
+    <img
+        id="mapImage"
+        src="images/map.jpg"
+        alt="Tarkov Map"
+    >
 
-#map img {
-    width: 100%;
-    pointer-events: none;
-}
+</div>
 
-/* MARKER */
-.marker {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    font-size: 20px;
-    user-select: none;
-}
-</style>
+</div><!-- СОЗДАНИЕ МАРКЕРА --><div id="createModal" class="modal"><div class="modal-content">
 
-</head>
-<body>
+    <h2>Создать маркер</h2>
 
-<div id="ui">
-    <button id="loginBtn">Войти</button>
-    <button id="logoutBtn">Выйти</button>
+    <select id="markerType">
 
-    <select id="type">
-        <option value="loot">💰 Loot</option>
-        <option value="boss">💀 Boss</option>
-        <option value="pmc">🔴 PMC</option>
-        <option value="scav">🟡 Scav</option>
-        <option value="quest">📜 Quest</option>
-        <option value="mine">☠️ Mine</option>
+        <option value="loot">💰 Лут</option>
+        <option value="boss">💀 Босс</option>
+        <option value="pmc">🔴 ЧВК</option>
+        <option value="scav">🟡 Дикий</option>
+        <option value="quest">📜 Квест</option>
+        <option value="mine">☠️ Мины</option>
+
     </select>
-</div>
 
-<div id="viewport">
-    <div id="map">
-        <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
+    <textarea
+        id="markerDescription"
+        placeholder="Введите описание..."
+    ></textarea>
+
+    <div class="modal-buttons">
+
+        <button id="saveMarkerBtn">
+            Сохранить
+        </button>
+
+        <button id="cancelMarkerBtn">
+            Отмена
+        </button>
+
     </div>
+
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+</div><!-- ПРОСМОТР МАРКЕРА --><div id="viewModal" class="modal"><div class="modal-content">
 
-import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <h2>Информация</h2>
 
-/* FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
-  authDomain: "tarkovmap-376d0.firebaseapp.com",
-  projectId: "tarkovmap-376d0",
-  storageBucket: "tarkovmap-376d0.firebasestorage.app",
-  messagingSenderId: "693794844907",
-  appId: "1:693794844907:web:bb020ca896ae7b07acceae",
-  databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
-};
+    <div id="viewText"></div>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+    <button id="closeViewBtn">
+        Закрыть
+    </button>
 
-const markersRef = ref(db,"markers");
+</div>
 
-const map = document.getElementById("map");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const typeSelect = document.getElementById("type");
-
-let isAdmin = false;
-
-/* POSITION SYSTEM */
-let scale = 1;
-let pos = { x: 0, y: 0 };
-
-function apply(){
-    map.style.transform =
-        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
-}
-
-/* DRAG */
-let drag = false;
-let start = {x:0,y:0};
-
-map.addEventListener("mousedown",(e)=>{
-    drag = true;
-    start.x = e.clientX - pos.x;
-    start.y = e.clientY - pos.y;
-});
-
-document.addEventListener("mouseup",()=> drag=false);
-
-document.addEventListener("mousemove",(e)=>{
-    if(!drag) return;
-    pos.x = e.clientX - start.x;
-    pos.y = e.clientY - start.y;
-    apply();
-});
-
-/* ZOOM */
-document.addEventListener("wheel",(e)=>{
-    e.preventDefault();
-
-    const mx = e.clientX;
-    const my = e.clientY;
-
-    const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(scale * zoom, 0.5), 3);
-
-    pos.x = mx - (mx - pos.x) * (newScale / scale);
-    pos.y = my - (my - pos.y) * (newScale / scale);
-
-    scale = newScale;
-    apply();
-},{passive:false});
-
-/* AUTH (ДОБАВЛЕНО ОБРАТНО БЕЗ УДАЛЕНИЯ ДРУГОГО) */
-loginBtn.onclick = () => {
-    signInWithPopup(auth, provider);
-};
-
-logoutBtn.onclick = () => {
-    signOut(auth);
-};
-
-onAuthStateChanged(auth,(user)=>{
-    if(user && user.email==="pinachet160@gmail.com"){
-        isAdmin = true;
-        loginBtn.style.display="none";
-        logoutBtn.style.display="inline-block";
-    } else if(user){
-        isAdmin = false;
-        loginBtn.style.display="none";
-        logoutBtn.style.display="inline-block";
-    } else {
-        isAdmin = false;
-        loginBtn.style.display="inline-block";
-        logoutBtn.style.display="none";
-    }
-});
-
-/* ICONS (НЕ ТРОГАЮ) */
-function icon(type){
-    if(type==="loot") return "💰";
-    if(type==="boss") return "💀";
-    if(type==="pmc") return "🔴";
-    if(type==="scav") return "🟡";
-    if(type==="quest") return "📜";
-    if(type==="mine") return "☠️";
-    return "📍";
-}
-
-/* ADD MARKER */
-map.addEventListener("click",(e)=>{
-    if(!isAdmin) return;
-
-    const rect = map.getBoundingClientRect();
-
-    const x = ((e.clientX-rect.left)/rect.width)*100;
-    const y = ((e.clientY-rect.top)/rect.height)*100;
-
-    push(markersRef,{
-        x,y,
-        type:typeSelect.value
-    });
-});
-
-/* LOAD MARKERS */
-onValue(markersRef,(snap)=>{
-    document.querySelectorAll(".marker").forEach(m=>m.remove());
-
-    snap.forEach(i=>{
-        const m=i.val();
-
-        const div=document.createElement("div");
-        div.className="marker";
-
-        div.style.left=m.x+"%";
-        div.style.top=m.y+"%";
-
-        div.innerHTML = icon(m.type);
-
-        map.appendChild(div);
-    });
-});
-</script>
-
-</body>
+</div><script type="module" src="map.js"></script></body>
 </html>
