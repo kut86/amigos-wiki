@@ -12,7 +12,7 @@ html, body {
     background: #111;
 }
 
-/* кнопка входа */
+/* кнопка */
 #loginBtn {
     position: fixed;
     top: 10px;
@@ -65,19 +65,14 @@ html, body {
 
 <div class="map-wrapper">
     <div class="map" id="map">
-        <img src="/gallery/tarkov/images/map.jpg">
+        <img src="images/map.jpg">
     </div>
 </div>
 
 <script type="module">
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import { getDatabase, ref, push, onValue } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
@@ -92,16 +87,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const auth = getAuth();
+const auth = getAuth(app);
 
 const markersRef = ref(db, "markers");
+
 const map = document.getElementById("map");
 const loginBtn = document.getElementById("loginBtn");
 
 let scale = 1;
 let isAdmin = false;
-
----
 
 /* 🔍 ZOOM */
 document.addEventListener("wheel", (e) => {
@@ -113,8 +107,6 @@ document.addEventListener("wheel", (e) => {
     map.style.transform = `scale(${scale})`;
 }, { passive: false });
 
----
-
 /* 🔐 LOGIN */
 loginBtn.onclick = () => {
     const email = prompt("Email:");
@@ -122,12 +114,10 @@ loginBtn.onclick = () => {
 
     signInWithEmailAndPassword(auth, email, pass)
         .then(() => alert("Вход выполнен"))
-        .catch(() => alert("Ошибка входа"));
+        .catch((e) => alert(e.message));
 };
 
----
-
-/* 👤 CHECK ADMIN */
+/* 👤 CHECK USER */
 onAuthStateChanged(auth, (user) => {
     if (user) {
         isAdmin = true;
@@ -137,8 +127,6 @@ onAuthStateChanged(auth, (user) => {
         loginBtn.innerText = "Войти";
     }
 });
-
----
 
 /* 📍 CLICK → ADD MARKER */
 map.addEventListener("click", (e) => {
@@ -153,10 +141,12 @@ map.addEventListener("click", (e) => {
     const text = prompt("Название маркера:");
     if (!text) return;
 
-    push(markersRef, { x, y, text });
+    push(markersRef, {
+        x: x,
+        y: y,
+        text: text
+    });
 });
-
----
 
 /* 📥 LOAD MARKERS */
 onValue(markersRef, (snapshot) => {
