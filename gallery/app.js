@@ -185,13 +185,11 @@ mapEl.addEventListener('click', e => {
   if (!addMode || !isAdmin) return;
   if (e.target.closest('.marker')) return;
 
-  const scale  = pz ? pz.getScale() : 1;
-  const pan    = pz ? pz.getPan()   : { x: 0, y: 0 };
-  const rect   = mapWrapper.getBoundingClientRect();
+  // rect самого mapEl — учитывает текущий зум и пан автоматически
+  const rect = mapEl.getBoundingClientRect();
 
-  /* координаты клика в процентах от размера картинки */
-  const x = ((e.clientX - rect.left - pan.x) / (mapImg.naturalWidth  * scale)) * 100;
-  const y = ((e.clientY - rect.top  - pan.y) / (mapImg.naturalHeight * scale)) * 100;
+  const x = ((e.clientX - rect.left) / rect.width)  * 100;
+  const y = ((e.clientY - rect.top)  / rect.height) * 100;
 
   pendingPos = { x, y };
   addForm.style.display = 'flex';
