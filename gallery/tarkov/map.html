@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Locked Map Pro</title>
+<title>Interactive Map Pro</title>
 
 <style>
 html, body {
@@ -19,15 +19,25 @@ html, body {
     top: 10px;
     left: 10px;
     z-index: 9999;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.75);
     padding: 10px;
     border-radius: 10px;
     color: white;
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
-/* VIEWPORT (ВАЖНО) */
+button, select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+#loginBtn { background: orange; font-weight: bold; }
+#logoutBtn { background: red; color: white; display:none; }
+
+/* VIEWPORT */
 #viewport {
     width: 100vw;
     height: 100vh;
@@ -63,6 +73,9 @@ html, body {
 <body>
 
 <div id="ui">
+    <button id="loginBtn">Войти</button>
+    <button id="logoutBtn">Выйти</button>
+
     <select id="type">
         <option value="loot">💰 Loot</option>
         <option value="boss">💀 Boss</option>
@@ -84,6 +97,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, push, onValue }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 /* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
@@ -97,25 +118,30 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 const markersRef = ref(db,"markers");
 
 const map = document.getElementById("map");
-const viewport = document.getElementById("viewport");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 const typeSelect = document.getElementById("type");
 
-/* SCALE + POS */
+let isAdmin = false;
+
+/* POSITION SYSTEM */
 let scale = 1;
 let pos = { x: 0, y: 0 };
 
-/* APPLY TRANSFORM */
-function apply() {
-    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+function apply(){
+    map.style.transform =
+        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
 }
 
-/* DRAG WITH LIMITS */
+/* DRAG */
 let drag = false;
-let start = { x:0, y:0 };
+let start = {x:0,y:0};
 
 map.addEventListener("mousedown",(e)=>{
     drag = true;
@@ -127,36 +153,68 @@ document.addEventListener("mouseup",()=> drag=false);
 
 document.addEventListener("mousemove",(e)=>{
     if(!drag) return;
-
     pos.x = e.clientX - start.x;
     pos.y = e.clientY - start.y;
-
     apply();
 });
 
-/* ZOOM (center fix) */
+/* ZOOM */
 document.addEventListener("wheel",(e)=>{
     e.preventDefault();
-
-    const rect = map.getBoundingClientRect();
 
     const mx = e.clientX;
     const my = e.clientY;
 
     const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-
     const newScale = Math.min(Math.max(scale * zoom, 0.5), 3);
 
     pos.x = mx - (mx - pos.x) * (newScale / scale);
     pos.y = my - (my - pos.y) * (newScale / scale);
 
     scale = newScale;
-
     apply();
 },{passive:false});
 
+/* AUTH (ДОБАВЛЕНО ОБРАТНО БЕЗ УДАЛЕНИЯ ДРУГОГО) */
+loginBtn.onclick = () => {
+    signInWithPopup(auth, provider);
+};
+
+logoutBtn.onclick = () => {
+    signOut(auth);
+};
+
+onAuthStateChanged(auth,(user)=>{
+    if(user && user.email==="pinachet160@gmail.com"){
+        isAdmin = true;
+        loginBtn.style.display="none";
+        logoutBtn.style.display="inline-block";
+    } else if(user){
+        isAdmin = false;
+        loginBtn.style.display="none";
+        logoutBtn.style.display="inline-block";
+    } else {
+        isAdmin = false;
+        loginBtn.style.display="inline-block";
+        logoutBtn.style.display="none";
+    }
+});
+
+/* ICONS (НЕ ТРОГАЮ) */
+function icon(type){
+    if(type==="loot") return "💰";
+    if(type==="boss") return "💀";
+    if(type==="pmc") return "🔴";
+    if(type==="scav") return "🟡";
+    if(type==="quest") return "📜";
+    if(type==="mine") return "☠️";
+    return "📍";
+}
+
 /* ADD MARKER */
 map.addEventListener("click",(e)=>{
+    if(!isAdmin) return;
+
     const rect = map.getBoundingClientRect();
 
     const x = ((e.clientX-rect.left)/rect.width)*100;
@@ -168,18 +226,7 @@ map.addEventListener("click",(e)=>{
     });
 });
 
-/* ICONS */
-function icon(type){
-    if(type==="loot") return "💰";
-    if(type==="boss") return "💀";
-    if(type==="pmc") return "🔴";
-    if(type==="scav") return "🟡";
-    if(type==="quest") return "📜";
-    if(type==="mine") return "☠️";
-    return "📍";
-}
-
-/* LOAD */
+/* LOAD MARKERS */
 onValue(markersRef,(snap)=>{
     document.querySelectorAll(".marker").forEach(m=>m.remove());
 
@@ -197,8 +244,6 @@ onValue(markersRef,(snap)=>{
         map.appendChild(div);
     });
 });
-
-apply();
 </script>
 
 </body>
