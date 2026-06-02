@@ -152,6 +152,8 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   inset: 0;
   overflow: hidden;
   cursor: grab;
+  touch-action: none;
+
 }
 #mapWrapper.dragging { cursor: grabbing; }
 
