@@ -103,43 +103,46 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
 
-/* ── Panzoom init (после загрузки картинки) ── */
-mapImg.onload = () => {
+/* ── Panzoom init ── */
+function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
+  if (!iw || !ih) return;
+
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  /* начальный масштаб — вписать в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih,
     1
   );
 
-  /* создаём Panzoom на mapEl */
   pz = Panzoom(mapEl, {
     maxScale:  5,
     minScale:  0.2,
     startScale,
     startX: (window.innerWidth  - iw * startScale) / 2,
     startY: (window.innerHeight - ih * startScale) / 2,
-    canvas: true,          // важно для работы touch внутри wrapper
+    canvas: true,
     cursor: 'grab',
   });
 
-  /* колесо мыши — зум к курсору */
   mapWrapper.addEventListener('wheel', e => {
     e.preventDefault();
     pz.zoomWithWheel(e);
     updateStatus();
   }, { passive: false });
 
-  /* обновлять statusBar при любом движении */
   mapEl.addEventListener('panzoomchange', updateStatus);
-
   updateStatus();
-};
+}
+
+if (mapImg.complete && mapImg.naturalWidth) {
+  initPanzoom();
+} else {
+  mapImg.onload = initPanzoom;
+}
 
 function updateStatus() {
   if (!pz) return;
