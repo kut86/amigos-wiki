@@ -111,13 +111,12 @@ function toast(msg, err = false) {
 }
 
 /* ── Auth ──────────────────────────────────────────────────── */
-const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2"; // твой реальный uid из Firebase
+const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 onAuthStateChanged(auth, user => {
   const loggedIn = !!user;
   const isAdmin = loggedIn && user.uid === ADMIN_UID;
 
-  // остальной код тот же ↓
   loginBtn.style.display   = loggedIn ? "none" : "";
   logoutBtn.style.display  = loggedIn ? "" : "none";
   adminBadge.style.display = isAdmin ? "" : "none";
