@@ -211,31 +211,28 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 /* Tooltip on hover */
 .marker-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 0%); /* вместо bottom */
   left: 50%;
   transform: translateX(-50%);
   background: rgba(10,11,12,.95);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 6px 10px;
-  white-space: nowrap;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-size: 10px;
   font-family: 'Share Tech Mono', monospace;
   pointer-events: none;
   opacity: 0;
   transition: opacity .15s, transform .15s;
-  transform: translateX(-50%) translateY(4px);
   max-width: 200px;
-  white-space: normal;
   text-align: center;
   line-height: 1.4;
   z-index: 300;
 }
-.marker:hover .marker-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
 
+.marker:hover .marker-tooltip {
+  opacity: 1; /* делаем видимым */
+  transform: translateX(-50%) translateY(4px);
+}
 /* Photo preview on hover */
 .marker-preview {
   position: absolute;
