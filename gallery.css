@@ -94,3 +94,17 @@ body {
     color: #333;
     line-height: 1.6;
 }
+.donate-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: orange;
+    color: black;
+    text-decoration: none;
+    border-radius: 15px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.donate-btn:hover {
+    background: lightgreen;
+}
