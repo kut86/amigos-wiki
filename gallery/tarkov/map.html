@@ -26,19 +26,23 @@ html, body {
     font-weight: bold;
 }
 
-/* карта */
+/* карта по центру */
 .map-wrapper {
     width: 100vw;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
     position: relative;
 }
 
 .map {
     position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: 0 0;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%);
 }
 
 .map img {
@@ -72,7 +76,12 @@ html, body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
@@ -89,6 +98,8 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+const provider = new GoogleAuthProvider();
+
 const markersRef = ref(db, "markers");
 
 const map = document.getElementById("map");
@@ -104,24 +115,24 @@ document.addEventListener("wheel", (e) => {
     scale += e.deltaY < 0 ? 0.1 : -0.1;
     scale = Math.min(Math.max(scale, 0.5), 3);
 
-    map.style.transform = `scale(${scale})`;
+    map.style.transform = `translate(-50%, -50%) scale(${scale})`;
 }, { passive: false });
 
-/* 🔐 LOGIN */
+/* 🔐 GOOGLE LOGIN */
 loginBtn.onclick = () => {
-    const email = prompt("Email:");
-    const pass = prompt("Пароль:");
-
-    signInWithEmailAndPassword(auth, email, pass)
+    signInWithPopup(auth, provider)
         .then(() => alert("Вход выполнен"))
         .catch((e) => alert(e.message));
 };
 
-/* 👤 CHECK USER */
+/* 👤 CHECK ADMIN */
 onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (user && user.email === "pinachet160@gmail.com") {
         isAdmin = true;
         loginBtn.innerText = "Админ";
+    } else if (user) {
+        isAdmin = false;
+        loginBtn.innerText = "Нет доступа";
     } else {
         isAdmin = false;
         loginBtn.innerText = "Войти";
@@ -142,9 +153,9 @@ map.addEventListener("click", (e) => {
     if (!text) return;
 
     push(markersRef, {
-        x: x,
-        y: y,
-        text: text
+        x,
+        y,
+        text
     });
 });
 
@@ -165,7 +176,6 @@ onValue(markersRef, (snapshot) => {
         map.appendChild(div);
     });
 });
-
 </script>
 
 </body>
