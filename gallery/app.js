@@ -70,16 +70,15 @@ const addConfirm  = document.getElementById("addConfirm");
 const addCancel   = document.getElementById("addCancel");
 
 /* ── State ─────────────────────────────────────────────────── */
-let isAdmin    = false;  // глобальная — НЕ переопределять через const внутри колбэков
-let current    = null;   // { id, ...markerData }
-let addMode    = false;  // waiting for click to place marker
-let pendingPos = null;   // {x,y} percent where user clicked
+let isAdmin    = false;
+let current    = null;
+let addMode    = false;
+let pendingPos = null;
 
 let scale = 1;
 let pos   = { x: 0, y: 0 };
 
-/* Snapshot cache for reactive filter */
-let allMarkers = {};  // { id: markerData }
+let allMarkers = {};
 
 /* ── Type icons ────────────────────────────────────────────── */
 const TYPE_EMOJI = { loot: '📦', boss: '💀', quest: '📋', custom: '⭐', bot: '🎯', exit: '🚪', structure: '🧩' };
@@ -95,13 +94,11 @@ function toast(msg, err = false) {
 }
 
 /* ── Auth ──────────────────────────────────────────────────── */
-
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 loginBtn.onclick  = () => signInWithPopup(auth, provider).catch(err => toast(err.message, true));
 logoutBtn.onclick = () => signOut(auth);
 
-// ИСПРАВЛЕНИЕ 1: убрали `const` перед isAdmin — теперь пишем в глобальную переменную
 onAuthStateChanged(auth, user => {
   if (user) {
     console.log("EMAIL:", user.email);
@@ -109,6 +106,8 @@ onAuthStateChanged(auth, user => {
   }
   const loggedIn = !!user;
   isAdmin = loggedIn && user.uid === ADMIN_UID;
+
+  console.log("isAdmin:", isAdmin);
 
   loginBtn.style.display   = loggedIn ? "none" : "";
   logoutBtn.style.display  = loggedIn ? "" : "none";
@@ -121,8 +120,7 @@ onAuthStateChanged(auth, user => {
 });
 
 
-/* ── MAP: natural sizing & initial center ──────────────────── */
-// ИСПРАВЛЕНИЕ 3: логика центрирования вынесена в отдельную функцию fitMap
+/* ── MAP ───────────────────────────────────────────────────── */
 function fitMap() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
@@ -149,20 +147,27 @@ function applyTransform() {
 }
 
 /* ── DRAG ──────────────────────────────────────────────────── */
-let drag = false, dragStart = { x:0, y:0 }, posStart = { x:0, y:0 };
+let drag      = false;
+let dragMoved = false;
+let dragStart = { x: 0, y: 0 };
+let posStart  = { x: 0, y: 0 };
 
 mapWrapper.addEventListener("pointerdown", e => {
-  drag = true;
-  dragStart  = { x: e.clientX, y: e.clientY };
-  posStart   = { ...pos };
+  drag      = true;
+  dragMoved = false;
+  dragStart = { x: e.clientX, y: e.clientY };
+  posStart  = { ...pos };
   mapWrapper.setPointerCapture(e.pointerId);
   mapWrapper.classList.add('dragging');
 });
 
 mapWrapper.addEventListener("pointermove", e => {
   if (!drag) return;
-  pos.x = posStart.x + (e.clientX - dragStart.x);
-  pos.y = posStart.y + (e.clientY - dragStart.y);
+  const dx = e.clientX - dragStart.x;
+  const dy = e.clientY - dragStart.y;
+  if (Math.hypot(dx, dy) > 4) dragMoved = true;
+  pos.x = posStart.x + dx;
+  pos.y = posStart.y + dy;
   applyTransform();
 });
 
@@ -171,12 +176,11 @@ mapWrapper.addEventListener("pointerup", () => {
   mapWrapper.classList.remove('dragging');
 });
 
-/* ── ZOOM (wheel + pinch) ──────────────────────────────────── */
+/* ── ZOOM ──────────────────────────────────────────────────── */
 mapWrapper.addEventListener("wheel", e => {
   e.preventDefault();
   const delta    = e.deltaY < 0 ? 0.12 : -0.12;
   const newScale = Math.min(Math.max(scale + delta, 0.3), 5);
-
   const cx = e.clientX, cy = e.clientY;
   pos.x = cx - (cx - pos.x) * (newScale / scale);
   pos.y = cy - (cy - pos.y) * (newScale / scale);
@@ -184,13 +188,12 @@ mapWrapper.addEventListener("wheel", e => {
   applyTransform();
 }, { passive: false });
 
-// Pinch zoom
 let lastDist = 0;
 mapWrapper.addEventListener("touchmove", e => {
   if (e.touches.length !== 2) return;
   e.preventDefault();
-  const dx = e.touches[0].clientX - e.touches[1].clientX;
-  const dy = e.touches[0].clientY - e.touches[1].clientY;
+  const dx   = e.touches[0].clientX - e.touches[1].clientX;
+  const dy   = e.touches[0].clientY - e.touches[1].clientY;
   const dist = Math.hypot(dx, dy);
   if (lastDist) {
     const factor = dist / lastDist;
@@ -201,10 +204,8 @@ mapWrapper.addEventListener("touchmove", e => {
 }, { passive: false });
 mapWrapper.addEventListener("touchend", () => { lastDist = 0; });
 
-/* Zoom buttons */
 document.getElementById("zoomIn").onclick    = () => zoom(1);
 document.getElementById("zoomOut").onclick   = () => zoom(-1);
-// ИСПРАВЛЕНИЕ 3: zoomReset теперь вызывает fitMap(), а не mapImg.onload()
 document.getElementById("zoomReset").onclick = fitMap;
 
 function zoom(dir) {
@@ -235,8 +236,9 @@ function enterAddMode() {
   addModeBtn.classList.add('btn-danger');
   toast('Нажмите на карту для добавления маркера');
 }
+
 function exitAddMode() {
-  addMode = false;
+  addMode    = false;
   pendingPos = null;
   mapWrapper.classList.remove('adding');
   addModeBtn.textContent = '+ Маркер';
@@ -263,6 +265,7 @@ function showAddForm() {
   addIcon.value   = '';
   addType.value   = 'loot';
 }
+
 function hideAddForm() {
   addForm.style.display = 'none';
 }
@@ -311,13 +314,12 @@ filterSel.addEventListener("change", renderAllMarkers);
 
 function createMarkerEl(id, m) {
   const div = document.createElement('div');
-  div.className = 'marker';
+  div.className  = 'marker';
   div.dataset.id = id;
 
   div.style.left = m.x + '%';
   div.style.top  = m.y + '%';
 
-  // ИСПРАВЛЕНИЕ 4: убран ненадёжный via.placeholder.com — используем data-URI
   const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
 
   if (m.imgUrl) {
@@ -347,16 +349,17 @@ function createMarkerEl(id, m) {
     `;
   }
 
-  div.addEventListener('click', e => {
+  /* ── ИСПРАВЛЕНИЕ: pointerup вместо click, проверяем dragMoved ── */
+  div.addEventListener('pointerup', e => {
     e.stopPropagation();
-    if (addMode) return;
+    if (addMode)    return;
+    if (dragMoved)  return;
     openModal(id, m);
   });
 
   mapEl.appendChild(div);
 }
 
-/* escape HTML for safety */
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -375,8 +378,8 @@ function openModal(id, m) {
   modalDesc.textContent   = m.text;
   modalCoords.textContent = `x:${m.x.toFixed(2)}% y:${m.y.toFixed(2)}%`;
 
-  editBtn.style.display = isAdmin ? '' : 'none';
-  delBtn.style.display  = isAdmin ? '' : 'none';
+  editBtn.style.display  = isAdmin ? '' : 'none';
+  delBtn.style.display   = isAdmin ? '' : 'none';
   editForm.style.display = 'none';
 
   modal.classList.add('open');
