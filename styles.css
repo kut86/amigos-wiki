@@ -194,8 +194,8 @@ button#calcBtn:hover {
 }
 
 .cost, .fast {
-    font-size: 0.75rem;
-    margin-right: 1px;
+    font-size: 0.55rem;
+    margin-right: 0.8px;
     font-weight: bold;
 }
  
