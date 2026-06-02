@@ -13,13 +13,13 @@ html, body {
     font-family: Arial;
 }
 
-/* TOP PANEL */
+/* UI */
 #ui {
     position: fixed;
     top: 10px;
     left: 10px;
     z-index: 9999;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0,0,0,0.7);
     padding: 10px;
     border-radius: 10px;
     color: white;
@@ -40,9 +40,9 @@ button, select, input {
 /* MAP */
 #map {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform-origin: center;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
     cursor: grab;
 }
 
@@ -63,8 +63,7 @@ button, select, input {
 /* MODAL */
 #modal {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.6);
     display: none;
     align-items: center;
@@ -76,10 +75,10 @@ button, select, input {
     padding: 15px;
     border-radius: 10px;
     color: white;
+    width: 260px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 250px;
 }
 </style>
 
@@ -96,36 +95,29 @@ button, select, input {
         <option value="boss">Boss</option>
         <option value="quest">Quest</option>
     </select>
-
-    <input id="search" placeholder="Поиск...">
 </div>
 
 <div id="map">
     <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
 </div>
 
-<!-- MODAL -->
+<!-- VIEW MODAL -->
 <div id="modal">
     <div class="modal-box">
-        <h3 id="title">Маркер</h3>
+        <h3>Маркер</h3>
+        <p id="viewText"></p>
 
-        <input id="text" placeholder="Название">
-
-        <select id="type">
-            <option value="loot">💰 Loot</option>
-            <option value="boss">💀 Boss</option>
-            <option value="quest">📜 Quest</option>
-        </select>
-
-        <button id="save">Сохранить</button>
-        <button id="delete">Удалить</button>
+        <button id="editBtn" style="display:none;">Редактировать</button>
+        <button id="delBtn" style="display:none;">Удалить</button>
         <button onclick="closeModal()">Закрыть</button>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, set, remove }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -153,48 +145,56 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const modal = document.getElementById("modal");
-const textInput = document.getElementById("text");
-const typeSelect = document.getElementById("type");
-const saveBtn = document.getElementById("save");
-const deleteBtn = document.getElementById("delete");
+const viewText = document.getElementById("viewText");
+const editBtn = document.getElementById("editBtn");
+const delBtn = document.getElementById("delBtn");
 
 const filter = document.getElementById("filter");
-const search = document.getElementById("search");
 
 let isAdmin = false;
+let current = null;
+
+/* POSITION */
 let scale = 1;
+let pos = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2
+};
+
+/* DRAG */
 let drag = false;
 let offset = {x:0,y:0};
-let pos = {x:0,y:0};
 
-let currentMarker = null;
-
-/* DRAG MAP */
-map.addEventListener("mousedown", (e)=>{
+map.addEventListener("mousedown",(e)=>{
     drag = true;
     offset.x = e.clientX - pos.x;
     offset.y = e.clientY - pos.y;
     map.style.cursor = "grabbing";
 });
 
-document.addEventListener("mouseup", ()=>{
+document.addEventListener("mouseup",()=>{
     drag = false;
     map.style.cursor = "grab";
 });
 
-document.addEventListener("mousemove", (e)=>{
+document.addEventListener("mousemove",(e)=>{
     if(!drag) return;
     pos.x = e.clientX - offset.x;
     pos.y = e.clientY - offset.y;
-    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+
+    map.style.transform =
+        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
 });
 
 /* ZOOM */
-document.addEventListener("wheel", (e)=>{
+document.addEventListener("wheel",(e)=>{
     e.preventDefault();
+
     scale += e.deltaY < 0 ? 0.1 : -0.1;
-    scale = Math.min(Math.max(scale, 0.5), 3);
-    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+    scale = Math.min(Math.max(scale,0.5),3);
+
+    map.style.transform =
+        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
 },{passive:false});
 
 /* LOGIN */
@@ -223,7 +223,7 @@ onAuthStateChanged(auth,(user)=>{
     }
 });
 
-/* ADD MARKER */
+/* ADD */
 map.addEventListener("click",(e)=>{
     if(!isAdmin) return;
 
@@ -232,59 +232,53 @@ map.addEventListener("click",(e)=>{
     const x = ((e.clientX-rect.left)/rect.width)*100;
     const y = ((e.clientY-rect.top)/rect.height)*100;
 
-    currentMarker = {x,y,id:null};
+    const text = prompt("Описание:");
+    if(!text) return;
 
-    openModal({
-        text:"",
-        type:"loot",
-        id:null,
-        x,y
+    push(markersRef,{
+        x,y,
+        text,
+        type:"loot"
     });
 });
 
-/* OPEN MODAL */
-function openModal(data){
+/* OPEN VIEW */
+function openView(data,id){
     modal.style.display="flex";
-    textInput.value=data.text||"";
-    typeSelect.value=data.type||"loot";
+    viewText.textContent = data.text;
 
-    currentMarker=data;
+    current = { ...data, id };
+
+    if(isAdmin){
+        editBtn.style.display="inline-block";
+        delBtn.style.display="inline-block";
+    } else {
+        editBtn.style.display="none";
+        delBtn.style.display="none";
+    }
 }
 
-/* CLOSE */
 window.closeModal = ()=>{
     modal.style.display="none";
-    currentMarker=null;
+    current=null;
 };
 
-/* SAVE */
-saveBtn.onclick = ()=>{
-    if(!currentMarker) return;
+/* EDIT */
+editBtn.onclick = ()=>{
+    const newText = prompt("Новое описание:", current.text);
+    if(!newText) return;
 
-    if(currentMarker.id){
-        set(ref(db,"markers/"+currentMarker.id),{
-            x:currentMarker.x,
-            y:currentMarker.y,
-            text:textInput.value,
-            type:typeSelect.value
-        });
-    } else {
-        push(markersRef,{
-            x:currentMarker.x,
-            y:currentMarker.y,
-            text:textInput.value,
-            type:typeSelect.value
-        });
-    }
+    set(ref(db,"markers/"+current.id),{
+        ...current,
+        text:newText
+    });
 
     closeModal();
 };
 
 /* DELETE */
-deleteBtn.onclick = ()=>{
-    if(currentMarker?.id){
-        remove(ref(db,"markers/"+currentMarker.id));
-    }
+delBtn.onclick = ()=>{
+    remove(ref(db,"markers/"+current.id));
     closeModal();
 };
 
@@ -297,31 +291,23 @@ onValue(markersRef,(snap)=>{
         const id=i.key;
 
         if(filter.value!=="all" && m.type!==filter.value) return;
-        if(search.value && !m.text?.toLowerCase().includes(search.value.toLowerCase())) return;
 
         const div=document.createElement("div");
         div.className="marker";
+
         div.style.left=m.x+"%";
         div.style.top=m.y+"%";
 
-        div.innerHTML =
-            m.type==="loot"?"💰":
-            m.type==="boss"?"💀":"📜";
+        div.innerHTML="📍";
 
         div.onclick=(e)=>{
             e.stopPropagation();
-            if(!isAdmin) return;
-
-            currentMarker={...m,id};
-            openModal({...m,id});
+            openView(m,id);
         };
 
         map.appendChild(div);
     });
 });
-
-filter.onchange=()=>onValue(markersRef,()=>{});
-search.oninput=()=>onValue(markersRef,()=>{});
 </script>
 
 </body>
