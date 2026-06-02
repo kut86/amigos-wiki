@@ -10,7 +10,7 @@ import { getAuth, GoogleAuthProvider,
          signOut }                             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
-/* ── Firebase*/
+/* ── Firebase ───────────────────────────────────────────────── */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -27,22 +27,6 @@ const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 const markersRef = ref(db, "markers");
-
-/* ── Авторизация и добавление маркера ───────────────────────── */
-signInWithPopup(auth, provider)
-  .then(result => {
-    const user = result.user;
-    console.log("Signed in:", user.uid);
-
-    // добавляем маркер с uid
-    push(markersRef, {
-      title: "markers",
-      createdBy: user.uid,
-      x: 100,
-      y: 200
-    });
-  })
-  .catch(err => console.error("Auth error:", err));
 
 /* ── DOM refs ──────────────────────────────────────────────── */
 const mapWrapper  = document.getElementById("mapWrapper");
@@ -86,7 +70,7 @@ const addConfirm  = document.getElementById("addConfirm");
 const addCancel   = document.getElementById("addCancel");
 
 /* ── State ─────────────────────────────────────────────────── */
-let isAdmin    = false;
+let isAdmin    = false;  // глобальная — НЕ переопределять через const внутри колбэков
 let current    = null;   // { id, ...markerData }
 let addMode    = false;  // waiting for click to place marker
 let pendingPos = null;   // {x,y} percent where user clicked
@@ -113,9 +97,13 @@ function toast(msg, err = false) {
 /* ── Auth ──────────────────────────────────────────────────── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
+loginBtn.onclick  = () => signInWithPopup(auth, provider).catch(err => toast(err.message, true));
+logoutBtn.onclick = () => signOut(auth);
+
+// ИСПРАВЛЕНИЕ 1: убрали `const` перед isAdmin — теперь пишем в глобальную переменную
 onAuthStateChanged(auth, user => {
   const loggedIn = !!user;
-  const isAdmin = loggedIn && user.uid === ADMIN_UID;
+  isAdmin = loggedIn && user.uid === ADMIN_UID;
 
   loginBtn.style.display   = loggedIn ? "none" : "";
   logoutBtn.style.display  = loggedIn ? "" : "none";
@@ -129,13 +117,15 @@ onAuthStateChanged(auth, user => {
 
 
 /* ── MAP: natural sizing & initial center ──────────────────── */
-mapImg.onload = () => {
+// ИСПРАВЛЕНИЕ 3: логика центрирования вынесена в отдельную функцию fitMap
+function fitMap() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
+  if (!iw || !ih) return;
+
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  // fit to screen
   const scaleX = window.innerWidth  / iw;
   const scaleY = window.innerHeight / ih;
   scale = Math.min(scaleX, scaleY, 1);
@@ -144,7 +134,9 @@ mapImg.onload = () => {
   pos.y = (window.innerHeight - ih * scale) / 2;
 
   applyTransform();
-};
+}
+
+mapImg.onload = fitMap;
 
 function applyTransform() {
   mapEl.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
@@ -169,7 +161,7 @@ mapWrapper.addEventListener("pointermove", e => {
   applyTransform();
 });
 
-mapWrapper.addEventListener("pointerup", e => {
+mapWrapper.addEventListener("pointerup", () => {
   drag = false;
   mapWrapper.classList.remove('dragging');
 });
@@ -180,7 +172,6 @@ mapWrapper.addEventListener("wheel", e => {
   const delta    = e.deltaY < 0 ? 0.12 : -0.12;
   const newScale = Math.min(Math.max(scale + delta, 0.3), 5);
 
-  // zoom toward cursor
   const cx = e.clientX, cy = e.clientY;
   pos.x = cx - (cx - pos.x) * (newScale / scale);
   pos.y = cy - (cy - pos.y) * (newScale / scale);
@@ -206,11 +197,10 @@ mapWrapper.addEventListener("touchmove", e => {
 mapWrapper.addEventListener("touchend", () => { lastDist = 0; });
 
 /* Zoom buttons */
-document.getElementById("zoomIn").onclick  = () => zoom(1);
-document.getElementById("zoomOut").onclick = () => zoom(-1);
-document.getElementById("zoomReset").onclick = () => {
-  mapImg.onload(); // re-fit
-};
+document.getElementById("zoomIn").onclick    = () => zoom(1);
+document.getElementById("zoomOut").onclick   = () => zoom(-1);
+// ИСПРАВЛЕНИЕ 3: zoomReset теперь вызывает fitMap(), а не mapImg.onload()
+document.getElementById("zoomReset").onclick = fitMap;
 
 function zoom(dir) {
   const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
@@ -251,7 +241,7 @@ function exitAddMode() {
 
 mapWrapper.addEventListener("click", e => {
   if (!addMode || !isAdmin) return;
-  if (e.target.closest('.marker')) return; // click was on a marker
+  if (e.target.closest('.marker')) return;
 
   const rect = mapEl.getBoundingClientRect();
   const x = ((e.clientX - rect.left) / rect.width)  * 100;
@@ -278,10 +268,10 @@ addConfirm.onclick = () => {
   if (!text) { toast('Введите описание', true); return; }
 
   push(markersRef, {
-    x:    pendingPos.x,
-    y:    pendingPos.y,
-    text: text,
-    type: addType.value,
+    x:       pendingPos.x,
+    y:       pendingPos.y,
+    text:    text,
+    type:    addType.value,
     imgUrl:  addImgUrl.value.trim() || null,
     iconUrl: addIcon.value.trim()   || null,
   }).then(() => {
@@ -300,7 +290,6 @@ onValue(markersRef, snap => {
 });
 
 function renderAllMarkers() {
-  // remove existing markers
   document.querySelectorAll('.marker').forEach(m => m.remove());
 
   const f = filterSel.value;
@@ -320,15 +309,16 @@ function createMarkerEl(id, m) {
   div.className = 'marker';
   div.dataset.id = id;
 
-  // Position in % relative to map image
   div.style.left = m.x + '%';
   div.style.top  = m.y + '%';
 
-  // Visual: photo marker or icon marker
+  // ИСПРАВЛЕНИЕ 4: убран ненадёжный via.placeholder.com — используем data-URI
+  const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
+
   if (m.imgUrl) {
     div.innerHTML = `
       <div class="marker-photo">
-        <img src="${esc(m.imgUrl)}" alt="" onerror="this.src='https://via.placeholder.com/36'">
+        <img src="${esc(m.imgUrl)}" alt="" onerror="this.src='${fallbackImg}'">
       </div>
       <div class="marker-preview">
         <img src="${esc(m.imgUrl)}" alt="">
@@ -338,7 +328,7 @@ function createMarkerEl(id, m) {
   } else if (m.iconUrl) {
     div.innerHTML = `
       <div class="marker-photo" style="border-color:var(--${m.type}-color,var(--accent))">
-        <img src="${esc(m.iconUrl)}" alt="">
+        <img src="${esc(m.iconUrl)}" alt="" onerror="this.src='${fallbackImg}'">
       </div>
       <div class="marker-tooltip">${esc(m.text)}</div>
     `;
@@ -399,10 +389,10 @@ function closeModal() {
 /* ── MODAL: EDIT ───────────────────────────────────────────── */
 editBtn.onclick = () => {
   if (!current) return;
-  editText.value   = current.text   || '';
-  editType.value   = current.type   || 'loot';
-  editImgUrl.value = current.imgUrl || '';
-  editIcon.value   = current.iconUrl|| '';
+  editText.value   = current.text    || '';
+  editType.value   = current.type    || 'loot';
+  editImgUrl.value = current.imgUrl  || '';
+  editIcon.value   = current.iconUrl || '';
   editForm.style.display = 'flex';
   editBtn.style.display  = 'none';
 };
