@@ -236,7 +236,20 @@ button#calcBtn:hover {
 #code {
     margin: 0;
 }
+.gallery-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: orange;
+    color: black;
+    text-decoration: none;
+    border-radius: 15px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
 
+.gallery-btn:hover {
+    background-color: lightgreen;
+}
 /* ─────────────────────────────────────────
    ПК (≥ 1025px)
 ───────────────────────────────────────── */
