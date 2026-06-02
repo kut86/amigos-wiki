@@ -16,9 +16,7 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* =========================
-   FIREBASE INIT (SAFE)
-========================= */
+/* ================= FIREBASE ================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
@@ -30,75 +28,70 @@ const firebaseConfig = {
   databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
-let app, db, auth, markersRef;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-try {
-    app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    auth = getAuth(app);
-    markersRef = ref(db, "markers");
+const markersRef = ref(db, "markers");
 
-    console.log("✅ Firebase подключен");
-} catch (e) {
-    console.error("❌ Firebase ошибка:", e);
-}
+/* ================= SAFE DOM ================= */
 
-/* =========================
-   DOM SAFE CHECK
-========================= */
+const map = document.getElementById("map");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const $ = (id) => document.getElementById(id);
+/* 🔥 FIX: поддержка разных HTML */
+const modal =
+    document.getElementById("modal") ||
+    document.getElementById("createModal") ||
+    null;
 
-const map = $("map");
-const loginBtn = $("loginBtn");
-const logoutBtn = $("logoutBtn");
+const textInput = document.getElementById("text");
+const typeInput = document.getElementById("type");
 
-const modal = $("modal");
-const textInput = $("text");
-const typeInput = $("type");
-const saveBtn = $("save");
-const deleteBtn = $("delete");
+const saveBtn = document.getElementById("save");
+const deleteBtn = document.getElementById("delete");
 
-const filter = $("filter");
-const search = $("search");
+const filter = document.getElementById("filter");
+const search = document.getElementById("search");
 
-/* =========================
-   STATE
-========================= */
+/* ================= STATE ================= */
 
 let isAdmin = false;
 const ADMIN_EMAIL = "pinachet160@gmail.com";
 
 let scale = 1;
 let pos = { x: 0, y: 0 };
+
 let drag = false;
 let offset = { x: 0, y: 0 };
 
 let currentMarker = null;
 let pending = null;
 
-/* =========================
-   SAFETY WRAPPER
-========================= */
+/* ================= SAFE MODAL ================= */
 
-function require(el, name) {
-    if (!el) {
-        console.error(`❌ Элемент не найден: ${name}`);
+function openModal() {
+    if (!modal) {
+        console.error("❌ modal не найден в HTML");
+        return;
     }
-    return el;
+    modal.style.display = "flex";
 }
 
-/* =========================
-   AUTH SAFE
-========================= */
+function closeModal() {
+    if (!modal) {
+        console.error("❌ modal не найден");
+        return;
+    }
+    modal.style.display = "none";
+}
 
-const provider = new GoogleAuthProvider();
+/* ================= AUTH ================= */
 
 loginBtn?.addEventListener("click", () => {
-    if (!auth) return console.error("Auth not ready");
-
-    signInWithPopup(auth, provider)
-        .catch(err => console.error("Login error:", err));
+    signInWithPopup(auth, provider).catch(console.error);
 });
 
 logoutBtn?.addEventListener("click", () => {
@@ -107,7 +100,7 @@ logoutBtn?.addEventListener("click", () => {
 
 onAuthStateChanged(auth, (user) => {
 
-    if (user?.email === ADMIN_EMAIL) {
+    if (user && user.email === ADMIN_EMAIL) {
         isAdmin = true;
         console.log("🟢 ADMIN MODE");
     } else {
@@ -123,9 +116,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-/* =========================
-   DRAG
-========================= */
+/* ================= DRAG ================= */
 
 map?.addEventListener("mousedown", (e) => {
     drag = true;
@@ -146,9 +137,7 @@ window.addEventListener("mousemove", (e) => {
     update();
 });
 
-/* =========================
-   ZOOM
-========================= */
+/* ================= ZOOM ================= */
 
 window.addEventListener("wheel", (e) => {
     if (!map) return;
@@ -156,12 +145,7 @@ window.addEventListener("wheel", (e) => {
     e.preventDefault();
 
     const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(scale * zoom, 0.5), 3);
-
-    pos.x = e.clientX - (e.clientX - pos.x) * (newScale / scale);
-    pos.y = e.clientY - (e.clientY - pos.y) * (newScale / scale);
-
-    scale = newScale;
+    scale = Math.min(Math.max(scale * zoom, 0.5), 3);
 
     update();
 
@@ -174,9 +158,7 @@ function update() {
         `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
 }
 
-/* =========================
-   CREATE MARKER
-========================= */
+/* ================= CREATE MARKER ================= */
 
 map?.addEventListener("click", (e) => {
 
@@ -192,28 +174,25 @@ map?.addEventListener("click", (e) => {
 
     currentMarker = null;
 
-    modal.style.display = "flex";
+    openModal();
 });
 
-/* =========================
-   SAVE (FIXED SAFE)
-========================= */
+/* ================= SAVE ================= */
 
 saveBtn?.addEventListener("click", () => {
 
     if (!markersRef) {
-        return console.error("❌ markersRef not ready");
+        console.error("❌ markersRef нет");
+        return;
     }
 
-    if (!pending) {
-        return console.warn("⚠️ Нет координат");
-    }
+    if (!pending) return;
 
     const data = {
         x: pending.x,
         y: pending.y,
-        text: textInput.value || "",
-        type: typeInput.value || "loot"
+        text: textInput?.value || "",
+        type: typeInput?.value || "loot"
     };
 
     if (currentMarker?.id) {
@@ -222,13 +201,11 @@ saveBtn?.addEventListener("click", () => {
         push(markersRef, data);
     }
 
-    modal.style.display = "none";
+    closeModal();
     pending = null;
 });
 
-/* =========================
-   DELETE SAFE
-========================= */
+/* ================= DELETE ================= */
 
 deleteBtn?.addEventListener("click", () => {
 
@@ -236,12 +213,10 @@ deleteBtn?.addEventListener("click", () => {
 
     remove(ref(db, "markers/" + currentMarker.id));
 
-    modal.style.display = "none";
+    closeModal();
 });
 
-/* =========================
-   LOAD MARKERS (SAFE)
-========================= */
+/* ================= LOAD ================= */
 
 function icon(type) {
     return {
@@ -267,26 +242,22 @@ onValue(markersRef, (snap) => {
         const id = i.key;
 
         const div = document.createElement("div");
-        div.className = "marker";
 
+        div.className = "marker";
         div.style.left = m.x + "%";
         div.style.top = m.y + "%";
-
         div.innerHTML = icon(m.type);
 
         div.onclick = (e) => {
 
             e.stopPropagation();
 
-            currentMarker = {
-                ...m,
-                id
-            };
+            currentMarker = { ...m, id };
 
-            textInput.value = m.text || "";
-            typeInput.value = m.type || "loot";
+            if (textInput) textInput.value = m.text || "";
+            if (typeInput) typeInput.value = m.type || "loot";
 
-            modal.style.display = "flex";
+            openModal();
         };
 
         map.appendChild(div);
