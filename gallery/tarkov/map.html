@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Interactive Map Pro</title>
+<title>Locked Map Pro</title>
 
 <style>
 html, body {
@@ -25,17 +25,15 @@ html, body {
     color: white;
     display: flex;
     gap: 8px;
-    align-items: center;
 }
 
-button, select, input {
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: none;
+/* VIEWPORT (ВАЖНО) */
+#viewport {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
 }
-
-#loginBtn { background: orange; font-weight: bold; }
-#logoutBtn { background: red; color: white; display:none; }
 
 /* MAP */
 #map {
@@ -59,67 +57,32 @@ button, select, input {
     font-size: 20px;
     user-select: none;
 }
-
-/* MODAL */
-#modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-box {
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-    color: white;
-    width: 260px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
 </style>
 
 </head>
 <body>
 
 <div id="ui">
-    <button id="loginBtn">Войти</button>
-    <button id="logoutBtn">Выйти</button>
-
-    <select id="filter">
-        <option value="all">Все</option>
-        <option value="loot">Loot</option>
-        <option value="boss">Boss</option>
-        <option value="quest">Quest</option>
+    <select id="type">
+        <option value="loot">💰 Loot</option>
+        <option value="boss">💀 Boss</option>
+        <option value="pmc">🔴 PMC</option>
+        <option value="scav">🟡 Scav</option>
+        <option value="quest">📜 Quest</option>
+        <option value="mine">☠️ Mine</option>
     </select>
 </div>
 
-<div id="map">
-    <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
-</div>
-
-<!-- VIEW MODAL -->
-<div id="modal">
-    <div class="modal-box">
-        <h3>Маркер</h3>
-        <p id="viewText"></p>
-
-        <button id="editBtn" style="display:none;">Редактировать</button>
-        <button id="delBtn" style="display:none;">Удалить</button>
-        <button onclick="closeModal()">Закрыть</button>
+<div id="viewport">
+    <div id="map">
+        <img src="https://odealo.com/uploads/public/Escape%20from%20Tarkov/Woods%20Guide/Woods_pointsofinterest.jpg">
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, set, remove }
+import { getDatabase, ref, push, onValue }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -134,153 +97,87 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-const markersRef = ref(db, "markers");
+const markersRef = ref(db,"markers");
 
 const map = document.getElementById("map");
+const viewport = document.getElementById("viewport");
+const typeSelect = document.getElementById("type");
 
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-
-const modal = document.getElementById("modal");
-const viewText = document.getElementById("viewText");
-const editBtn = document.getElementById("editBtn");
-const delBtn = document.getElementById("delBtn");
-
-const filter = document.getElementById("filter");
-
-let isAdmin = false;
-let current = null;
-
-/* POSITION */
+/* SCALE + POS */
 let scale = 1;
-let pos = {
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2
-};
+let pos = { x: 0, y: 0 };
 
-/* DRAG */
+/* APPLY TRANSFORM */
+function apply() {
+    map.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+}
+
+/* DRAG WITH LIMITS */
 let drag = false;
-let offset = {x:0,y:0};
+let start = { x:0, y:0 };
 
 map.addEventListener("mousedown",(e)=>{
     drag = true;
-    offset.x = e.clientX - pos.x;
-    offset.y = e.clientY - pos.y;
-    map.style.cursor = "grabbing";
+    start.x = e.clientX - pos.x;
+    start.y = e.clientY - pos.y;
 });
 
-document.addEventListener("mouseup",()=>{
-    drag = false;
-    map.style.cursor = "grab";
-});
+document.addEventListener("mouseup",()=> drag=false);
 
 document.addEventListener("mousemove",(e)=>{
     if(!drag) return;
-    pos.x = e.clientX - offset.x;
-    pos.y = e.clientY - offset.y;
 
-    map.style.transform =
-        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+    pos.x = e.clientX - start.x;
+    pos.y = e.clientY - start.y;
+
+    apply();
 });
 
-/* ZOOM */
+/* ZOOM (center fix) */
 document.addEventListener("wheel",(e)=>{
     e.preventDefault();
 
-    scale += e.deltaY < 0 ? 0.1 : -0.1;
-    scale = Math.min(Math.max(scale,0.5),3);
+    const rect = map.getBoundingClientRect();
 
-    map.style.transform =
-        `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
+    const mx = e.clientX;
+    const my = e.clientY;
+
+    const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+
+    const newScale = Math.min(Math.max(scale * zoom, 0.5), 3);
+
+    pos.x = mx - (mx - pos.x) * (newScale / scale);
+    pos.y = my - (my - pos.y) * (newScale / scale);
+
+    scale = newScale;
+
+    apply();
 },{passive:false});
 
-/* LOGIN */
-loginBtn.onclick = ()=>{
-    signInWithPopup(auth, provider);
-};
-
-logoutBtn.onclick = ()=>{
-    signOut(auth);
-};
-
-/* AUTH */
-onAuthStateChanged(auth,(user)=>{
-    if(user && user.email==="pinachet160@gmail.com"){
-        isAdmin=true;
-        loginBtn.style.display="none";
-        logoutBtn.style.display="inline-block";
-    } else if(user){
-        isAdmin=false;
-        loginBtn.style.display="none";
-        logoutBtn.style.display="inline-block";
-    } else {
-        isAdmin=false;
-        loginBtn.style.display="inline-block";
-        logoutBtn.style.display="none";
-    }
-});
-
-/* ADD */
+/* ADD MARKER */
 map.addEventListener("click",(e)=>{
-    if(!isAdmin) return;
-
     const rect = map.getBoundingClientRect();
 
     const x = ((e.clientX-rect.left)/rect.width)*100;
     const y = ((e.clientY-rect.top)/rect.height)*100;
 
-    const text = prompt("Описание:");
-    if(!text) return;
-
     push(markersRef,{
         x,y,
-        text,
-        type:"loot"
+        type:typeSelect.value
     });
 });
 
-/* OPEN VIEW */
-function openView(data,id){
-    modal.style.display="flex";
-    viewText.textContent = data.text;
-
-    current = { ...data, id };
-
-    if(isAdmin){
-        editBtn.style.display="inline-block";
-        delBtn.style.display="inline-block";
-    } else {
-        editBtn.style.display="none";
-        delBtn.style.display="none";
-    }
+/* ICONS */
+function icon(type){
+    if(type==="loot") return "💰";
+    if(type==="boss") return "💀";
+    if(type==="pmc") return "🔴";
+    if(type==="scav") return "🟡";
+    if(type==="quest") return "📜";
+    if(type==="mine") return "☠️";
+    return "📍";
 }
-
-window.closeModal = ()=>{
-    modal.style.display="none";
-    current=null;
-};
-
-/* EDIT */
-editBtn.onclick = ()=>{
-    const newText = prompt("Новое описание:", current.text);
-    if(!newText) return;
-
-    set(ref(db,"markers/"+current.id),{
-        ...current,
-        text:newText
-    });
-
-    closeModal();
-};
-
-/* DELETE */
-delBtn.onclick = ()=>{
-    remove(ref(db,"markers/"+current.id));
-    closeModal();
-};
 
 /* LOAD */
 onValue(markersRef,(snap)=>{
@@ -288,9 +185,6 @@ onValue(markersRef,(snap)=>{
 
     snap.forEach(i=>{
         const m=i.val();
-        const id=i.key;
-
-        if(filter.value!=="all" && m.type!==filter.value) return;
 
         const div=document.createElement("div");
         div.className="marker";
@@ -298,16 +192,13 @@ onValue(markersRef,(snap)=>{
         div.style.left=m.x+"%";
         div.style.top=m.y+"%";
 
-        div.innerHTML="📍";
-
-        div.onclick=(e)=>{
-            e.stopPropagation();
-            openView(m,id);
-        };
+        div.innerHTML = icon(m.type);
 
         map.appendChild(div);
     });
 });
+
+apply();
 </script>
 
 </body>
