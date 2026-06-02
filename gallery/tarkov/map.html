@@ -2,10 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Map</title>
-<button id="loginBtn" style="position:fixed;top:10px;left:10px;z-index:999;">
-Войти
-</button>
+<title>Map Admin</title>
+
 <style>
 html, body {
     margin: 0;
@@ -14,6 +12,21 @@ html, body {
     background: #111;
 }
 
+/* кнопка входа */
+#loginBtn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 9999;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: orange;
+    font-weight: bold;
+}
+
+/* карта */
 .map-wrapper {
     width: 100vw;
     height: 100vh;
@@ -33,6 +46,7 @@ html, body {
     display: block;
 }
 
+/* маркеры */
 .marker {
     position: absolute;
     width: 14px;
@@ -47,6 +61,8 @@ html, body {
 </head>
 <body>
 
+<button id="loginBtn">Войти</button>
+
 <div class="map-wrapper">
     <div class="map" id="map">
         <img src="images/map.jpg">
@@ -54,10 +70,16 @@ html, body {
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-/* 🔑 ТВОЙ FIREBASE */
+import { getDatabase, ref, push, onValue } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -70,11 +92,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const markersRef = ref(db, "markers");
+const auth = getAuth();
 
+const markersRef = ref(db, "markers");
 const map = document.getElementById("map");
+const loginBtn = document.getElementById("loginBtn");
 
 let scale = 1;
+let isAdmin = false;
+
+---
 
 /* 🔍 ZOOM */
 document.addEventListener("wheel", (e) => {
@@ -86,8 +113,37 @@ document.addEventListener("wheel", (e) => {
     map.style.transform = `scale(${scale})`;
 }, { passive: false });
 
-/* 📍 ДОБАВЛЕНИЕ МАРКЕРА */
+---
+
+/* 🔐 LOGIN */
+loginBtn.onclick = () => {
+    const email = prompt("Email:");
+    const pass = prompt("Пароль:");
+
+    signInWithEmailAndPassword(auth, email, pass)
+        .then(() => alert("Вход выполнен"))
+        .catch(() => alert("Ошибка входа"));
+};
+
+---
+
+/* 👤 CHECK ADMIN */
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        isAdmin = true;
+        loginBtn.innerText = "Админ";
+    } else {
+        isAdmin = false;
+        loginBtn.innerText = "Войти";
+    }
+});
+
+---
+
+/* 📍 CLICK → ADD MARKER */
 map.addEventListener("click", (e) => {
+
+    if (!isAdmin) return;
 
     const rect = map.getBoundingClientRect();
 
@@ -100,7 +156,9 @@ map.addEventListener("click", (e) => {
     push(markersRef, { x, y, text });
 });
 
-/* 📥 ЗАГРУЗКА МАРКЕРОВ */
+---
+
+/* 📥 LOAD MARKERS */
 onValue(markersRef, (snapshot) => {
 
     document.querySelectorAll(".marker").forEach(m => m.remove());
