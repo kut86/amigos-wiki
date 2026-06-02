@@ -52,7 +52,7 @@ signInWithPopup(auth, provider)
 
     // добавляем маркер с uid
     push(markersRef, {
-      title: "Мой маркер",
+      title: "markers",
       createdBy: user.uid,
       x: 100,
       y: 200
