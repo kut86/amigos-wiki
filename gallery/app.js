@@ -95,6 +95,7 @@ function toast(msg, err = false) {
 }
 
 /* ── Auth ──────────────────────────────────────────────────── */
+
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 loginBtn.onclick  = () => signInWithPopup(auth, provider).catch(err => toast(err.message, true));
@@ -102,6 +103,10 @@ logoutBtn.onclick = () => signOut(auth);
 
 // ИСПРАВЛЕНИЕ 1: убрали `const` перед isAdmin — теперь пишем в глобальную переменную
 onAuthStateChanged(auth, user => {
+  if (user) {
+    console.log("EMAIL:", user.email);
+    console.log("UID:", user.uid);
+  }
   const loggedIn = !!user;
   isAdmin = loggedIn && user.uid === ADMIN_UID;
 
