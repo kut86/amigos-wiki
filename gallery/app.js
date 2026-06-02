@@ -127,22 +127,23 @@ function toast(msg, err = false) {
 }
 
 /* ── Auth ──────────────────────────────────────────────────── */
-loginBtn.onclick  = () => signInWithPopup(auth, provider);
-logoutBtn.onclick = () => signOut(auth);
+const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2"; // твой реальный uid из Firebase
 
 onAuthStateChanged(auth, user => {
   const loggedIn = !!user;
-  isAdmin = loggedIn && user.email === "pinachet160@gmail.com";
+  const isAdmin = loggedIn && user.uid === ADMIN_UID;
 
-  loginBtn.style.display  = loggedIn ? 'none' : '';
-  logoutBtn.style.display = loggedIn ? ''     : 'none';
-  adminBadge.style.display = isAdmin ? ''     : 'none';
-  addModeBtn.style.display = isAdmin ? ''     : 'none';
+  // остальной код тот же ↓
+  loginBtn.style.display   = loggedIn ? "none" : "";
+  logoutBtn.style.display  = loggedIn ? "" : "none";
+  adminBadge.style.display = isAdmin ? "" : "none";
+  addModeBtn.style.display = isAdmin ? "" : "none";
 
   if (!isAdmin) exitAddMode();
   renderAllMarkers();
-  toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
+  toast(loggedIn ? `Вошёл как ${user.email}` : "Выход");
 });
+
 
 /* ── MAP: natural sizing & initial center ──────────────────── */
 mapImg.onload = () => {
