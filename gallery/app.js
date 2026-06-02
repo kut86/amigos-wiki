@@ -82,8 +82,8 @@ let pos   = { x: 0, y: 0 };
 let allMarkers = {};  // { id: markerData }
 
 /* ── Type icons ────────────────────────────────────────────── */
-const TYPE_EMOJI = { loot: '📦', boss: '💀', quest: '📋', custom: '⭐' };
-const TYPE_LABEL = { loot: 'Loot', boss: 'Boss', quest: 'Quest', custom: 'Custom' };
+const TYPE_EMOJI = { loot: '📦', boss: '💀', quest: '📋', custom: '⭐', bot: '🎯', exit: '🚪', structure: '🧩' };
+const TYPE_LABEL = { loot: 'Loot', boss: 'Boss', quest: 'Quest', custom: 'Custom', bot: 'Снайпер', exit: 'Выход', structure: 'Точка интереса' };
 
 /* ── Toast ─────────────────────────────────────────────────── */
 function toast(msg, err = false) {
