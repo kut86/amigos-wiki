@@ -25,6 +25,11 @@ const firebaseConfig = {
   appId: "1:693794844907:web:bb020ca896ae7b07acceae",
   databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
 };
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 /* DOM */
 
 const map = document.getElementById("map");
