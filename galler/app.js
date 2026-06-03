@@ -125,6 +125,35 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
 
+
+
+/* ══════════════════════════════════════════
+   СМЕНА КАРТЫ
+   ══════════════════════════════════════════ */
+mapSelect.addEventListener('change', e => switchMap(e.target.value));
+
+function switchMap(mapId) {
+  if (!MAPS[mapId] || mapId === currentMap) return;
+
+  exitAddMode();
+  closeModal();
+
+  /* отписка от Firebase */
+  if (offFn) { offFn(); offFn = null; }
+
+  /* очистка маркеров */
+  allMarkers = {};
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+
+  currentMap = mapId;
+  currentRef = ref(db, `maps/${mapId}/markers`);
+
+  /* смена картинки — initPanzoom вызовется через событие load */
+  mapImg.src = MAPS[mapId].imgUrl;
+
+  subscribeMarkers();
+  toast(`Карта: ${MAPS[mapId].label}`);
+}
 /* ══════════════════════════════════════════
    PANZOOM
    ══════════════════════════════════════════ */
@@ -192,34 +221,6 @@ function updateStatus() {
 document.getElementById('zoomIn').onclick    = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
 document.getElementById('zoomOut').onclick   = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
 document.getElementById('zoomReset').onclick = () => { if (pz) { pz.reset();   updateStatus(); } };
-
-/* ══════════════════════════════════════════
-   СМЕНА КАРТЫ
-   ══════════════════════════════════════════ */
-mapSelect.addEventListener('change', e => switchMap(e.target.value));
-
-function switchMap(mapId) {
-  if (!MAPS[mapId] || mapId === currentMap) return;
-
-  exitAddMode();
-  closeModal();
-
-  /* отписка от Firebase */
-  if (offFn) { offFn(); offFn = null; }
-
-  /* очистка маркеров */
-  allMarkers = {};
-  document.querySelectorAll('.marker').forEach(m => m.remove());
-
-  currentMap = mapId;
-  currentRef = ref(db, `maps/${mapId}/markers`);
-
-  /* смена картинки — initPanzoom вызовется через событие load */
-  mapImg.src = MAPS[mapId].imgUrl;
-
-  subscribeMarkers();
-  toast(`Карта: ${MAPS[mapId].label}`);
-}
 
 /* ══════════════════════════════════════════
    FIREBASE
