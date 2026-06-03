@@ -1,5 +1,5 @@
 /* ============================================================
-   TARKOV MAP — app.js (Panzoom edition)
+   TARKOV MAP — app.js (Panzoom edition) удучшения навигации сайта
    ============================================================ */
 
 import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
