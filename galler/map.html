@@ -9,16 +9,27 @@
 <body>
 
 <!-- ══════════════════════════════════════════════
-     HUD / TOP BAR 
+     HUD / TOP BAR
      ══════════════════════════════════════════════ -->
 <div id="ui">
 
   <!-- Auth panel -->
   <div class="hud-panel">
-    <span class="hud-label">Аккаунт ЧВК</span>
+    <span class="hud-label">ТАКТИК</span>
     <button id="loginBtn"  class="btn btn-login">Войти</button>
     <button id="logoutBtn" class="btn btn-logout" style="display:none">Выйти</button>
-    <span id="adminBadge">ADMIN ЧВК</span>
+    <span id="adminBadge">ADMIN</span>
+  </div>
+
+
+  <!-- Map selector -->
+  <div class="hud-panel">
+    <span class="hud-label">Карта</span>
+    <select id="mapSelect">
+      <option value="woods">🌲 Лес</option>
+      <option value="customs">🏭 Таможня</option>
+      <option value="interchange">🏬 Развязка</option>
+    </select>
   </div>
 
   <!-- Filter panel -->
@@ -31,21 +42,11 @@
       <option value="boss">Босс</option>
       <option value="quest">Квесты</option>
        <option value="exit">Выходы</option>
-      <option value="custom"> Кастом</option>
        <option value="structure">Точки интересов</option>
-      
      
     </select>
   </div>
-   <!-- секция карт -->
-<div class="hud-panel">
-  <span class="hud-label">Карта</span>
-  <select id="mapSelect">
-    <option value="woods">Лес</option>
-    <option value="customs">Таможня</option>
-    <option value="interchange">Развязка</option>
-  </select>
-</div>
+
   <!-- Add marker button (admin only) -->
   <button id="addModeBtn" class="btn btn-primary" style="display:none">+ Маркер</button>
 
@@ -59,7 +60,7 @@
   <div id="map">
     <img
       id="mapImage"
-      src="https://gspics.org/images/2026/06/03/IDigvX.jpg"
+      src="https://gspics.org/images/2026/06/02/IDiQvu.png"
       alt="Tarkov Woods Map"
     >
     <!-- Markers will be appended here by JS -->
@@ -98,7 +99,6 @@
       <option value="boss">💀 Boss</option>
       <option value="quest">📋 Quest</option>
       <option value="exit">⭐ Выходы</option>
-      <option value="custom">⭐ Кастом</option>
       <option value="structure">🧩Точки интересов</option>
     </select>
   </div>
@@ -156,7 +156,6 @@
             <option value="boss">💀 Boss</option>
             <option value="quest">📋 Quest</option>
             <option value="exit">⭐ Выходы</option>
-            <option value="custom">⭐ Кастом</option>
             <option value="structure">🧩Точки интересов</option>
           </select>
         </div>
@@ -205,7 +204,6 @@
 
 
 <!-- JS -->
-<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 <script type="module" src="app.js"></script>
 
 <!-- Small fix: sync cancelEdit / saveBtn visibility with editForm -->
