@@ -158,16 +158,26 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   display: inline-block;
 }*/
 
+#mapWrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+}
+#mapWrapper.dragging { cursor: grabbing; }
+
+#map {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0; /* ← важно для твоих формул */
+}
+
 #map img {
   display: block;
   pointer-events: none;
   image-rendering: crisp-edges;
 }
-#map {
-  position: absolute;
-  top: 0; left: 0;
-  transform-origin: center center;
-}
+
 
 /*#mapWrapper {
   position: fixed;
