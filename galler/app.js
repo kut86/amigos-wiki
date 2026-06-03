@@ -133,18 +133,19 @@ function initPanzoom() {
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
+  /* уничтожаем старый */
   if (pz) { pz.destroy(); pz = null; }
 
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  // масштаб чтобы вписать карту в экран
+  /* масштаб чтобы вписать карту в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih
   );
 
-  // центр относительно окна
+  /* центр */
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
@@ -157,7 +158,7 @@ function initPanzoom() {
     canvas:     true,
   });
 
-  // дополнительная проверка: подправляем центр
+  // 🔹 ДОБАВЛЕНА ПРОВЕРКА: если Panzoom не выставил центр как нужно — поправляем
   const pan = pz.getPan();
   const expectedX = (window.innerWidth  - iw * startScale) / 2;
   const expectedY = (window.innerHeight - ih * startScale) / 2;
@@ -169,6 +170,7 @@ function initPanzoom() {
   updateCursor();
   updateStatus();
 }
+
 
 
 /* ══════════════════════════════════════════
