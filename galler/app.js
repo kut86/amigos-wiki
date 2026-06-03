@@ -193,20 +193,7 @@ document.getElementById('zoomIn').onclick    = () => { if (pz) { pz.zoomIn();  u
 document.getElementById('zoomOut').onclick   = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
 document.getElementById('zoomReset').onclick = () => { if (pz) { pz.reset();   updateStatus(); } };
 
-  // 🔹 ДОБАВЛЕНА ПРОВЕРКА: если Panzoom не выставил центр как нужно — поправляем
-  const pan = pz.getPan();
-  const expectedX = (window.innerWidth  - iw * startScale) / 2;
-  const expectedY = (window.innerHeight - ih * startScale) / 2;
-
-  if (Math.abs(pan.x - expectedX) > 1 || Math.abs(pan.y - expectedY) > 1) {
-    pz.pan(expectedX, expectedY);
-  }
-
-  updateCursor();
-  updateStatus();
-}
-
-
+  
 
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
