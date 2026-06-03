@@ -1,10 +1,11 @@
 /* ============================================================
-   TARKOV MAP — app.js (Panzoom edition)
+   TARKOV MAP — app.js (Panzoom + multi-map edition)
    ============================================================ */
 
 import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push,
-         onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+         onValue, update, remove,
+         off }                     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, GoogleAuthProvider,
          signInWithPopup, onAuthStateChanged,
          signOut }                 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -20,23 +21,44 @@ const firebaseConfig = {
   databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
-const app        = initializeApp(firebaseConfig);
-const db         = getDatabase(app);
-const auth       = getAuth(app);
-const provider   = new GoogleAuthProvider();
-const markersRef = ref(db, "markers");
+const app      = initializeApp(firebaseConfig);
+const db       = getDatabase(app);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+/* ── Список карт — сюда добавляй новые ── */
+const MAPS = {
+  woods: {
+    label:  'Лес',
+    imgUrl: 'https://gspics.org/images/2026/06/02/IDiQvu.png'
+  },
+  customs: {
+    label:  'Таможня',
+    imgUrl: 'https://ссылка-на-таможню.png'  // ← замени на реальную
+  },
+  interchange: {
+    label:  'Развязка',
+    imgUrl: 'https://ссылка-на-развязку.png' // ← замени на реальную
+  }
+};
+
+/* ── Текущая карта и ссылка на маркеры в Firebase ── */
+let currentMap = 'woods';
+let markersRef = ref(db, `maps/${currentMap}/markers`);
+let unsubscribe = null; // функция отписки от Firebase
 
 /* ── DOM ── */
-const mapWrapper = document.getElementById("mapWrapper");
-const mapEl      = document.getElementById("map");
-const mapImg     = document.getElementById("mapImage");
-const loginBtn   = document.getElementById("loginBtn");
-const logoutBtn  = document.getElementById("logoutBtn");
-const adminBadge = document.getElementById("adminBadge");
-const filterSel  = document.getElementById("filter");
-const addModeBtn = document.getElementById("addModeBtn");
-const statusBar  = document.getElementById("statusBar");
-const toastCont  = document.getElementById("toastContainer");
+const mapWrapper  = document.getElementById("mapWrapper");
+const mapEl       = document.getElementById("map");
+const mapImg      = document.getElementById("mapImage");
+const loginBtn    = document.getElementById("loginBtn");
+const logoutBtn   = document.getElementById("logoutBtn");
+const adminBadge  = document.getElementById("adminBadge");
+const filterSel   = document.getElementById("filter");
+const mapSelect   = document.getElementById("mapSelect");
+const addModeBtn  = document.getElementById("addModeBtn");
+const statusBar   = document.getElementById("statusBar");
+const toastCont   = document.getElementById("toastContainer");
 
 const modal       = document.getElementById("modal");
 const modalTitle  = document.getElementById("modalTitle");
@@ -56,13 +78,13 @@ const editIcon    = document.getElementById("editIcon");
 const saveBtn     = document.getElementById("saveBtn");
 const cancelEdit  = document.getElementById("cancelEdit");
 
-const addForm    = document.getElementById("addForm");
-const addText    = document.getElementById("addText");
-const addType    = document.getElementById("addType");
-const addImgUrl  = document.getElementById("addImgUrl");
-const addIcon    = document.getElementById("addIcon");
-const addConfirm = document.getElementById("addConfirm");
-const addCancel  = document.getElementById("addCancel");
+const addForm     = document.getElementById("addForm");
+const addText     = document.getElementById("addText");
+const addType     = document.getElementById("addType");
+const addImgUrl   = document.getElementById("addImgUrl");
+const addIcon     = document.getElementById("addIcon");
+const addConfirm  = document.getElementById("addConfirm");
+const addCancel   = document.getElementById("addCancel");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -73,7 +95,6 @@ let pendingPos = null;
 let allMarkers = {};
 let pz         = null;
 
-/* определяем мобильное устройство */
 const isMobile = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 const TYPE_EMOJI = { loot:'📦', boss:'💀', quest:'📋', custom:'⭐', bot:'🎯', exit:'🚪', structure:'🧩' };
@@ -102,8 +123,43 @@ onAuthStateChanged(auth, user => {
   addModeBtn.style.display = isAdmin  ? '' : 'none';
 
   if (!isAdmin) exitAddMode();
-  renderAllMarkers();
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
+});
+
+/* ── Смена карты ── */
+function switchMap(mapId) {
+  if (!MAPS[mapId]) return;
+
+  currentMap = mapId;
+  markersRef = ref(db, `maps/${mapId}/markers`);
+
+  /* отписываемся от старой карты */
+  if (unsubscribe) {
+    off(unsubscribe);
+    unsubscribe = null;
+  }
+
+  /* меняем картинку */
+  mapImg.src = MAPS[mapId].imgUrl;
+
+  /* очищаем маркеры */
+  allMarkers = {};
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+
+  /* переинициализируем Panzoom под новую картинку */
+  if (pz) { pz.destroy(); pz = null; }
+
+  /* подписываемся на маркеры новой карты */
+  subscribeMarkers();
+
+  toast(`Карта: ${MAPS[mapId].label}`);
+}
+
+/* выбор карты через select */
+mapSelect.addEventListener('change', e => {
+  exitAddMode();
+  closeModal();
+  switchMap(e.target.value);
 });
 
 /* ── Panzoom ── */
@@ -111,6 +167,8 @@ function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
+
+  if (pz) { pz.destroy(); pz = null; }
 
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
@@ -121,20 +179,18 @@ function initPanzoom() {
     1
   );
 
-  /* центрируем карту */
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
   pz = Panzoom(mapEl, {
-    maxScale:   5,
-    minScale:   0.2,
+    maxScale: 5,
+    minScale: 0.2,
     startScale,
     startX,
     startY,
-    canvas:     true,
-    cursor:     'grab',
-    /* не даём Panzoom уходить за пределы экрана */
-    contain:    'outside',
+    canvas:  true,
+    cursor:  'grab',
+    contain: 'outside',
   });
 
   mapWrapper.addEventListener('wheel', e => {
@@ -147,17 +203,13 @@ function initPanzoom() {
   updateStatus();
 }
 
-/* если картинка уже в кэше — onload не сработает */
-if (mapImg.complete && mapImg.naturalWidth) {
-  initPanzoom();
-} else {
-  mapImg.onload = initPanzoom;
-}
+mapImg.onload = initPanzoom;
+if (mapImg.complete && mapImg.naturalWidth) initPanzoom();
 
 function updateStatus() {
   if (!pz) return;
   const scale = pz.getScale();
-  statusBar.textContent = `ZOOM ${(scale * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
+  statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(scale * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
 }
 
 document.getElementById('zoomIn').onclick    = () => { pz && pz.zoomIn();  updateStatus(); };
@@ -203,13 +255,11 @@ function exitAddMode() {
 mapEl.addEventListener('click', e => {
   if (!addMode || !isAdmin) return;
   if (e.target.closest('.marker')) return;
-
-  /* точные координаты через getBoundingClientRect mapEl */
   const rect = mapEl.getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width)  * 100;
-  const y = ((e.clientY - rect.top)  / rect.height) * 100;
-
-  pendingPos = { x, y };
+  pendingPos = {
+    x: ((e.clientX - rect.left) / rect.width)  * 100,
+    y: ((e.clientY - rect.top)  / rect.height) * 100
+  };
   addForm.style.display = 'flex';
   addText.value = addImgUrl.value = addIcon.value = '';
   addType.value = 'loot';
@@ -231,13 +281,20 @@ addConfirm.onclick = () => {
 
 addCancel.onclick = exitAddMode;
 
-/* ── RENDER ── */
-onValue(markersRef, snap => {
-  allMarkers = {};
-  snap.forEach(i => { allMarkers[i.key] = i.val(); });
-  renderAllMarkers();
-});
+/* ── ПОДПИСКА НА МАРКЕРЫ ── */
+function subscribeMarkers() {
+  /* onValue возвращает функцию отписки */
+  unsubscribe = onValue(markersRef, snap => {
+    allMarkers = {};
+    snap.forEach(i => { allMarkers[i.key] = i.val(); });
+    renderAllMarkers();
+  });
+}
 
+/* запускаем подписку на старте */
+subscribeMarkers();
+
+/* ── RENDER ── */
 function renderAllMarkers() {
   document.querySelectorAll('.marker').forEach(m => m.remove());
   const f = filterSel.value;
@@ -257,7 +314,6 @@ function createMarkerEl(id, m) {
   div.style.left = m.x + '%';
   div.style.top  = m.y + '%';
 
-  /* на мобильных убираем hover-эффекты */
   if (isMobile()) div.classList.add('no-hover');
 
   const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
@@ -336,7 +392,8 @@ saveBtn.onclick = () => {
   if (!current) return;
   const text = editText.value.trim();
   if (!text) { toast('Введите описание', true); return; }
-  update(ref(db, 'markers/' + current.id), {
+  /* правильный путь — текущая карта */
+  update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
     x: current.x, y: current.y,
     text,
     type:    editType.value,
@@ -349,8 +406,8 @@ saveBtn.onclick = () => {
 delBtn.onclick = () => {
   if (!current) return;
   if (!confirm('Удалить маркер?')) return;
-  remove(ref(db, 'markers/' + current.id))
+  /* правильный путь — текущая карта */
+  remove(ref(db, `maps/${currentMap}/markers/${current.id}`))
     .then(() => { toast('Удалено'); closeModal(); })
     .catch(e => toast(e.message, true));
 };
-     
