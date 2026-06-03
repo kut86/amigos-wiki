@@ -158,7 +158,12 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   display: inline-block;
 }*/
 
-#mapWrapper {
+#mapEl {
+  display: inline-block;
+} 
+
+
+  #mapWrapper {
   width: auto;
   height: auto;
   display: flex;
@@ -182,7 +187,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
 #map {
   position: fixed;
-  top: 0; left: 0;
+  top: 10; left: 10;
   transform-origin: 0 0;
   /* size set by JS */
 
@@ -193,28 +198,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   pointer-events: none;
   image-rendering: crisp-edges;
 }
-/*#mapWrapper {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  cursor: grab;
-}
-#mapWrapper.dragging { cursor: grabbing; }
-
-#map {
-  position: absolute;
-  top: 0; left: 0;
-  transform-origin: 0 0;
-  /* size set by JS */
-/*}
-
-#map img {
-  display: block;
-  width: 100%;
-  pointer-events: none;
-  image-rendering: crisp-edges;
-}
-*/
+   
 /* ── MARKERS ───────────────────────────────────────────────── */
 .marker {
   position: absolute;
