@@ -26,7 +26,7 @@ const db       = getDatabase(app);
 const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── Список карт ── */
+/* ── Список карт — добавляй сюда новые ── */
 const MAPS = {
   woods: {
     label:  'Лес',
@@ -34,11 +34,11 @@ const MAPS = {
   },
   customs: {
     label:  'Таможня',
-    imgUrl: 'https://i.imgur.com/FKY4S2W.jpg'  // ← замени на реальную
+    imgUrl: 'https://ссылка-на-таможню.jpg'
   },
   interchange: {
     label:  'Развязка',
-    imgUrl: 'https://gspics.org/images/2026/06/03/IDrVtJ.webp' // ← замени на реальную
+    imgUrl: 'https://ссылка-на-развязку.jpg'
   }
 };
 
@@ -83,15 +83,15 @@ const addCancel   = document.getElementById("addCancel");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
-let isAdmin     = false;
-let current     = null;
-let addMode     = false;
-let pendingPos  = null;
-let allMarkers  = {};
-let pz          = null;
-let currentMap  = 'woods';
-let currentRef  = null;   // текущий ref Firebase
-let offFn       = null;   // функция отписки
+let isAdmin    = false;
+let current    = null;
+let addMode    = false;
+let pendingPos = null;
+let allMarkers = {};
+let pz         = null;
+let currentMap = 'woods';
+let currentRef = null;
+let offFn      = null;
 
 const isMobile = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
@@ -132,50 +132,50 @@ function initPanzoom() {
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
-  /* уничтожаем старый экземпляр если был */
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
+  /* уничтожаем старый */
+  if (pz) { pz.destroy(); pz = null; }
 
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
+  /* масштаб чтобы вписать карту в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
-    window.innerHeight / ih,
-    1
+    window.innerHeight / ih
   );
+
+  /* центр */
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
   pz = Panzoom(mapEl, {
-    maxScale: 5,
-    minScale: 0.2,
+    maxScale:   8,
+    minScale:   0.1,
     startScale,
     startX,
     startY,
-    canvas:  true,
-    cursor:  'grab',
-    contain: 'outside',
+    canvas:     true,
   });
 
-  /* wheel только один раз — через флаг */
-  if (!mapWrapper._wheelBound) {
-    mapWrapper.addEventListener('wheel', e => {
-      e.preventDefault();
-      if (pz) { pz.zoomWithWheel(e); updateStatus(); }
-    }, { passive: false });
-    mapWrapper._wheelBound = true;
-  }
-
-  mapEl.addEventListener('panzoomchange', updateStatus);
+  updateCursor();
   updateStatus();
 }
 
-/* запускаем Panzoom когда картинка загружена */
+/* картинка загружена — инициализируем */
 mapImg.addEventListener('load', initPanzoom);
 if (mapImg.complete && mapImg.naturalWidth) initPanzoom();
+
+/* колесо мыши — зум */
+mapWrapper.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (pz) { pz.zoomWithWheel(e); updateStatus(); }
+}, { passive: false });
+
+mapEl.addEventListener('panzoomchange', updateStatus);
+
+function updateCursor() {
+  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
+}
 
 function updateStatus() {
   if (!pz) return;
@@ -190,9 +190,7 @@ document.getElementById('zoomReset').onclick = () => { if (pz) { pz.reset();   u
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
    ══════════════════════════════════════════ */
-mapSelect.addEventListener('change', e => {
-  switchMap(e.target.value);
-});
+mapSelect.addEventListener('change', e => switchMap(e.target.value));
 
 function switchMap(mapId) {
   if (!MAPS[mapId] || mapId === currentMap) return;
@@ -200,35 +198,28 @@ function switchMap(mapId) {
   exitAddMode();
   closeModal();
 
-  /* отписываемся от старой карты Firebase */
+  /* отписка от Firebase */
   if (offFn) { offFn(); offFn = null; }
 
-  /* очищаем маркеры */
+  /* очистка маркеров */
   allMarkers = {};
   document.querySelectorAll('.marker').forEach(m => m.remove());
 
-  /* меняем текущую карту */
   currentMap = mapId;
   currentRef = ref(db, `maps/${mapId}/markers`);
 
-  /* меняем картинку — Panzoom пересоздастся через событие load */
+  /* смена картинки — initPanzoom вызовется через событие load */
   mapImg.src = MAPS[mapId].imgUrl;
 
-  /* подписываемся на маркеры новой карты */
   subscribeMarkers();
-
-  updateStatus();
   toast(`Карта: ${MAPS[mapId].label}`);
 }
 
 /* ══════════════════════════════════════════
-   FIREBASE ПОДПИСКА
+   FIREBASE
    ══════════════════════════════════════════ */
 function subscribeMarkers() {
-  /* если ref не задан — используем текущую карту */
   if (!currentRef) currentRef = ref(db, `maps/${currentMap}/markers`);
-
-  /* onValue возвращает функцию отписки */
   offFn = onValue(currentRef, snap => {
     allMarkers = {};
     snap.forEach(i => { allMarkers[i.key] = i.val(); });
@@ -236,7 +227,6 @@ function subscribeMarkers() {
   });
 }
 
-/* первый запуск */
 currentRef = ref(db, `maps/${currentMap}/markers`);
 subscribeMarkers();
 
@@ -248,33 +238,19 @@ addModeBtn.onclick = () => addMode ? exitAddMode() : enterAddMode();
 function enterAddMode() {
   if (!isAdmin) return;
   addMode = true;
-  mapWrapper.classList.add('adding');
   addModeBtn.textContent = '✕ Отмена';
   addModeBtn.classList.add('btn-danger');
-  if (pz) {
-    const scale = pz.getScale();
-    const pan   = pz.getPan();
-    pz.setOptions({ disablePan: true, disableZoom: true });
-    pz.zoom(scale, { animate: false });
-    pz.pan(pan.x, pan.y, { animate: false });
-  }
+  updateCursor();
   toast('Нажмите на карту для добавления маркера');
 }
 
 function exitAddMode() {
   addMode    = false;
   pendingPos = null;
-  mapWrapper.classList.remove('adding');
   addModeBtn.textContent = '+ Маркер';
   addModeBtn.classList.remove('btn-danger');
   addForm.style.display  = 'none';
-  if (pz) {
-    const scale = pz.getScale();
-    const pan   = pz.getPan();
-    pz.setOptions({ disablePan: false, disableZoom: false });
-    pz.zoom(scale, { animate: false });
-    pz.pan(pan.x, pan.y, { animate: false });
-  }
+  updateCursor();
 }
 
 mapEl.addEventListener('click', e => {
@@ -322,7 +298,7 @@ function renderAllMarkers() {
 filterSel.addEventListener('change', renderAllMarkers);
 
 function createMarkerEl(id, m) {
-  const div = document.createElement('div');
+  const div      = document.createElement('div');
   div.className  = 'marker';
   div.dataset.id = id;
   div.style.left = m.x + '%';
