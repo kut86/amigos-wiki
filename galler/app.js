@@ -125,7 +125,39 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
 
+/* ══════════════════════════════════════════
+   PANZOOM
+   ══════════════════════════════════════════ */
+function initPanzoom() {
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  if (!iw || !ih) return;
 
+  if (pz) { pz.destroy(); pz = null; }
+
+  mapEl.style.width  = iw + 'px';
+  mapEl.style.height = ih + 'px';
+
+  // масштаб чтобы вписать карту в экран
+  const startScale = Math.min(
+    window.innerWidth  / iw,
+    window.innerHeight / ih
+  );
+
+  pz = Panzoom(mapEl, {
+    maxScale: 8,
+    minScale: 0.1,
+    startScale,
+    canvas: true,
+    contain: 'center'
+  });
+
+  // гарантированное центрирование
+  pz.center();
+
+  updateCursor();
+  updateStatus();
+}
 
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
@@ -154,38 +186,7 @@ function switchMap(mapId) {
   subscribeMarkers();
   toast(`Карта: ${MAPS[mapId].label}`);
 }
-/* ══════════════════════════════════════════
-   PANZOOM
-   ══════════════════════════════════════════ */
-function initPanzoom() {
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-  if (!iw || !ih) return;
 
-  if (pz) { pz.destroy(); pz = null; }
-
-  mapEl.style.width  = iw + 'px';
-  mapEl.style.height = ih + 'px';
-
-  const startScale = Math.min(
-    window.innerWidth  / iw,
-    window.innerHeight / ih
-  );
-
-  pz = Panzoom(mapEl, {
-    maxScale: 8,
-    minScale: 0.1,
-    startScale,
-    canvas: true,
-    contain: 'center'
-  });
-
-  // гарантированно центрируем
-  pz.center();
-
-  updateCursor();
-  updateStatus();
-}
 
 /* ══════════════════════════════════════════
    FIREBASE
