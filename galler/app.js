@@ -128,70 +128,57 @@ onAuthStateChanged(auth, user => {
 /* ══════════════════════════════════════════
    PANZOOM
    ══════════════════════════════════════════ */
+/* ── Panzoom init ── */
 function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
-  /* уничтожаем старый */
-  if (pz) { pz.destroy(); pz = null; }
-
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  /* масштаб чтобы вписать карту в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
-    window.innerHeight / ih
+    window.innerHeight / ih,
+    1
   );
 
-  /* центр */
-  const startX = (window.innerWidth  - iw * startScale) / 2;
-  const startY = (window.innerHeight - ih * startScale) / 2;
-
   pz = Panzoom(mapEl, {
-    maxScale:   8,
-    minScale:   0.1,
+    maxScale:  5,
+    minScale:  0.2,
     startScale,
-    startX,
-    startY,
-    canvas:     true,
+    startX: (window.innerWidth  - iw * startScale) / 2,
+    startY: (window.innerHeight - ih * startScale) / 2,
+    canvas: true,
+    cursor: 'grab',
   });
 
-  updateCursor();
+  mapWrapper.addEventListener('wheel', e => {
+    e.preventDefault();
+    pz.zoomWithWheel(e);
+    updateStatus();
+  }, { passive: false });
+
+  mapEl.addEventListener('panzoomchange', updateStatus);
   updateStatus();
 }
 
-/* картинка загружена — инициализируем */
-mapImg.addEventListener('load', () => {
-  /* небольшая задержка — даём браузеру отрендерить картинку */
-  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
-});
-
 if (mapImg.complete && mapImg.naturalWidth) {
-  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
-}
-/* колесо мыши — зум */
-mapWrapper.addEventListener('wheel', e => {
-  e.preventDefault();
-  if (pz) { pz.zoomWithWheel(e); updateStatus(); }
-}, { passive: false });
-
-mapEl.addEventListener('panzoomchange', updateStatus);
-
-function updateCursor() {
-  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
+  initPanzoom();
+} else {
+  mapImg.onload = initPanzoom;
 }
 
 function updateStatus() {
   if (!pz) return;
-  const s = pz.getScale();
-  statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(s * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
+  const scale = pz.getScale();
+  statusBar.textContent = `ZOOM ${(scale * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
 }
 
-document.getElementById('zoomIn').onclick    = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
-document.getElementById('zoomOut').onclick   = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
-document.getElementById('zoomReset').onclick = () => { if (pz) { pz.reset();   updateStatus(); } };
+/* Zoom buttons */
+document.getElementById('zoomIn').onclick    = () => { pz && pz.zoomIn();  updateStatus(); };
+document.getElementById('zoomOut').onclick   = () => { pz && pz.zoomOut(); updateStatus(); };
+document.getElementById('zoomReset').onclick = () => { pz && pz.reset();   updateStatus(); };
 
   
 
