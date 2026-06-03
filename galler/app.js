@@ -34,11 +34,11 @@ const MAPS = {
   },
   customs: {
     label:  'Таможня',
-    imgUrl: 'https://ссылка-на-таможню.png'  // ← замени на реальную
+    imgUrl: 'https://i.imgur.com/FKY4S2W.jpg'  // ← замени на реальную
   },
   interchange: {
     label:  'Развязка',
-    imgUrl: 'https://ссылка-на-развязку.png' // ← замени на реальную
+    imgUrl: 'https://gspics.org/images/2026/06/03/IDrVtJ.webp' // ← замени на реальную
   }
 };
 
