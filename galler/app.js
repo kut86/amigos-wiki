@@ -31,7 +31,7 @@ const provider = new GoogleAuthProvider();
 const MAPS = {
   woods: {
     label:  'Лес',
-    imgUrl: 'https://gspics.org/images/2026/06/03/IDigvX.jpg'
+    imgUrl: 'https://gspics.org/images/2026/06/02/IDiQvu.png'
   },
   customs: {
     label:  'Таможня',
