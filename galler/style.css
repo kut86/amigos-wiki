@@ -158,7 +158,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   display: inline-block;
 }*/
 
- #mapWrapper {
+#mapWrapper {
   width: auto;
   height: auto;
   display: flex;
@@ -171,8 +171,6 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 #mapEl {
   display: inline-block;
 }
-
- 
 
 #mapWrapper {
   position: fixed;
@@ -187,7 +185,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   top: 15; left: 15;
   transform-origin: 0 0;
   /* size set by JS */
-}
+
 
 #map img {
   display: block;
@@ -195,7 +193,6 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   pointer-events: none;
   image-rendering: crisp-edges;
 }
-
 /*#mapWrapper {
   position: fixed;
   inset: 0;
