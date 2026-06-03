@@ -27,6 +27,7 @@ const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 /* ── Список карт — добавляй сюда новые ── */
+ 
 const MAPS = {
   woods: {
     label:  'Лес',
@@ -34,10 +35,11 @@ const MAPS = {
   },
   customs: {
     label:  'Таможня',
-    imgUrl: 'https://i.imgur.com/FKY4S2W.jpg'   
+    imgUrl: 'https://i.imgur.com/FKY4S2W.jpg'
+  },
   interchange: {
     label:  'Развязка',
-    imgUrl: 'https://gspics.org/images/2026/06/03/IDrVtJ.webp'  
+    imgUrl: 'https://gspics.org/images/2026/06/03/IDrVtJ.webp'
   }
 };
 
