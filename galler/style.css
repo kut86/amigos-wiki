@@ -158,6 +158,22 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   display: inline-block;
 }*/
 
+ #mapWrapper {
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;   /* вертикальное центрирование */
+  justify-content: center; /* горизонтальное центрирование */
+   overflow: hidden;      /* чтобы карта не выходила за экран */
+   background: #000;      /* фон */
+ }
+
+#mapEl {
+  display: inline-block;
+}
+
+ 
+
 #mapWrapper {
   position: fixed;
   inset: 0;
@@ -168,16 +184,17 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
 #map {
   position: absolute;
-  top: 0; left: 0;
-  transform-origin: 0 0; /* ← важно для твоих формул */
+  top: 15; left: 15;
+  transform-origin: 0 0;
+  /* size set by JS */
 }
 
 #map img {
   display: block;
+  width: 100%;
   pointer-events: none;
   image-rendering: crisp-edges;
 }
-
 
 /*#mapWrapper {
   position: fixed;
