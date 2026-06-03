@@ -173,7 +173,13 @@ function enterAddMode() {
   mapWrapper.classList.add('adding');
   addModeBtn.textContent = '✕ Отмена';
   addModeBtn.classList.add('btn-danger');
-  if (pz) pz.setOptions({ disablePan: true, disableZoom: true });
+  if (pz) {
+    const scale = pz.getScale();
+    const pan   = pz.getPan();
+    pz.setOptions({ disablePan: true, disableZoom: true });
+    pz.zoom(scale, { animate: false });
+    pz.pan(pan.x, pan.y, { animate: false });
+  }
   toast('Нажмите на карту для добавления маркера');
 }
 
@@ -184,7 +190,13 @@ function exitAddMode() {
   addModeBtn.textContent = '+ Маркер';
   addModeBtn.classList.remove('btn-danger');
   addForm.style.display  = 'none';
-  if (pz) pz.setOptions({ disablePan: false, disableZoom: false });
+  if (pz) {
+    const scale = pz.getScale();
+    const pan   = pz.getPan();
+    pz.setOptions({ disablePan: false, disableZoom: false });
+    pz.zoom(scale, { animate: false });
+    pz.pan(pan.x, pan.y, { animate: false });
+  }
 }
 
 /* клик по карте — разместить маркер */
@@ -341,3 +353,4 @@ delBtn.onclick = () => {
     .then(() => { toast('Удалено'); closeModal(); })
     .catch(e => toast(e.message, true));
 };
+     
