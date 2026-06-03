@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tarkov Map</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     HUD / TOP BAR
+     ══════════════════════════════════════════════ -->
+<div id="ui">
+
+  <!-- Auth panel -->
+  <div class="hud-panel">
+    <span class="hud-label">Аккаунт ЧВК</span>
+    <button id="loginBtn"  class="btn btn-login">Войти</button>
+    <button id="logoutBtn" class="btn btn-logout" style="display:none">Выйти</button>
+    <span id="adminBadge">ADMIN ЧВК</span>
+  </div>
+
+  <!-- Filter panel -->
+  <div class="hud-panel">
+    <span class="hud-label">Фильтр</span>
+    <select id="filter">
+      <option value="all">Все</option>
+      <option value="loot">Лут</option>
+       <option value="bot">снайпер</option>
+      <option value="boss">Босс</option>
+      <option value="quest">Квесты</option>
+       <option value="exit">Выходы</option>
+       <option value="structure">Точки интересов</option>
+     
+    </select>
+  </div>
+
+  <!-- Add marker button (admin only) -->
+  <button id="addModeBtn" class="btn btn-primary" style="display:none">+ Маркер</button>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     MAP
+     ══════════════════════════════════════════════ -->
+<div id="mapWrapper">
+  <div id="map">
+    <img
+      id="mapImage"
+      src="https://gspics.org/images/2026/06/02/IDiQvu.png"
+      alt="Tarkov Woods Map"
+    >
+    <!-- Markers will be appended here by JS -->
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     ADD FORM (floating panel, shown while adding)
+     ══════════════════════════════════════════════ -->
+<div id="addForm" style="
+  display:none;
+  position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+  z-index:9100;
+  background:rgba(10,11,12,.95);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+  width:300px; max-width:calc(100vw - 32px);
+  flex-direction:column; gap:10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.7);
+  backdrop-filter:blur(10px);
+">
+  <div class="hud-label" style="color:var(--accent)">НОВЫЙ МАРКЕР</div>
+
+  <div class="form-group">
+    <label class="form-label">Описание</label>
+    <textarea id="addText" placeholder="Что здесь находится?"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Тип</label>
+    <select id="addType">
+      <option value="loot">📦 Loot</option>
+      <option value="bot">🎯снайпер</option>
+      <option value="boss">💀 Boss</option>
+      <option value="quest">📋 Quest</option>
+      <option value="exit">⭐ Выходы</option>
+      <option value="structure">🧩Точки интересов</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">URL фото (опционально)</label>
+    <input id="addImgUrl" type="url" placeholder="https://...">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">URL кастомной иконки (опционально)</label>
+    <input id="addIcon" type="url" placeholder="https://...icon.png">
+  </div>
+
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button id="addCancel"  class="btn btn-sm">Отмена</button>
+    <button id="addConfirm" class="btn btn-sm btn-primary">Добавить</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     MARKER VIEW / EDIT MODAL
+     ══════════════════════════════════════════════ -->
+<div id="modal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <div class="modal-title">
+        <span id="modalTitle">Маркер</span>
+        <span id="modalBadge" class="modal-type-badge badge-loot">loot</span>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px">
+      <!-- Photo (only if marker has one) -->
+      <img id="modalPhoto" class="modal-photo" src="" alt="" style="display:none">
+
+      <!-- Description -->
+      <p id="modalDesc" class="modal-desc"></p>
+      <p id="modalCoords" class="modal-coords"></p>
+
+      <!-- Edit form (hidden by default) -->
+      <div id="editForm" style="display:none;flex-direction:column;gap:10px">
+        <div class="form-group">
+          <label class="form-label">Описание</label>
+          <textarea id="editText"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Тип</label>
+          <select id="editType">
+            <option value="loot">📦 Loot</option>
+            <option value="bot">🎯снайпер</option>
+            <option value="boss">💀 Boss</option>
+            <option value="quest">📋 Quest</option>
+            <option value="exit">⭐ Выходы</option>
+            <option value="structure">🧩Точки интересов</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL фото</label>
+          <input id="editImgUrl" type="url" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL иконки</label>
+          <input id="editIcon" type="url" placeholder="https://...icon.png">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="cancelEdit" class="btn btn-sm" style="display:none">Отмена</button>
+      <button id="saveBtn"    class="btn btn-sm btn-primary" style="display:none">Сохранить</button>
+      <button id="editBtn"    class="btn btn-sm">Редактировать</button>
+      <button id="delBtn"     class="btn btn-sm btn-danger">Удалить</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     ZOOM CONTROLS
+     ══════════════════════════════════════════════ -->
+<div id="zoomControls">
+  <button class="zoom-btn" id="zoomIn"    title="Приблизить">＋</button>
+  <button class="zoom-btn" id="zoomReset" title="Сброс">⊙</button>
+  <button class="zoom-btn" id="zoomOut"   title="Отдалить">－</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     STATUS BAR
+     ══════════════════════════════════════════════ -->
+<div id="statusBar">ZOOM 100% · 0 маркеров</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TOAST CONTAINER
+     ══════════════════════════════════════════════ -->
+<div id="toastContainer"></div>
+
+
+<!-- JS -->
+<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+<script type="module" src="app.js"></script>
+
+<!-- Small fix: sync cancelEdit / saveBtn visibility with editForm -->
+<script>
+  (function(){
+    const editForm  = document.getElementById('editForm');
+    const saveBtn   = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelEdit');
+
+    const obs = new MutationObserver(()=>{
+      const show = editForm.style.display !== 'none';
+      saveBtn.style.display   = show ? '' : 'none';
+      cancelBtn.style.display = show ? '' : 'none';
+    });
+    obs.observe(editForm, { attributes: true, attributeFilter: ['style'] });
+  })();
+</script>
+
+</body>
+</html>
