@@ -1,5 +1,5 @@
 /* ============================================================
-   TARKOV MAP — app.js (Panzoom edition) удучшения навигации сайта
+   TARKOV MAP — app.js (Panzoom edition)
    ============================================================ */
 
 import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -56,13 +56,13 @@ const editIcon    = document.getElementById("editIcon");
 const saveBtn     = document.getElementById("saveBtn");
 const cancelEdit  = document.getElementById("cancelEdit");
 
-const addForm     = document.getElementById("addForm");
-const addText     = document.getElementById("addText");
-const addType     = document.getElementById("addType");
-const addImgUrl   = document.getElementById("addImgUrl");
-const addIcon     = document.getElementById("addIcon");
-const addConfirm  = document.getElementById("addConfirm");
-const addCancel   = document.getElementById("addCancel");
+const addForm    = document.getElementById("addForm");
+const addText    = document.getElementById("addText");
+const addType    = document.getElementById("addType");
+const addImgUrl  = document.getElementById("addImgUrl");
+const addIcon    = document.getElementById("addIcon");
+const addConfirm = document.getElementById("addConfirm");
+const addCancel  = document.getElementById("addCancel");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -71,7 +71,10 @@ let current    = null;
 let addMode    = false;
 let pendingPos = null;
 let allMarkers = {};
-let pz         = null;   // Panzoom instance
+let pz         = null;
+
+/* определяем мобильное устройство */
+const isMobile = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 const TYPE_EMOJI = { loot:'📦', boss:'💀', quest:'📋', custom:'⭐', bot:'🎯', exit:'🚪', structure:'🧩' };
 const TYPE_LABEL = { loot:'Loot', boss:'Boss', quest:'Quest', custom:'Custom', bot:'Снайпер', exit:'Выход', structure:'Точка интереса' };
@@ -103,7 +106,7 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
 
-/* ── Panzoom init ── */
+/* ── Panzoom ── */
 function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
@@ -118,14 +121,20 @@ function initPanzoom() {
     1
   );
 
+  /* центрируем карту */
+  const startX = (window.innerWidth  - iw * startScale) / 2;
+  const startY = (window.innerHeight - ih * startScale) / 2;
+
   pz = Panzoom(mapEl, {
-    maxScale:  5,
-    minScale:  0.2,
+    maxScale:   5,
+    minScale:   0.2,
     startScale,
-    startX: (window.innerWidth  - iw * startScale) / 2,
-    startY: (window.innerHeight - ih * startScale) / 2,
-    canvas: true,
-    cursor: 'grab',
+    startX,
+    startY,
+    canvas:     true,
+    cursor:     'grab',
+    /* не даём Panzoom уходить за пределы экрана */
+    contain:    'outside',
   });
 
   mapWrapper.addEventListener('wheel', e => {
@@ -138,6 +147,7 @@ function initPanzoom() {
   updateStatus();
 }
 
+/* если картинка уже в кэше — onload не сработает */
 if (mapImg.complete && mapImg.naturalWidth) {
   initPanzoom();
 } else {
@@ -150,7 +160,6 @@ function updateStatus() {
   statusBar.textContent = `ZOOM ${(scale * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
 }
 
-/* Zoom buttons */
 document.getElementById('zoomIn').onclick    = () => { pz && pz.zoomIn();  updateStatus(); };
 document.getElementById('zoomOut').onclick   = () => { pz && pz.zoomOut(); updateStatus(); };
 document.getElementById('zoomReset').onclick = () => { pz && pz.reset();   updateStatus(); };
@@ -164,7 +173,6 @@ function enterAddMode() {
   mapWrapper.classList.add('adding');
   addModeBtn.textContent = '✕ Отмена';
   addModeBtn.classList.add('btn-danger');
-  /* отключаем перетаскивание пока ставим маркер */
   if (pz) pz.setOptions({ disablePan: true, disableZoom: true });
   toast('Нажмите на карту для добавления маркера');
 }
@@ -176,7 +184,6 @@ function exitAddMode() {
   addModeBtn.textContent = '+ Маркер';
   addModeBtn.classList.remove('btn-danger');
   addForm.style.display  = 'none';
-  /* возвращаем управление картой */
   if (pz) pz.setOptions({ disablePan: false, disableZoom: false });
 }
 
@@ -185,9 +192,8 @@ mapEl.addEventListener('click', e => {
   if (!addMode || !isAdmin) return;
   if (e.target.closest('.marker')) return;
 
-  // rect самого mapEl — учитывает текущий зум и пан автоматически
+  /* точные координаты через getBoundingClientRect mapEl */
   const rect = mapEl.getBoundingClientRect();
-
   const x = ((e.clientX - rect.left) / rect.width)  * 100;
   const y = ((e.clientY - rect.top)  / rect.height) * 100;
 
@@ -201,7 +207,6 @@ addConfirm.onclick = () => {
   if (!pendingPos) return;
   const text = addText.value.trim();
   if (!text) { toast('Введите описание', true); return; }
-
   push(markersRef, {
     x: pendingPos.x, y: pendingPos.y,
     text,
@@ -240,12 +245,15 @@ function createMarkerEl(id, m) {
   div.style.left = m.x + '%';
   div.style.top  = m.y + '%';
 
+  /* на мобильных убираем hover-эффекты */
+  if (isMobile()) div.classList.add('no-hover');
+
   const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
 
   if (m.imgUrl) {
     div.innerHTML = `
       <div class="marker-photo"><img src="${esc(m.imgUrl)}" alt="" onerror="this.src='${fallback}'"></div>
-      <div class="marker-preview"><img src="${esc(m.imgUrl)}" alt=""></div>
+      ${isMobile() ? '' : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt=""></div>`}
       <div class="marker-tooltip">${esc(m.text)}</div>`;
   } else if (m.iconUrl) {
     div.innerHTML = `
@@ -259,7 +267,6 @@ function createMarkerEl(id, m) {
       <div class="marker-tooltip">${esc(m.text)}</div>`;
   }
 
-  /* клик на маркер */
   div.addEventListener('click', e => {
     e.stopPropagation();
     if (addMode) return;
