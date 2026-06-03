@@ -144,20 +144,32 @@ function initPanzoom() {
     window.innerHeight / ih
   );
 
+  // центр относительно окна
+  const startX = (window.innerWidth  - iw * startScale) / 2;
+  const startY = (window.innerHeight - ih * startScale) / 2;
+
   pz = Panzoom(mapEl, {
-    maxScale: 8,
-    minScale: 0.1,
+    maxScale:   8,
+    minScale:   0.1,
     startScale,
-    canvas: true,
-    contain: 'center'
+    startX,
+    startY,
+    canvas:     true,
   });
 
-  // гарантированное центрирование
-  pz.center();
+  // дополнительная проверка: подправляем центр
+  const pan = pz.getPan();
+  const expectedX = (window.innerWidth  - iw * startScale) / 2;
+  const expectedY = (window.innerHeight - ih * startScale) / 2;
+
+  if (Math.abs(pan.x - expectedX) > 1 || Math.abs(pan.y - expectedY) > 1) {
+    pz.pan(expectedX, expectedY);
+  }
 
   updateCursor();
   updateStatus();
 }
+
 
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
