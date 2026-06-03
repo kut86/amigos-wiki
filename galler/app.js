@@ -163,9 +163,14 @@ function initPanzoom() {
 }
 
 /* картинка загружена — инициализируем */
-mapImg.addEventListener('load', initPanzoom);
-if (mapImg.complete && mapImg.naturalWidth) initPanzoom();
+mapImg.addEventListener('load', () => {
+  /* небольшая задержка — даём браузеру отрендерить картинку */
+  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
+});
 
+if (mapImg.complete && mapImg.naturalWidth) {
+  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
+}
 /* колесо мыши — зум */
 mapWrapper.addEventListener('wheel', e => {
   e.preventDefault();
