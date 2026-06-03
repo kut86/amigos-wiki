@@ -208,6 +208,7 @@ document.getElementById('zoomReset').onclick = () => { pz && pz.reset();   updat
     startX,
     startY,
     canvas:     true,
+    cursor: 'grab',
   });
 
   updateCursor();
