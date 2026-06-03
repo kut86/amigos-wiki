@@ -144,7 +144,32 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 }
 
 /* ── MAP CONTAINER ─────────────────────────────────────────── */
-#mapWrapper {
+/*#mapWrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;   /* вертикальное центрирование */
+ /* justify-content: center; /* горизонтальное центрирование */
+ /*  overflow: hidden;      /* чтобы карта не выходила за экран */
+ /*  background: #000;      /* фон */
+/* }
+
+#mapEl {
+  display: inline-block;
+}*/
+
+#map img {
+  display: block;
+  pointer-events: none;
+  image-rendering: crisp-edges;
+}
+#map {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: center center;
+}
+
+/*#mapWrapper {
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -157,7 +182,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   top: 0; left: 0;
   transform-origin: 0 0;
   /* size set by JS */
-}
+/*}
 
 #map img {
   display: block;
@@ -165,7 +190,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   pointer-events: none;
   image-rendering: crisp-edges;
 }
-
+*/
 /* ── MARKERS ───────────────────────────────────────────────── */
 .marker {
   position: absolute;
