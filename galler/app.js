@@ -34,7 +34,7 @@ const provider = new GoogleAuthProvider();
 
 const MAPS = {
   woods: { label: "Лес", imgUrl: "https://gspics.org/images/2026/06/04/IDrpdE.png" },
-  customs: { label: "Таможня", imgUrl: "" },
+  customs: { label: "Таможня", imgUrl: "https://gspics.org/images/2026/06/04/IDrpdE.png" },
   interchange: { label: "Развязка", imgUrl: "https://gspics.org/images/2026/06/04/IDrpdE.png" }
 };
 
