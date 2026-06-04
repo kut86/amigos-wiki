@@ -389,3 +389,48 @@ document.getElementById("zoomReset").onclick = () => {
 
 switchMap("woods");
               
+/* ───────────────── FAKE 3D EFFECT ───────────────── */
+/* делает лёгкий tilt + depth ощущение при движении мыши */
+
+let mapWrapper = document.getElementById("map").parentElement;
+
+let tiltEnabled = true;
+
+function apply3DTilt(x, y) {
+  if (!tiltEnabled || !pz) return;
+
+  const rx = (y - 0.5) * -6; // tilt X
+  const ry = (x - 0.5) * 6;  // tilt Y
+
+  const el = document.getElementById("map");
+
+  el.style.transformOrigin = "center";
+  el.style.transform = `
+    perspective(1200px)
+    rotateX(${rx}deg)
+    rotateY(${ry}deg)
+    scale(1)
+  `;
+}
+
+/* мышь (ПК) */
+mapWrapper.addEventListener("mousemove", (e) => {
+  const rect = mapWrapper.getBoundingClientRect();
+
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+
+  apply3DTilt(x, y);
+});
+
+/* сброс когда мышь ушла */
+mapWrapper.addEventListener("mouseleave", () => {
+  const el = document.getElementById("map");
+  el.style.transform = "";
+});
+
+/* отключаем tilt при зуме (чтобы не конфликтовало) */
+document.addEventListener("wheel", () => {
+  const el = document.getElementById("map");
+  el.style.transition = "transform 0.15s ease-out";
+});
