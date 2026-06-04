@@ -145,13 +145,19 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 #map {
   position: absolute;
   top: 0; left: 0;
-  transform-origin: -379.124px, -743.363px;
+  transform-origin: -1010px, -550px;
+  translate: (-1010px, -550px);
   will-change: transform; /* добавить */
 }
 #map {
-  left: 0;
-  top: 0;
-  transform: scale 0.967508;
+  left: -0%;
+  top: -0%;
+  move; user-select: none; 
+  touch-action: none; 
+  transform-origin: 50% 50%; 
+  transition: none; 
+  transform: scale(0.646586) 
+}
 #map img {
   display: block;
   width: auto;
