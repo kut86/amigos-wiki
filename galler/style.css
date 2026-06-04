@@ -180,13 +180,6 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   transition: transform .15s;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .marker:hover {
-    transform: translate(-50%, -50%) scale(3.0);
-    z-index: 200;
-  }
-}
-
 .marker-icon {
   width: 32px; height: 32px;
   border-radius: 50% 50% 50% 0;
@@ -196,11 +189,6 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   box-shadow: 0 4px 8px rgba(0,0,0,.6);
   border: 1px solid rgba(255,255,255,.18);
   transition: box-shadow .15s;
-}
-@media (hover: hover) and (pointer: fine) {
-  .marker:hover .marker-icon {
-    box-shadow: 0 0 0 3px rgba(255,255,255,.25), 0 4px 12px rgba(0,0,0,.7);
-  }
 }
 
 .marker-icon span { rotate: 45deg; line-height: 1; }
@@ -221,16 +209,12 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   box-shadow: 0 2px 10px rgba(0,0,0,.7);
   transition: box-shadow .15s;
 }
-.marker-photo img { width: 100%; height: 100%; object-fit: cover; }
-.marker:hover .marker-photo { box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
-/*.marker-photo img { width: 100%; height: 100%; object-fit: cover; }
-@media (hover: hover) and (pointer: fine) {
-  .marker:hover .marker-photo {
-    box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8);
-  }
-}*/
+.marker-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-/* Tooltip — только десктоп */
 .marker-tooltip {
   position: absolute;
   top: calc(100% + -1px);
@@ -251,20 +235,14 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   z-index: 300;
   white-space: nowrap;
 }
-@media (hover: hover) and (pointer: fine) {
-  .marker:hover .marker-tooltip {
-    opacity: 1;
-    transform: translateX(-50%) translateY(4px);
-  }
-}
 
-/* Preview фото — только десктоп */
 .marker-preview {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  width: 160px; height: 120px;
+  width: 350px;
+  height: 280px;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--accent);
@@ -273,24 +251,47 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   opacity: 0;
   transition: opacity .2s, transform .2s;
   z-index: 300;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.marker-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* все hover эффекты в одном блоке */
 @media (hover: hover) and (pointer: fine) {
+  .marker:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 200;
+  }
+  .marker:hover .marker-icon {
+    box-shadow: 0 0 0 3px rgba(255,255,255,.25), 0 4px 12px rgba(0,0,0,.7);
+  }
+  .marker:hover .marker-photo {
+    box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8);
+  }
+  .marker:hover .marker-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(4px);
+  }
   .marker:hover .marker-preview {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
-}
-.marker-preview img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: contain;
-  background: #000; 
 }
 
 /* мобильные — без hover */
 .marker.no-hover:hover {
   transform: translate(-50%, -50%) scale(0.65) !important;
 }
+
 
 /* ── MODAL ── */
 #modal {
