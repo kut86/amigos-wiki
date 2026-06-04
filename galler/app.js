@@ -128,57 +128,43 @@ onAuthStateChanged(auth, user => {
   /* ─────────────────────────────────────────
    PANZOOM (FIXED STABLE)
 ───────────────────────────────────────── */
+/* ─────────────────────────────────────────
+   PANZOOM (STABLE WORKING VERSION)
+───────────────────────────────────────── */
 
 async function initPanzoom() {
-  // 🔥 гарантируем, что картинка реально готова
-  if (mapImg.decode) {
-    try {
-      await mapImg.decode();
-    } catch (e) {
-      // fallback если decode не поддерживается
-      await new Promise(res => {
-        if (mapImg.complete && mapImg.naturalWidth) return res();
-        mapImg.onload = () => res();
-      });
-    }
-  } else {
-    await new Promise(res => {
-      if (mapImg.complete && mapImg.naturalWidth) return res();
-      mapImg.onload = () => res();
-    });
-  }
+  // 🔥 защита от пустого изображения
+  if (!mapImg.complete || !mapImg.naturalWidth) return;
 
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
 
   if (!iw || !ih) return;
 
-  // 🔥 полностью убираем старый Panzoom
+  // 🔥 уничтожаем старый Panzoom полностью
   if (pz) {
     pz.destroy();
     pz = null;
   }
 
-  // 🔥 сбрасываем transform перед новой инициализацией
-  mapEl.style.transform = "translate(0px, 0px) scale(1)";
+  // 🔥 сбрасываем transform (ВАЖНО)
+  mapEl.style.transform = "translate(0px,0px) scale(1)";
+  mapEl.style.transformOrigin = "0 0";
 
-  // важно: фиксируем реальные размеры карты
+  // ❗ НЕ задаём фиксированные размеры через JS (это ломало у тебя всё)
   mapEl.style.width = iw + "px";
   mapEl.style.height = ih + "px";
-  mapEl.style.transformOrigin = "0 0";
 
   // создаём Panzoom
   pz = Panzoom(mapEl, {
     maxScale: 8,
     minScale: 0.05,
-    canvas: false,
     contain: "outside",
     panOnlyWhenZoomed: false,
     excludeClass: "marker"
   });
 
-  
-  // 🔥 стартовое позиционирование после рендера
+  // 🔥 даём браузеру один кадр на layout
   requestAnimationFrame(() => {
     const scale = Math.min(
       window.innerWidth / iw,
@@ -194,33 +180,63 @@ async function initPanzoom() {
 
     updateStatus();
   });
-}
+                   }
+
       
 /* ══════════════════════════════════════════    
    СМЕНА КАРТЫ    
    ══════════════════════════════════════════ */    
-mapSelect.addEventListener('change', e => switchMap(e.target.value));    
-    
-function switchMap(mapId) {    
-  if (!MAPS[mapId] || mapId === currentMap) return;    
-    
-  exitAddMode();    
-  closeModal();    
-    
-  if (offFn) { offFn(); offFn = null; }    
-    
-  allMarkers = {};    
-  document.querySelectorAll('.marker').forEach(m => m.remove());    
-    
-  currentMap = mapId;    
-  currentRef = ref(db, `maps/${mapId}/markers`);    
-    
-  /* смена src — initPanzoom сработает через событие load */    
-  mapImg.src = MAPS[mapId].imgUrl;    
-    
-  subscribeMarkers();    
-  toast(`Карта: ${MAPS[mapId].label}`);    
-}    
+/* ══════════════════════════════════════════  
+   СМЕНА КАРТЫ (FIXED IMAGE LOAD)  
+   ══════════════════════════════════════════ */  
+
+mapSelect.addEventListener('change', e => switchMap(e.target.value));  
+
+function waitImage(img) {
+  return new Promise((resolve, reject) => {
+    if (img.complete && img.naturalWidth) return resolve();
+
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("Image failed to load"));
+  });
+}
+
+async function switchMap(mapId) {
+  if (!MAPS[mapId] || mapId === currentMap) return;
+
+  exitAddMode();
+  closeModal();
+
+  if (offFn) {
+    offFn();
+    offFn = null;
+  }
+
+  allMarkers = {};
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+
+  currentMap = mapId;
+  currentRef = ref(db, `maps/${mapId}/markers`);
+
+  const url = MAPS[mapId].imgUrl;
+
+  // 🔥 ВАЖНО: сначала ставим src
+  mapImg.src = url;
+
+  try {
+    await waitImage(mapImg);
+
+    // только после загрузки
+    initPanzoom();
+
+  } catch (e) {
+    console.error(e);
+    toast("❌ КАРТА НЕ ЗАГРУЗИЛАСЬ", true);
+  }
+
+  subscribeMarkers();
+  toast(`Карта: ${MAPS[mapId].label}`);
+}
     
 /* ══════════════════════════════════════════    
    FIREBASE    
