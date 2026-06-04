@@ -8,7 +8,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ── Firebase ── */
+/* ───────── FIREBASE ───────── */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -24,7 +24,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── MAPS ── */
+/* ───────── MAPS ───────── */
 const MAPS = {
   woods: {
     label: "Лес",
@@ -40,7 +40,7 @@ const MAPS = {
   }
 };
 
-/* ── DOM ── */
+/* ───────── DOM ───────── */
 const mapWrapper = document.getElementById("mapWrapper");
 const mapEl = document.getElementById("map");
 const mapImg = document.getElementById("mapImage");
@@ -49,12 +49,14 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const adminBadge = document.getElementById("adminBadge");
 
-const filterSel = document.getElementById("filter");
 const mapSelect = document.getElementById("mapSelect");
+const filterSel = document.getElementById("filter");
 const addModeBtn = document.getElementById("addModeBtn");
+
 const statusBar = document.getElementById("statusBar");
 const toastCont = document.getElementById("toastContainer");
 
+/* modal */
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalBadge = document.getElementById("modalBadge");
@@ -75,6 +77,7 @@ const editIcon = document.getElementById("editIcon");
 const saveBtn = document.getElementById("saveBtn");
 const cancelEdit = document.getElementById("cancelEdit");
 
+/* add */
 const addForm = document.getElementById("addForm");
 const addText = document.getElementById("addText");
 const addType = document.getElementById("addType");
@@ -83,7 +86,7 @@ const addIcon = document.getElementById("addIcon");
 const addConfirm = document.getElementById("addConfirm");
 const addCancel = document.getElementById("addCancel");
 
-/* ── STATE ── */
+/* ───────── STATE ───────── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 let isAdmin = false;
@@ -99,7 +102,7 @@ let currentMap = "woods";
 let currentRef = null;
 let offFn = null;
 
-/* ── TOAST ── */
+/* ───────── TOAST ───────── */
 function toast(msg, err = false) {
   const t = document.createElement("div");
   t.className = "toast" + (err ? " err" : "");
@@ -108,10 +111,8 @@ function toast(msg, err = false) {
   setTimeout(() => t.remove(), 3000);
 }
 
-/* ── AUTH ── */
-loginBtn.onclick = () =>
-  signInWithPopup(auth, provider).catch(e => toast(e.message, true));
-
+/* ───────── AUTH ───────── */
+loginBtn.onclick = () => signInWithPopup(auth, provider).catch(e => toast(e.message, true));
 logoutBtn.onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, user => {
@@ -124,23 +125,15 @@ onAuthStateChanged(auth, user => {
   addModeBtn.style.display = isAdmin ? "" : "none";
 
   if (!isAdmin) exitAddMode();
-
-  toast(logged ? `Вошёл как ${user.email}` : "Выход");
 });
 
-/* ─────────────────────────────────────────
-   PANZOOM (НЕ ТРОГАЕМ ЛОГИКУ, ТОЛЬКО СТАБИЛИЗАЦИЯ СТАРТА)
-───────────────────────────────────────── */
+/* ───────── SAFE START SYSTEM (FIXED) ───────── */
 function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
-
   if (!iw || !ih) return;
 
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
+  if (pz) pz.destroy();
 
   mapEl.style.width = iw + "px";
   mapEl.style.height = ih + "px";
@@ -149,9 +142,8 @@ function initPanzoom() {
   pz = Panzoom(mapEl, {
     maxScale: 8,
     minScale: 0.05,
-    canvas: false,
     contain: "outside",
-    panOnlyWhenZoomed: false,
+    canvas: false,
     excludeClass: "marker"
   });
 
@@ -172,38 +164,30 @@ function initPanzoom() {
   });
 }
 
-/* ─────────────────────────────────────────
-   🔥 FIX СТАРТА КАРТЫ (ГЛАВНЫЙ БАГ)
-───────────────────────────────────────── */
+/* ───────── CRITICAL FIX: SINGLE ENTRY START ───────── */
+function startMapSystem() {
+  initPanzoom();
 
-let firstInitDone = false;
+  if (!currentRef) {
+    currentRef = ref(db, `maps/${currentMap}/markers`);
+  }
 
-function safeInit() {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      initPanzoom();
-
-      if (!firstInitDone) {
-        subscribeMarkers();
-        firstInitDone = true;
-      }
-    });
-  });
+  subscribeMarkers();
 }
 
-/* load карты */
+/* load handler */
 mapImg.addEventListener("load", () => {
-  setTimeout(safeInit, 50);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(startMapSystem);
+  });
 });
 
-/* FIX CACHE (ВАЖНО) */
+/* cache fix */
 if (mapImg.complete && mapImg.naturalWidth) {
-  setTimeout(safeInit, 50);
+  requestAnimationFrame(startMapSystem);
 }
 
-/* ─────────────────────────────────────────
-   SWITCH MAP (БЕЗ subscribeMarkers — ЭТО ВАЖНО)
-───────────────────────────────────────── */
+/* ───────── SWITCH MAP ───────── */
 function switchMap(mapId) {
   if (!MAPS[mapId] || mapId === currentMap) return;
 
@@ -223,23 +207,18 @@ function switchMap(mapId) {
   toast(`Карта: ${MAPS[mapId].label}`);
 }
 
-/* ─────────────────────────────────────────
-   FIREBASE
-───────────────────────────────────────── */
+/* ───────── FIREBASE ───────── */
 function subscribeMarkers() {
-  if (!currentRef)
-    currentRef = ref(db, `maps/${currentMap}/markers`);
+  if (!currentRef) return;
 
   offFn = onValue(currentRef, snap => {
     allMarkers = {};
-    snap.forEach(i => allMarkers[i.key] = i.val());
+    snap.forEach(i => (allMarkers[i.key] = i.val()));
     renderAllMarkers();
   });
 }
 
-/* ─────────────────────────────────────────
-   MARKERS
-───────────────────────────────────────── */
+/* ───────── MARKERS ───────── */
 function renderAllMarkers() {
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
@@ -260,11 +239,7 @@ function createMarker(id, m) {
   div.style.left = m.x + "%";
   div.style.top = m.y + "%";
 
-  div.innerHTML = `
-    <div class="marker-icon ${m.type}">
-      <span>${m.type}</span>
-    </div>
-  `;
+  div.innerHTML = `<div class="marker-icon ${m.type}"><span>📍</span></div>`;
 
   div.onclick = e => {
     e.stopPropagation();
@@ -274,21 +249,18 @@ function createMarker(id, m) {
   mapEl.appendChild(div);
 }
 
-/* ─────────────────────────────────────────
-   MODAL
-───────────────────────────────────────── */
+/* ───────── MODAL ───────── */
 function openModal(id, m) {
   current = { id, ...m };
 
   modalTitle.textContent = m.type;
   modalBadge.textContent = m.type;
-  modalBadge.className = `modal-type-badge badge-${m.type}`;
 
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
 
   modalDesc.textContent = m.text;
-  modalCoords.textContent = `x:${m.x.toFixed(2)} y:${m.y.toFixed(2)}`;
+  modalCoords.textContent = `${m.x.toFixed(2)}% / ${m.y.toFixed(2)}%`;
 
   editBtn.style.display = isAdmin ? "" : "none";
   delBtn.style.display = isAdmin ? "" : "none";
@@ -306,44 +278,22 @@ modal.onclick = e => {
   if (e.target === modal) closeModal();
 };
 
-/* ─────────────────────────────────────────
-   ADMIN LOCK
-───────────────────────────────────────── */
-editBtn.onclick = () => {
-  if (!isAdmin || !current) return;
+/* ───────── ADD MODE FIX ───────── */
+mapEl.addEventListener("click", e => {
+  if (!addMode || !isAdmin) return;
 
-  editText.value = current.text || "";
-  editType.value = current.type || "loot";
-  editImgUrl.value = current.imgUrl || "";
-  editIcon.value = current.iconUrl || "";
+  const rect = mapEl.getBoundingClientRect();
 
-  editForm.style.display = "flex";
-};
+  pendingPos = {
+    x: ((e.clientX - rect.left) / rect.width) * 100,
+    y: ((e.clientY - rect.top) / rect.height) * 100
+  };
 
-saveBtn.onclick = () => {
-  if (!isAdmin || !current) return;
+  addForm.style.display = "flex";
+});
 
-  update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
-    ...current,
-    text: editText.value,
-    type: editType.value,
-    imgUrl: editImgUrl.value || null,
-    iconUrl: editIcon.value || null
-  });
-
-  closeModal();
-};
-
-delBtn.onclick = () => {
-  if (!isAdmin || !current) return;
-  remove(ref(db, `maps/${currentMap}/markers/${current.id}`));
-  closeModal();
-};
-
-/* ─────────────────────────────────────────
-   ADD MODE
-───────────────────────────────────────── */
+/* ───────── INIT ───────── */
 mapSelect.onchange = e => switchMap(e.target.value);
 
-switchMap("woods");   // 🔥 теперь безопасно (через load/cached init)
-subscribeMarkers();
+/* ONLY ONE START (FIXED) */
+switchMap("woods");
