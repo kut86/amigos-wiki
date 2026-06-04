@@ -129,6 +129,25 @@ onAuthStateChanged(auth, user => {
 
   if (!isAdmin) exitAddMode();
 });
+/* ───────────────── MAP SWITCH ───────────────── */
+
+mapSelect.addEventListener("change", e => switchMap(e.target.value));
+
+function switchMap(id) {
+  currentMap = id;
+
+  if (offFn) offFn();
+
+  allMarkers = {};
+  document.querySelectorAll(".marker").forEach(m => m.remove());
+
+  mapImg.src = MAPS[id].imgUrl;
+
+  mapImg.onload = () => {
+    initPanzoom();
+    subscribe();
+  };
+}
 
 /* ───────────────── PANZOOM ───────────────── */
 
@@ -186,25 +205,6 @@ function initPanzoom() {
   requestAnimationFrame(doCenter);
 }*/
 
-/* ───────────────── MAP SWITCH ───────────────── */
-
-mapSelect.addEventListener("change", e => switchMap(e.target.value));
-
-function switchMap(id) {
-  currentMap = id;
-
-  if (offFn) offFn();
-
-  allMarkers = {};
-  document.querySelectorAll(".marker").forEach(m => m.remove());
-
-  mapImg.src = MAPS[id].imgUrl;
-
-  mapImg.onload = () => {
-    initPanzoom();
-    subscribe();
-  };
-}
 
 /* ───────────────── FIREBASE ───────────────── */
 
