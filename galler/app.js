@@ -166,7 +166,7 @@ function initPanzoom() {
   mapEl.parentElement.addEventListener("wheel", pz.zoomWithWheel);
 
   /* ждём пока браузер отрендерит картинку и только потом центрируем */
-  const doCenter = () => {
+  /*const doCenter = () => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) { requestAnimationFrame(doCenter); return; }
