@@ -200,7 +200,7 @@ function updateStatus() {
 
 document.getElementById('zoomIn').onclick  = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
 document.getElementById('zoomOut').onclick = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
-document.getElementById('zoomReset').onclick = () => {
+
   if (!pz) return;
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
