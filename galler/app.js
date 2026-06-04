@@ -8,7 +8,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ───────── FIREBASE ───────── */
+/* ── Firebase ── */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -24,7 +24,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ───────── MAPS ───────── */
+/* ── Maps ── */
 const MAPS = {
   woods: {
     label: "Лес",
@@ -40,7 +40,7 @@ const MAPS = {
   }
 };
 
-/* ───────── DOM ───────── */
+/* ── DOM ── */
 const mapWrapper = document.getElementById("mapWrapper");
 const mapEl = document.getElementById("map");
 const mapImg = document.getElementById("mapImage");
@@ -56,14 +56,13 @@ const addModeBtn = document.getElementById("addModeBtn");
 const statusBar = document.getElementById("statusBar");
 const toastCont = document.getElementById("toastContainer");
 
-/* modal */
+/* Modal */
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalBadge = document.getElementById("modalBadge");
 const modalPhoto = document.getElementById("modalPhoto");
 const modalDesc = document.getElementById("modalDesc");
 const modalCoords = document.getElementById("modalCoords");
-
 const editBtn = document.getElementById("editBtn");
 const delBtn = document.getElementById("delBtn");
 const modalClose = document.getElementById("modalClose");
@@ -73,11 +72,10 @@ const editText = document.getElementById("editText");
 const editType = document.getElementById("editType");
 const editImgUrl = document.getElementById("editImgUrl");
 const editIcon = document.getElementById("editIcon");
-
 const saveBtn = document.getElementById("saveBtn");
 const cancelEdit = document.getElementById("cancelEdit");
 
-/* add */
+/* Add */
 const addForm = document.getElementById("addForm");
 const addText = document.getElementById("addText");
 const addType = document.getElementById("addType");
@@ -86,7 +84,7 @@ const addIcon = document.getElementById("addIcon");
 const addConfirm = document.getElementById("addConfirm");
 const addCancel = document.getElementById("addCancel");
 
-/* ───────── STATE ───────── */
+/* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 let isAdmin = false;
@@ -102,7 +100,7 @@ let currentMap = "woods";
 let currentRef = null;
 let offFn = null;
 
-/* ───────── TOAST ───────── */
+/* ── Toast ── */
 function toast(msg, err = false) {
   const t = document.createElement("div");
   t.className = "toast" + (err ? " err" : "");
@@ -111,7 +109,7 @@ function toast(msg, err = false) {
   setTimeout(() => t.remove(), 3000);
 }
 
-/* ───────── AUTH ───────── */
+/* ── AUTH ── */
 loginBtn.onclick = () => signInWithPopup(auth, provider).catch(e => toast(e.message, true));
 logoutBtn.onclick = () => signOut(auth);
 
@@ -127,7 +125,17 @@ onAuthStateChanged(auth, user => {
   if (!isAdmin) exitAddMode();
 });
 
-/* ───────── SAFE START SYSTEM (FIXED) ───────── */
+/* ── ADD MODE FIX (MISSING FUNCTION FIXED) ── */
+function exitAddMode() {
+  addMode = false;
+  pendingPos = null;
+  addForm.style.display = "none";
+  addModeBtn.textContent = "+ Маркер";
+  addModeBtn.classList.remove("btn-danger");
+  mapWrapper.style.cursor = "grab";
+}
+
+/* ── PANZOOM ── */
 function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
@@ -137,7 +145,6 @@ function initPanzoom() {
 
   mapEl.style.width = iw + "px";
   mapEl.style.height = ih + "px";
-  mapEl.style.transformOrigin = "0 0";
 
   pz = Panzoom(mapEl, {
     maxScale: 8,
@@ -153,19 +160,22 @@ function initPanzoom() {
       window.innerHeight / ih
     ) * 0.95;
 
-    pz.zoom(scale, { animate: false });
-
     const x = (window.innerWidth - iw * scale) / 2;
     const y = (window.innerHeight - ih * scale) / 2;
 
-    pz.pan(x, y, { animate: false });
+    requestAnimationFrame(() => {
+      pz.zoom(scale, { animate: false });
 
-    updateStatus();
+      requestAnimationFrame(() => {
+        pz.pan(x, y, { animate: false });
+        updateStatus();
+      });
+    });
   });
 }
 
-/* ───────── CRITICAL FIX: SINGLE ENTRY START ───────── */
-function startMapSystem() {
+/* ── START FIX (CRITICAL) ── */
+function startSystem() {
   initPanzoom();
 
   if (!currentRef) {
@@ -175,24 +185,22 @@ function startMapSystem() {
   subscribeMarkers();
 }
 
-/* load handler */
+/* image load safe */
 mapImg.addEventListener("load", () => {
   requestAnimationFrame(() => {
-    requestAnimationFrame(startMapSystem);
+    requestAnimationFrame(startSystem);
   });
 });
 
-/* cache fix */
 if (mapImg.complete && mapImg.naturalWidth) {
-  requestAnimationFrame(startMapSystem);
+  requestAnimationFrame(startSystem);
 }
 
-/* ───────── SWITCH MAP ───────── */
+/* ── SWITCH MAP (FIXED SAFETY) ── */
 function switchMap(mapId) {
   if (!MAPS[mapId] || mapId === currentMap) return;
 
   exitAddMode();
-  closeModal();
 
   if (offFn) offFn();
 
@@ -207,7 +215,9 @@ function switchMap(mapId) {
   toast(`Карта: ${MAPS[mapId].label}`);
 }
 
-/* ───────── FIREBASE ───────── */
+mapSelect.onchange = e => switchMap(e.target.value);
+
+/* ── FIREBASE ── */
 function subscribeMarkers() {
   if (!currentRef) return;
 
@@ -218,7 +228,7 @@ function subscribeMarkers() {
   });
 }
 
-/* ───────── MARKERS ───────── */
+/* ── MARKERS ── */
 function renderAllMarkers() {
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
@@ -249,7 +259,7 @@ function createMarker(id, m) {
   mapEl.appendChild(div);
 }
 
-/* ───────── MODAL ───────── */
+/* ── MODAL ── */
 function openModal(id, m) {
   current = { id, ...m };
 
@@ -261,9 +271,6 @@ function openModal(id, m) {
 
   modalDesc.textContent = m.text;
   modalCoords.textContent = `${m.x.toFixed(2)}% / ${m.y.toFixed(2)}%`;
-
-  editBtn.style.display = isAdmin ? "" : "none";
-  delBtn.style.display = isAdmin ? "" : "none";
 
   modal.classList.add("open");
 }
@@ -278,7 +285,7 @@ modal.onclick = e => {
   if (e.target === modal) closeModal();
 };
 
-/* ───────── ADD MODE FIX ───────── */
+/* ── ADD MARKER CLICK ── */
 mapEl.addEventListener("click", e => {
   if (!addMode || !isAdmin) return;
 
@@ -292,8 +299,5 @@ mapEl.addEventListener("click", e => {
   addForm.style.display = "flex";
 });
 
-/* ───────── INIT ───────── */
-mapSelect.onchange = e => switchMap(e.target.value);
-
-/* ONLY ONE START (FIXED) */
+/* ── INIT ── */
 switchMap("woods");
