@@ -139,7 +139,7 @@ function initPanzoom() {
 
   pz = Panzoom(mapEl, {
     maxScale: 3,
-    minScale: 0.3,
+    minScale: 0.5,
     contain:  "outside"
   });
 
