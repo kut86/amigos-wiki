@@ -138,8 +138,8 @@ function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
-    maxScale: 3,
-    minScale: 0.5,
+    maxScale: 8,
+    minScale: 0.2,
     contain:  "outside"
   });
 
@@ -363,6 +363,26 @@ delBtn.onclick = () => {
   remove(ref(db, `maps/${currentMap}/markers/${current.id}`))
     .then(() => { toast("Удалено"); closeModal(); })
     .catch(e => toast(e.message, true));
+};
+
+/* ───────────────── INIT ───────────────── */
+
+
+/* ───────────────── ZOOM BUTTONS ───────────────── */
+
+document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
+document.getElementById("zoomOut").onclick   = () => pz && pz.zoomOut();
+document.getElementById("zoomReset").onclick = () => {
+  if (!pz) return;
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+  pz.zoom(s, { animate: true });
+  pz.pan(
+    (window.innerWidth  - iw * s) / 2,
+    (window.innerHeight - ih * s) / 2,
+    { animate: true }
+  );
 };
 
 /* ───────────────── INIT ───────────────── */
