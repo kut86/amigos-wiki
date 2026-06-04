@@ -169,6 +169,49 @@ async function initPanzoom() {
   mapEl.style.transformOrigin = "0 0";
 
   // создаём Panzoom
+  /* ─────────────────────────────────────────
+   PANZOOM (FIXED STABLE)
+───────────────────────────────────────── */
+
+async function initPanzoom() {
+  // 🔥 гарантируем, что картинка реально готова
+  if (mapImg.decode) {
+    try {
+      await mapImg.decode();
+    } catch (e) {
+      // fallback если decode не поддерживается
+      await new Promise(res => {
+        if (mapImg.complete && mapImg.naturalWidth) return res();
+        mapImg.onload = () => res();
+      });
+    }
+  } else {
+    await new Promise(res => {
+      if (mapImg.complete && mapImg.naturalWidth) return res();
+      mapImg.onload = () => res();
+    });
+  }
+
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+
+  if (!iw || !ih) return;
+
+  // 🔥 полностью убираем старый Panzoom
+  if (pz) {
+    pz.destroy();
+    pz = null;
+  }
+
+  // 🔥 сбрасываем transform перед новой инициализацией
+  mapEl.style.transform = "translate(0px, 0px) scale(1)";
+
+  // важно: фиксируем реальные размеры карты
+  mapEl.style.width = iw + "px";
+  mapEl.style.height = ih + "px";
+  mapEl.style.transformOrigin = "0 0";
+
+  // создаём Panzoom
   pz = Panzoom(mapEl, {
     maxScale: 8,
     minScale: 0.05,
@@ -178,6 +221,23 @@ async function initPanzoom() {
     excludeClass: "marker"
   });
 
+  // 🔥 стартовое позиционирование после рендера
+  requestAnimationFrame(() => {
+    const scale = Math.min(
+      window.innerWidth / iw,
+      window.innerHeight / ih
+    ) * 0.95;
+
+    pz.zoom(scale, { animate: false });
+
+    const x = (window.innerWidth - iw * scale) / 2;
+    const y = (window.innerHeight - ih * scale) / 2;
+
+    pz.pan(x, y, { animate: false });
+
+    updateStatus();
+  });
+}
   // 🔥 стартовое позиционирование после рендера
   requestAnimationFrame(() => {
     const scale = Math.min(
