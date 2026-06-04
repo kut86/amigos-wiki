@@ -168,10 +168,10 @@ function initPanzoom() {
     const scale = Math.min(
       window.innerWidth  / mapImg.width,
       window.innerHeight / mapImg.height
-    ) * 0.1;
+    ) * 0.2;
 
     pz.zoom(scale, { animate: false });
-    pz.pan(900,500, { animate: false });
+    pz.pan(0,0, { animate: false });
   });
 }
 /*function initPanzoom() {
