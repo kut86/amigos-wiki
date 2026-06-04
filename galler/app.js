@@ -379,8 +379,8 @@ document.getElementById("zoomReset").onclick = () => {
   const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
   pz.zoom(s, { animate: true });
   pz.pan(
-    (window.innerWidth  - iw * s) / 2,
-    (window.innerHeight - ih * s) / 2,
+    (window.innerWidth  - iw * s) / 0.1,
+    (window.innerHeight - ih * s) / 0.1,
     { animate: true }
   );
 };
