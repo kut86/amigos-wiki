@@ -137,82 +137,43 @@ function initPanzoom() {
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  /* масштаб чтобы картинка влезла в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih
   );
 
-  /* создаём Panzoom без startX/startY — они ненадёжны */
+  const startX = (window.innerWidth  - iw * startScale) / 2;
+  const startY = (window.innerHeight - ih * startScale) / 2;
+
+  /* Выставляем transform ДО создания Panzoom — нет прыжка */
+  mapEl.style.transform =
+    `matrix(${startScale},0,0,${startScale},${startX},${startY})`;
+
   pz = Panzoom(mapEl, {
-    maxScale: 8,
-    minScale: 0.1,
-    canvas:   true,
+    maxScale:   8,
+    minScale:   0.1,
+    canvas:     true,
+    startScale: startScale,
+    startX:     startX,
+    startY:     startY,
   });
-
-  /* задаём масштаб и центр ПОСЛЕ создания */
-  pz.zoom(startScale, { animate: false });
-
-  /* центр: смещаем так чтобы картинка была по центру экрана */
-  const panX = (window.innerWidth  - iw * startScale) / 2;
-  const panY = (window.innerHeight - ih * startScale) / 2;
-  pz.pan(panX, panY, { animate: false });
 
   updateCursor();
   updateStatus();
 }
-
-let pzIniting = false;
-
-mapImg.addEventListener('load', () => {
-  if (pzIniting) return;
-  pzIniting = true;
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    initPanzoom();
-    pzIniting = false;
-  }));
-});
-
-if (mapImg.complete && mapImg.naturalWidth) {
-  if (!pzIniting) {
-    pzIniting = true;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      initPanzoom();
-      pzIniting = false;
-    }));
-  }
-}
-
-mapWrapper.addEventListener('wheel', e => {
-  e.preventDefault();
-  if (pz) { pz.zoomWithWheel(e); updateStatus(); }
-}, { passive: false });
-
-mapEl.addEventListener('panzoomchange', updateStatus);
-
-function updateCursor() {
-  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
-}
-
-function updateStatus() {
-  if (!pz) return;
-  const s = pz.getScale();
-  statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(s * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
-}
-
-document.getElementById('zoomIn').onclick    = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
-document.getElementById('zoomOut').onclick   = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
 document.getElementById('zoomReset').onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
   const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+  const x  = (window.innerWidth  - iw * s) / 2;
+  const y  = (window.innerHeight - ih * s) / 2;
+
+  mapEl.style.transform =
+    `matrix(${s},0,0,${s},${x},${y})`;
+
   pz.zoom(s, { animate: false });
-  pz.pan(
-    (window.innerWidth  - iw * s) / 2,
-    (window.innerHeight - ih * s) / 2,
-    { animate: false }
-  );
+  pz.pan(x, y, { animate: false });
   updateStatus();
 };
 /* ══════════════════════════════════════════
