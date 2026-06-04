@@ -134,14 +134,14 @@ onAuthStateChanged(auth, user => {
 
 let pz = null;
 
-function initPanzoom() {
+/*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
     maxScale: 8,
     minScale: 0.2,
     contain:  "outside"
-  });
+  });*/
 
   mapEl.parentElement.addEventListener("wheel", pz.zoomWithWheel);
 
