@@ -141,20 +141,23 @@ function initPanzoom() {
     window.innerWidth  / iw,
     window.innerHeight / ih
   );
-
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
   pz = Panzoom(mapEl, {
-    maxScale:      8,
-    minScale:      0.05,
-    canvas:        false,   /* без артефактов на мобиле */
-    contain:       false,
-    noBind:        false,
+    maxScale: 8,
+    minScale: 0.05,
+    canvas:   true,
+    contain:  false,
   });
 
   pz.zoom(startScale, { animate: false });
   pz.pan(startX, startY, { animate: false });
+
+  /* touch — передаём события врапперу */
+  mapWrapper.addEventListener('touchstart', pz.handleDown,  { passive: false });
+  mapWrapper.addEventListener('touchmove',  pz.handleMove,  { passive: false });
+  mapWrapper.addEventListener('touchend',   pz.handleUp,    { passive: false });
 
   updateCursor();
   updateStatus();
@@ -186,7 +189,7 @@ mapWrapper.addEventListener('wheel', e => {
   if (pz) { pz.zoomWithWheel(e); updateStatus(); }
 }, { passive: false });
 
-mapEl.addEventListener('panzoomchange', updateStatus);
+mapEl.addEventListener('panzoomend', updateStatus);
 
 function updateCursor() {
   mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
@@ -198,18 +201,15 @@ function updateStatus() {
   statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(s * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
 }
 
-/* Зум от центра экрана */
 function zoomToCenter(factor) {
   if (!pz) return;
   const s    = pz.getScale();
   const newS = Math.min(8, Math.max(0.05, s * factor));
-  const { x, y } = pz.getPan();
+  const pan  = pz.getPan();
   const cx   = window.innerWidth  / 2;
   const cy   = window.innerHeight / 2;
-  /* точка на карте под центром экрана */
-  const mapX = (cx - x) / s;
-  const mapY = (cy - y) / s;
-  /* новый pan чтобы та же точка осталась под центром */
+  const mapX = (cx - pan.x) / s;
+  const mapY = (cy - pan.y) / s;
   const newX = cx - mapX * newS;
   const newY = cy - mapY * newS;
   pz.zoom(newS, { animate: false });
@@ -217,9 +217,8 @@ function zoomToCenter(factor) {
   updateStatus();
 }
 
-document.getElementById('zoomIn').onclick  = () => zoomToCenter(1.3);
-document.getElementById('zoomOut').onclick = () => zoomToCenter(1 / 1.3);
-
+document.getElementById('zoomIn').onclick    = () => zoomToCenter(1.3);
+document.getElementById('zoomOut').onclick   = () => zoomToCenter(1 / 1.3);
 document.getElementById('zoomReset').onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
@@ -231,6 +230,8 @@ document.getElementById('zoomReset').onclick = () => {
   pz.pan(x, y, { animate: false });
   updateStatus();
 };
+
+
   
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
