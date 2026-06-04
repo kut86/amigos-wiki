@@ -126,6 +126,9 @@ onAuthStateChanged(auth, user => {
 /* ══════════════════════════════════════════
    PANZOOM
    ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   PANZOOM
+   ══════════════════════════════════════════ */
 function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
@@ -136,28 +139,31 @@ function initPanzoom() {
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
+  /* масштаб чтобы картинка влезла в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih
   );
-  const startX = (window.innerWidth  - iw * startScale) / 2;
-  const startY = (window.innerHeight - ih * startScale) / 2;
 
+  /* создаём Panzoom без startX/startY — они ненадёжны */
   pz = Panzoom(mapEl, {
-    maxScale:   8,
-    minScale:   0.1,
-    startScale,
-    startX,
-    startY,
-    canvas:     true,
+    maxScale: 8,
+    minScale: 0.1,
+    canvas:   true,
   });
+
+  /* задаём масштаб и центр ПОСЛЕ создания */
+  pz.zoom(startScale, { animate: false });
+
+  /* центр: смещаем так чтобы картинка была по центру экрана */
+  const panX = (window.innerWidth  - iw * startScale) / 2;
+  const panY = (window.innerHeight - ih * startScale) / 2;
+  pz.pan(panX, panY, { animate: false });
 
   updateCursor();
   updateStatus();
 }
 
-/* запускаем после загрузки картинки — двойной rAF гарантирует
-   что браузер успел посчитать размеры */
 mapImg.addEventListener('load', () => {
   requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
 });
@@ -166,7 +172,6 @@ if (mapImg.complete && mapImg.naturalWidth) {
   requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
 }
 
-/* колесо мыши */
 mapWrapper.addEventListener('wheel', e => {
   e.preventDefault();
   if (pz) { pz.zoomWithWheel(e); updateStatus(); }
@@ -186,8 +191,19 @@ function updateStatus() {
 
 document.getElementById('zoomIn').onclick    = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
 document.getElementById('zoomOut').onclick   = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
-document.getElementById('zoomReset').onclick = () => { if (pz) { pz.reset();   updateStatus(); } };
-
+document.getElementById('zoomReset').onclick = () => {
+  if (!pz) return;
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+  pz.zoom(s, { animate: false });
+  pz.pan(
+    (window.innerWidth  - iw * s) / 2,
+    (window.innerHeight - ih * s) / 2,
+    { animate: false }
+  );
+  updateStatus();
+};
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
    ══════════════════════════════════════════ */
