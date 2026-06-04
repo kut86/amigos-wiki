@@ -135,6 +135,7 @@ function initPanzoom() {
 
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
+  mapEl.style.transform = 'matrix(1,0,0,1,0,0)';
 
   const startScale = Math.min(
     window.innerWidth  / iw,
@@ -144,17 +145,16 @@ function initPanzoom() {
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
-  mapEl.style.transform =
-    `matrix(${startScale},0,0,${startScale},${startX},${startY})`;
-
   pz = Panzoom(mapEl, {
-    maxScale:   8,
-    minScale:   0.1,
-    canvas:     true,
-    startScale: startScale,
-    startX:     startX,
-    startY:     startY,
+    maxScale:      8,
+    minScale:      0.05,
+    canvas:        false,   /* без артефактов на мобиле */
+    contain:       false,
+    noBind:        false,
   });
+
+  pz.zoom(startScale, { animate: false });
+  pz.pan(startX, startY, { animate: false });
 
   updateCursor();
   updateStatus();
@@ -198,8 +198,28 @@ function updateStatus() {
   statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(s * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
 }
 
-document.getElementById('zoomIn').onclick  = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
-document.getElementById('zoomOut').onclick = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
+/* Зум от центра экрана */
+function zoomToCenter(factor) {
+  if (!pz) return;
+  const s    = pz.getScale();
+  const newS = Math.min(8, Math.max(0.05, s * factor));
+  const { x, y } = pz.getPan();
+  const cx   = window.innerWidth  / 2;
+  const cy   = window.innerHeight / 2;
+  /* точка на карте под центром экрана */
+  const mapX = (cx - x) / s;
+  const mapY = (cy - y) / s;
+  /* новый pan чтобы та же точка осталась под центром */
+  const newX = cx - mapX * newS;
+  const newY = cy - mapY * newS;
+  pz.zoom(newS, { animate: false });
+  pz.pan(newX, newY, { animate: false });
+  updateStatus();
+}
+
+document.getElementById('zoomIn').onclick  = () => zoomToCenter(1.3);
+document.getElementById('zoomOut').onclick = () => zoomToCenter(1 / 1.3);
+
 document.getElementById('zoomReset').onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
@@ -207,11 +227,11 @@ document.getElementById('zoomReset').onclick = () => {
   const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
   const x  = (window.innerWidth  - iw * s) / 2;
   const y  = (window.innerHeight - ih * s) / 2;
-  mapEl.style.transform = `matrix(${s},0,0,${s},${x},${y})`;
   pz.zoom(s, { animate: false });
   pz.pan(x, y, { animate: false });
   updateStatus();
 };
+  
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
    ══════════════════════════════════════════ */
