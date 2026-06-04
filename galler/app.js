@@ -4,11 +4,10 @@
 
 import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push,
-         onValue, update, remove,
-         off }                     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+         onValue, update, remove }  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, GoogleAuthProvider,
          signInWithPopup, onAuthStateChanged,
-         signOut }                 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+         signOut }                  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* ── Firebase ── */
 const firebaseConfig = {
@@ -26,12 +25,11 @@ const db       = getDatabase(app);
 const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── Список карт — добавляй сюда новые ── */
- 
+/* ── Список карт ── */
 const MAPS = {
   woods: {
     label:  'Лес',
-    imgUrl: 'https://i.imgur.com/IvAlf2V.jpeg?fb'
+    imgUrl: 'https://i.imgur.com/IvAlf2V.jpeg'
   },
   customs: {
     label:  'Таможня',
@@ -128,103 +126,47 @@ onAuthStateChanged(auth, user => {
 /* ══════════════════════════════════════════
    PANZOOM
    ══════════════════════════════════════════ */
-/* ── Panzoom init ── */
-/*function initPanzoom() {
+function initPanzoom() {
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
-  mapEl.style.width  = iw + 'px';
-  mapEl.style.height = ih + 'px';
-
-  const startScale = Math.min(
-    window.innerWidth  / iw,
-    window.innerHeight / ih,
-    1
-  );
-
-  pz = Panzoom(mapEl, {
-    maxScale:  5,
-    minScale:  0.2,
-    startScale,
-    startX: (window.innerWidth  - iw * startScale) / 2,
-    startY: (window.innerHeight - ih * startScale) / 2,
-    canvas: true,
-    cursor: 'grab',
-  });
-
-  mapWrapper.addEventListener('wheel', e => {
-    e.preventDefault();
-    pz.zoomWithWheel(e);
-    updateStatus();
-  }, { passive: false });
-
-  mapEl.addEventListener('panzoomchange', updateStatus);
-  updateStatus();
-}
-
-if (mapImg.complete && mapImg.naturalWidth) {
-  initPanzoom();
-} else {
-  mapImg.onload = initPanzoom;
-}
-
-function updateStatus() {
-  if (!pz) return;
-  const scale = pz.getScale();
-  statusBar.textContent = `ZOOM ${(scale * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
-}
-
-/* Zoom buttons */
-/*document.getElementById('zoomIn').onclick    = () => { pz && pz.zoomIn();  updateStatus(); };
-document.getElementById('zoomOut').onclick   = () => { pz && pz.zoomOut(); updateStatus(); };
-document.getElementById('zoomReset').onclick = () => { pz && pz.reset();   updateStatus(); };*/
-
-  function initPanzoom() {
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-  if (!iw || !ih) return;
-
-  /* уничтожаем старый */
   if (pz) { pz.destroy(); pz = null; }
 
   mapEl.style.width  = iw + 'px';
   mapEl.style.height = ih + 'px';
 
-  /* масштаб чтобы вписать карту в экран */
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih
   );
-
-  /* центр */
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
   pz = Panzoom(mapEl, {
-    maxScale:   5,
-    minScale:   0.2,
+    maxScale:   8,
+    minScale:   0.1,
     startScale,
     startX,
     startY,
     canvas:     true,
-    cursor: 'grab',
   });
 
   updateCursor();
   updateStatus();
 }
 
-/* картинка загружена — инициализируем */
+/* запускаем после загрузки картинки — двойной rAF гарантирует
+   что браузер успел посчитать размеры */
 mapImg.addEventListener('load', () => {
-  /* небольшая задержка — даём браузеру отрендерить картинку */
   requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
 });
 
 if (mapImg.complete && mapImg.naturalWidth) {
   requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
 }
-/* колесо мыши — зум */
+
+/* колесо мыши */
 mapWrapper.addEventListener('wheel', e => {
   e.preventDefault();
   if (pz) { pz.zoomWithWheel(e); updateStatus(); }
@@ -257,23 +199,20 @@ function switchMap(mapId) {
   exitAddMode();
   closeModal();
 
-  /* отписка от Firebase */
   if (offFn) { offFn(); offFn = null; }
 
-  /* очистка маркеров */
   allMarkers = {};
   document.querySelectorAll('.marker').forEach(m => m.remove());
 
   currentMap = mapId;
   currentRef = ref(db, `maps/${mapId}/markers`);
 
-  /* смена картинки — initPanzoom вызовется через событие load */
+  /* смена src — initPanzoom сработает через событие load */
   mapImg.src = MAPS[mapId].imgUrl;
 
   subscribeMarkers();
   toast(`Карта: ${MAPS[mapId].label}`);
 }
-
 
 /* ══════════════════════════════════════════
    FIREBASE
@@ -461,3 +400,4 @@ delBtn.onclick = () => {
     .then(() => { toast('Удалено'); closeModal(); })
     .catch(e => toast(e.message, true));
 };
+                                
