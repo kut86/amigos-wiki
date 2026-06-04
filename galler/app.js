@@ -132,7 +132,7 @@ onAuthStateChanged(auth, user => {
 
 /* ───────────────── PANZOOM ───────────────── */
 
-/*let pz = null;*/
+let pz = null;
 
 /*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
