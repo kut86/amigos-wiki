@@ -158,7 +158,7 @@ function initPanzoom() {
 
   pz = Panzoom(mapEl, {
     maxScale: 5,
-   /* minScale: 1.0,*/
+   minScale: 0.5,
     contain:  "outside"
   });
 
@@ -171,7 +171,7 @@ function initPanzoom() {
     ) * 0.1;
 
     pz.zoom(scale, { animate: false });
-    pz.pan(0, 0, { animate: false });
+    pz.pan(900,500, { animate: false });
   });
 }
 /*function initPanzoom() {
