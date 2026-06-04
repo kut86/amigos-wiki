@@ -132,9 +132,9 @@ onAuthStateChanged(auth, user => {
 
 /* ───────────────── PANZOOM ───────────────── */
 
-let pz = null;
+/*let pz = null;*/
 
-function initPanzoom() {
+/*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
@@ -154,6 +154,36 @@ function initPanzoom() {
     pz.zoom(scale, { animate: false });
     pz.pan(0, 0, { animate: false });
   });
+}*/
+function initPanzoom() {
+  if (pz) { pz.destroy(); pz = null; }
+
+  pz = Panzoom(mapEl, {
+    maxScale: 8,
+    minScale: 0.1,
+  });
+
+  mapEl.parentElement.addEventListener("wheel", pz.zoomWithWheel);
+
+  /* ждём пока браузер отрендерит картинку и только потом центрируем */
+  const doCenter = () => {
+    const iw = mapImg.naturalWidth;
+    const ih = mapImg.naturalHeight;
+    if (!iw || !ih) { requestAnimationFrame(doCenter); return; }
+
+    mapEl.style.width  = iw + "px";
+    mapEl.style.height = ih + "px";
+
+    const s = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+    pz.zoom(s, { animate: false });
+    pz.pan(
+      (window.innerWidth  - iw * s) / 2,
+      (window.innerHeight - ih * s) / 2,
+      { animate: false }
+    );
+  };
+
+  requestAnimationFrame(doCenter);
 }
 
 /* ───────────────── MAP SWITCH ───────────────── */
