@@ -123,17 +123,11 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');    
 });    
     
-/* ══════════════════════════════════════════    
-
-  /* ─────────────────────────────────────────
-   PANZOOM (FIXED STABLE)
-───────────────────────────────────────── */
-/* ─────────────────────────────────────────
-   PANZOOM (STABLE WORKING VERSION)
-───────────────────────────────────────── */
+/* ══════════════════════════════════════════
+   PANZOOM (FIXED STABLE CLEAN VERSION)
+══════════════════════════════════════════ */
 
 async function initPanzoom() {
-  // 🔥 защита от пустого изображения
   if (!mapImg.complete || !mapImg.naturalWidth) return;
 
   const iw = mapImg.naturalWidth;
@@ -141,21 +135,18 @@ async function initPanzoom() {
 
   if (!iw || !ih) return;
 
-  // 🔥 уничтожаем старый Panzoom полностью
+  // 🔥 полный reset старого Panzoom
   if (pz) {
     pz.destroy();
     pz = null;
   }
 
-  // 🔥 сбрасываем transform (ВАЖНО)
+  // 🔥 важно: НЕ задаём фиксированные размеры (это ломало тебе всё)
+  mapEl.style.width = iw + "px";
+  mapEl.style.height = ih + "px";
   mapEl.style.transform = "translate(0px,0px) scale(1)";
   mapEl.style.transformOrigin = "0 0";
 
-  // ❗ НЕ задаём фиксированные размеры через JS (это ломало у тебя всё)
-  mapEl.style.width = iw + "px";
-  mapEl.style.height = ih + "px";
-
-  // создаём Panzoom
   pz = Panzoom(mapEl, {
     maxScale: 8,
     minScale: 0.05,
@@ -164,7 +155,6 @@ async function initPanzoom() {
     excludeClass: "marker"
   });
 
-  // 🔥 даём браузеру один кадр на layout
   requestAnimationFrame(() => {
     const scale = Math.min(
       window.innerWidth / iw,
@@ -173,23 +163,19 @@ async function initPanzoom() {
 
     pz.zoom(scale, { animate: false });
 
-    const x = (window.innerWidth - iw * scale) / 2;
-    const y = (window.innerHeight - ih * scale) / 2;
-
-    pz.pan(x, y, { animate: false });
+    pz.pan(
+      (window.innerWidth - iw * scale) / 2,
+      (window.innerHeight - ih * scale) / 2,
+      { animate: false }
+    );
 
     updateStatus();
   });
-                   }
+}
 
-      
-/* ══════════════════════════════════════════    
-   СМЕНА КАРТЫ    
-   ══════════════════════════════════════════ */    
-/* ══════════════════════════════════════════  
-   СМЕНА КАРТЫ (FIXED IMAGE LOAD)  
-   ══════════════════════════════════════════ */  
-
+/* ══════════════════════════════════════════
+   MAP ENGINE
+══════════════════════════════════════════ */
 mapSelect.addEventListener('change', e => switchMap(e.target.value));  
 
 function waitImage(img) {
