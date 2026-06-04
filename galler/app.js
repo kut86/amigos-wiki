@@ -215,20 +215,7 @@ document.getElementById('zoomReset').onclick = () => {
 };
 
 document.getElementById('zoomReset').onclick = () => {
-  if (!pz) return;
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
-  const x  = (window.innerWidth  - iw * s) / 2;
-  const y  = (window.innerHeight - ih * s) / 2;
 
-  mapEl.style.transform =
-    `matrix(${s},0,0,${s},${x},${y})`;
-
-  pz.zoom(s, { animate: false });
-  pz.pan(x, y, { animate: false });
-  updateStatus();
-};
 /* ══════════════════════════════════════════
    СМЕНА КАРТЫ
    ══════════════════════════════════════════ */
