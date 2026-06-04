@@ -295,14 +295,16 @@ function esc(s) {
 function openModal(id, m) {
   current = { id, ...m };
 
-  modalTitle.textContent   = m.type;
+  modalTitle.textContent   = TYPE_LABEL[m.type] || m.type;
+  modalBadge.textContent   = TYPE_LABEL[m.type] || m.type;
+  modalBadge.className     = `modal-type-badge badge-${m.type}`;
   modalDesc.textContent    = m.text;
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
 
   /* кнопки только для админа */
-  editBtn.style.display = isAdmin ? "" : "none";
-  delBtn.style.display  = isAdmin ? "" : "none";
+  editBtn.style.display  = isAdmin ? "" : "none";
+  delBtn.style.display   = isAdmin ? "" : "none";
   editForm.style.display = "none";
 
   modal.classList.add("open");
