@@ -131,30 +131,39 @@ function initPanzoom() {
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
-  if (pz) { pz.destroy(); pz = null; }
+  if (pz) {
+    mapWrapper.removeEventListener('touchstart', pz.handleDown);
+    mapWrapper.removeEventListener('touchmove',  pz.handleMove);
+    mapWrapper.removeEventListener('touchend',   pz.handleUp);
+    pz.destroy();
+    pz = null;
+  }
 
-  mapEl.style.width  = iw + 'px';
-  mapEl.style.height = ih + 'px';
+  mapEl.style.width     = iw + 'px';
+  mapEl.style.height    = ih + 'px';
   mapEl.style.transform = 'matrix(1,0,0,1,0,0)';
 
   const startScale = Math.min(
     window.innerWidth  / iw,
     window.innerHeight / ih
-  );
+  ) * 0.95; /* небольшой отступ чтобы карта не касалась краёв */
+
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
   pz = Panzoom(mapEl, {
     maxScale: 8,
-    minScale: 0.05,
-    canvas:   true,
+    minScale: 0.02,
+    canvas:   false,  /* false — иначе touch ломается на мобиле */
     contain:  false,
+    panOnlyWhenZoomed: false,
+    excludeClass: 'marker',
   });
 
   pz.zoom(startScale, { animate: false });
   pz.pan(startX, startY, { animate: false });
 
-  /* touch — передаём события врапперу */
+  /* touch вешаем на wrapper а не на mapEl */
   mapWrapper.addEventListener('touchstart', pz.handleDown,  { passive: false });
   mapWrapper.addEventListener('touchmove',  pz.handleMove,  { passive: false });
   mapWrapper.addEventListener('touchend',   pz.handleUp,    { passive: false });
@@ -189,7 +198,7 @@ mapWrapper.addEventListener('wheel', e => {
   if (pz) { pz.zoomWithWheel(e); updateStatus(); }
 }, { passive: false });
 
-mapEl.addEventListener('panzoomend', updateStatus);
+mapEl.addEventListener('panzoomchange', updateStatus);
 
 function updateCursor() {
   mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
@@ -204,16 +213,14 @@ function updateStatus() {
 function zoomToCenter(factor) {
   if (!pz) return;
   const s    = pz.getScale();
-  const newS = Math.min(8, Math.max(0.05, s * factor));
+  const newS = Math.min(8, Math.max(0.02, s * factor));
   const pan  = pz.getPan();
   const cx   = window.innerWidth  / 2;
   const cy   = window.innerHeight / 2;
   const mapX = (cx - pan.x) / s;
   const mapY = (cy - pan.y) / s;
-  const newX = cx - mapX * newS;
-  const newY = cy - mapY * newS;
   pz.zoom(newS, { animate: false });
-  pz.pan(newX, newY, { animate: false });
+  pz.pan(cx - mapX * newS, cy - mapY * newS, { animate: false });
   updateStatus();
 }
 
@@ -223,14 +230,13 @@ document.getElementById('zoomReset').onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
   const ih = mapImg.naturalHeight;
-  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih) * 0.95;
   const x  = (window.innerWidth  - iw * s) / 2;
   const y  = (window.innerHeight - ih * s) / 2;
   pz.zoom(s, { animate: false });
   pz.pan(x, y, { animate: false });
   updateStatus();
 };
-
 
   
 /* ══════════════════════════════════════════
