@@ -400,7 +400,7 @@ delBtn.onclick = () => {
 
 /* ───────────────── ZOOM BUTTONS ───────────────── */
 
-document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
+/*document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
 document.getElementById("zoomOut").onclick   = () => pz && pz.zoomOut();
 document.getElementById("zoomReset").onclick = () => {
   if (!pz) return;
@@ -413,7 +413,7 @@ document.getElementById("zoomReset").onclick = () => {
     (window.innerHeight - ih * s) / 0.1,
     { animate: true }
   );
-};
+};*/
 
 /* ───────────────── INIT ───────────────── */
 
