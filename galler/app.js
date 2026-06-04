@@ -291,62 +291,66 @@ addConfirm.onclick = () => {
     
 addCancel.onclick = exitAddMode;    
     
-/* ══════════════════════════════════════════    
-   RENDER    
-   ══════════════════════════════════════════ */    
-function renderAllMarkers() {    
-  document.querySelectorAll('.marker').forEach(m => m.remove());    
-  const f = filterSel.value;    
-  Object.entries(allMarkers).forEach(([id, m]) => {    
-    if (f !== 'all' && m.type !== f) return;    
-    createMarkerEl(id, m);    
-  });    
-  updateStatus();    
-}    
-    
-filterSel.addEventListener('change', renderAllMarkers);    
-    
-function createMarkerEl(id, m) {    
-  const div      = document.createElement('div');    
-  div.className  = 'marker';    
-  div.dataset.id = id;    
-  div.style.left = m.x + '%';    
-  div.style.top  = m.y + '%';    
-    
-  if (isMobile()) div.classList.add('no-hover');    
-    
-  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";    
-    
-  if (m.imgUrl) {    
-    div.innerHTML = `    
-      <div class="marker-photo"><img src="${esc(m.imgUrl)}" alt="" onerror="this.src='${fallback}'"></div>    
-      ${isMobile() ? '' : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt=""></div>`}    
-      <div class="marker-tooltip">${esc(m.text)}</div>`;    
-  } else if (m.iconUrl) {    
-    div.innerHTML = `    
-      <div class="marker-photo" style="border-color:var(--${m.type}-color,var(--accent))">    
-        <img src="${esc(m.iconUrl)}" alt="" onerror="this.src='${fallback}'">    
-      </div>    
-      <div class="marker-tooltip">${esc(m.text)}</div>`;    
-  } else {    
-    div.innerHTML = `    
-      <div class="marker-icon ${m.type}"><span>${TYPE_EMOJI[m.type] || '📍'}</span></div>    
-      <div class="marker-tooltip">${esc(m.text)}</div>`;    
-  }    
-    
-  div.addEventListener('click', e => {    
-    e.stopPropagation();    
-    if (addMode) return;    
-    openModal(id, m);    
-  });    
-    
-  mapEl.appendChild(div);    
-}    
-    
-function esc(s) {    
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');    
-}    
-    
+/* ══════════════════════════════════════════
+   MARKERS RENDER (FIXED FOR PANZOOM)
+══════════════════════════════════════════ */
+
+function createMarkerEl(id, m) {
+  const div = document.createElement("div");
+  div.className = "marker";
+  div.dataset.id = id;
+
+  // ❗ размеры картинки (важно для правильного позиционирования)
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+
+  // защита от 0 (если картинка ещё не загрузилась)
+  if (!iw || !ih) return;
+
+  // % → px (САМАЯ ВАЖНАЯ ЧАСТЬ)
+  const x = (m.x / 100) * iw;
+  const y = (m.y / 100) * ih;
+
+  div.style.left = x + "px";
+  div.style.top  = y + "px";
+
+  const fallback =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E?%3C/text%3E%3C/svg%3E";
+
+  if (m.imgUrl) {
+    div.innerHTML = `
+      <div class="marker-photo">
+        <img src="${esc(m.imgUrl)}" alt="" onerror="this.src='${fallback}'">
+      </div>
+      ${isMobile() ? "" : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt=""></div>`}
+      <div class="marker-tooltip">${esc(m.text)}</div>
+    `;
+  } 
+  else if (m.iconUrl) {
+    div.innerHTML = `
+      <div class="marker-photo">
+        <img src="${esc(m.iconUrl)}" alt="" onerror="this.src='${fallback}'">
+      </div>
+      <div class="marker-tooltip">${esc(m.text)}</div>
+    `;
+  } 
+  else {
+    div.innerHTML = `
+      <div class="marker-icon ${m.type}">
+        <span>${TYPE_EMOJI[m.type] || "📍"}</span>
+      </div>
+      <div class="marker-tooltip">${esc(m.text)}</div>
+    `;
+  }
+
+  div.addEventListener("click", e => {
+    e.stopPropagation();
+    if (addMode) return;
+    openModal(id, m);
+  });
+
+  mapEl.appendChild(div);
+}
 /* ══════════════════════════════════════════    
    MODAL    
    ══════════════════════════════════════════ */    
