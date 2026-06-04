@@ -32,7 +32,7 @@ const provider = new GoogleAuthProvider();
 const MAPS = {
   woods: {
     label: "Лес",
-    imgUrl: "https://i.imgur.com/IvAlf2V.jpeg"
+    imgUrl: "https://i.imgur.com/FKY4S2W.jpg"
   },
   customs: {
     label: "Таможня",
