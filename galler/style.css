@@ -222,11 +222,13 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   transition: box-shadow .15s;
 }
 .marker-photo img { width: 100%; height: 100%; object-fit: cover; }
+.marker:hover .marker-photo { box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
+/*.marker-photo img { width: 100%; height: 100%; object-fit: cover; }
 @media (hover: hover) and (pointer: fine) {
   .marker:hover .marker-photo {
     box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8);
   }
-}
+}*/
 
 /* Tooltip — только десктоп */
 .marker-tooltip {
