@@ -123,9 +123,7 @@ onAuthStateChanged(auth, user => {
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
 
-/* ══════════════════════════════════════════
-   PANZOOM
-   ══════════════════════════════════════════ */
+
 /* ══════════════════════════════════════════
    PANZOOM
    ══════════════════════════════════════════ */
@@ -164,12 +162,25 @@ function initPanzoom() {
   updateStatus();
 }
 
+let pzIniting = false;
+
 mapImg.addEventListener('load', () => {
-  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
+  if (pzIniting) return;
+  pzIniting = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    initPanzoom();
+    pzIniting = false;
+  }));
 });
 
 if (mapImg.complete && mapImg.naturalWidth) {
-  requestAnimationFrame(() => requestAnimationFrame(initPanzoom));
+  if (!pzIniting) {
+    pzIniting = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      initPanzoom();
+      pzIniting = false;
+    }));
+  }
 }
 
 mapWrapper.addEventListener('wheel', e => {
