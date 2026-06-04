@@ -134,7 +134,7 @@ onAuthStateChanged(auth, user => {
 
 let pz = null;
 
-/*function initPanzoom() {
+function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
@@ -154,8 +154,8 @@ let pz = null;
     pz.zoom(scale, { animate: false });
     pz.pan(0, 0, { animate: false });
   });
-}*/
-function initPanzoom() {
+}
+/*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
@@ -184,7 +184,7 @@ function initPanzoom() {
   };
 
   requestAnimationFrame(doCenter);
-}
+}*/
 
 /* ───────────────── MAP SWITCH ───────────────── */
 
