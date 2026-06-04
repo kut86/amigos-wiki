@@ -138,8 +138,8 @@ function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
-    maxScale: 10,
-    minScale: 0.0,
+    maxScale: 5,
+    minScale: -1.0,
     contain:  "outside"
   });
 
