@@ -100,6 +100,11 @@ const TYPE_EMOJI = {
   custom: "⭐", bot: "🎯", exit: "🚪", structure: "🧩"
 };
 
+const TYPE_LABEL = {
+  loot: "Loot", boss: "Boss", quest: "Quest",
+  custom: "Custom", bot: "Снайпер", exit: "Выход", structure: "Точка интереса"
+};
+
 function toast(msg, err = false) {
   const toastCont = document.getElementById("toastContainer");
   const t = document.createElement("div");
