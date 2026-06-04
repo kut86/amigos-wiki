@@ -33,7 +33,7 @@ const provider = new GoogleAuthProvider();
 /* ───────────────── MAPS ───────────────── */
 
 const MAPS = {
-  woods: { label: "Лес", imgUrl: "https://i.imgur.com/IvAlf2V.jpeg" },
+  woods: { label: "Лес", imgUrl: "https://cdn.discordapp.com/attachments/1091424012216844288/1512070225493884988/IvAlf2V.webp?ex=6a22c0a2&is=6a216f22&hm=c728e500454af2601d48988489c2bd1a53bbc942f1d3e8b070dcb1a785745649&" },
   customs: { label: "Таможня", imgUrl: "https://i.imgur.com/FKY4S2W.jpg" },
   interchange: { label: "Развязка", imgUrl: "https://gspics.org/images/2026/06/03/IDrVtJ.webp" }
 };
