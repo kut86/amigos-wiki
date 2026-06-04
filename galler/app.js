@@ -1,7 +1,4 @@
-/* ============================================================
-   TARKOV MAP — CLEAN STABLE VERSION
-   Panzoom + Firebase + markers (% only)
-============================================================ */
+/* ======== APP.js ===================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -400,7 +397,7 @@ delBtn.onclick = () => {
 
 /* ───────────────── ZOOM BUTTONS ───────────────── */
 
-/*document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
+ document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
 document.getElementById("zoomOut").onclick   = () => pz && pz.zoomOut();
 document.getElementById("zoomReset").onclick = () => {
   if (!pz) return;
@@ -413,7 +410,7 @@ document.getElementById("zoomReset").onclick = () => {
     (window.innerHeight - ih * s) / 0.1,
     { animate: true }
   );
-};*/
+}; 
 
 /* ───────────────── INIT ───────────────── */
 
