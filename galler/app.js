@@ -114,7 +114,7 @@ onAuthStateChanged(auth, user => {
   const loggedIn = !!user;
   isAdmin = loggedIn && user.uid === ADMIN_UID;
 
-  loginBtn.style.display   = loggedIn ? 'none' : '';
+   loginBtn.style.display   = loggedIn ? 'none' : '';
   logoutBtn.style.display  = loggedIn ? '' : 'none';
   adminBadge.style.display = isAdmin  ? '' : 'none';
   addModeBtn.style.display = isAdmin  ? '' : 'none';
@@ -122,7 +122,6 @@ onAuthStateChanged(auth, user => {
   if (!isAdmin) exitAddMode();
   toast(loggedIn ? `Вошёл как ${user.email}` : 'Выход');
 });
-
 
 /* ══════════════════════════════════════════
    PANZOOM
@@ -145,7 +144,6 @@ function initPanzoom() {
   const startX = (window.innerWidth  - iw * startScale) / 2;
   const startY = (window.innerHeight - ih * startScale) / 2;
 
-  /* Выставляем transform ДО создания Panzoom — нет прыжка */
   mapEl.style.transform =
     `matrix(${startScale},0,0,${startScale},${startX},${startY})`;
 
@@ -161,6 +159,61 @@ function initPanzoom() {
   updateCursor();
   updateStatus();
 }
+
+let pzIniting = false;
+
+mapImg.addEventListener('load', () => {
+  if (pzIniting) return;
+  pzIniting = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    initPanzoom();
+    pzIniting = false;
+  }));
+});
+
+if (mapImg.complete && mapImg.naturalWidth) {
+  if (!pzIniting) {
+    pzIniting = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      initPanzoom();
+      pzIniting = false;
+    }));
+  }
+}
+
+mapWrapper.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (pz) { pz.zoomWithWheel(e); updateStatus(); }
+}, { passive: false });
+
+mapEl.addEventListener('panzoomchange', updateStatus);
+
+function updateCursor() {
+  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
+}
+
+function updateStatus() {
+  if (!pz) return;
+  const s = pz.getScale();
+  statusBar.textContent = `${MAPS[currentMap].label} · ZOOM ${(s * 100).toFixed(0)}% · ${Object.keys(allMarkers).length} маркеров`;
+}
+
+document.getElementById('zoomIn').onclick  = () => { if (pz) { pz.zoomIn();  updateStatus(); } };
+document.getElementById('zoomOut').onclick = () => { if (pz) { pz.zoomOut(); updateStatus(); } };
+document.getElementById('zoomReset').onclick = () => {
+  if (!pz) return;
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih);
+  const x  = (window.innerWidth  - iw * s) / 2;
+  const y  = (window.innerHeight - ih * s) / 2;
+  mapEl.style.transform =
+    `matrix(${s},0,0,${s},${x},${y})`;
+  pz.zoom(s, { animate: false });
+  pz.pan(x, y, { animate: false });
+  updateStatus();
+};
+
 document.getElementById('zoomReset').onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
