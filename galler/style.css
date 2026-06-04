@@ -152,8 +152,8 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   position: absolute;
   top: 0; left: 0;
   transform-origin: 0 0;
+  will-change: transform; /* добавить */
 }
-
 #map img {
   display: block;
   width: 100%;
