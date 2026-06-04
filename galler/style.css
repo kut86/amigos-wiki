@@ -145,18 +145,18 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 #map {
   position: absolute;
   top: 0; left: 0;
-  transform-origin: -1010px, -550px;
-  translate: (-1010px, -550px);
+  transform-origin: 0 , 0;
+  translate: ( 0, 0);
   will-change: transform; /* добавить */
 }
 #map {
-  left: -0%;
-  top: -0%;
+  left: -0 ;
+  top: -0 ;
   move; user-select: none; 
   touch-action: none; 
   transform-origin: 50% 50%; 
-  transition: none; 
-  transform: scale(0.646586) 
+  
+  
 }
 #map img {
   display: block;
@@ -379,7 +379,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 }
 
 /* ── ZOOM CONTROLS ── */
-/*#zoomControls {
+#zoomControls {
   position: fixed;
   bottom: 20px; right: 20px;
   z-index: 9000;
@@ -400,7 +400,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 .zoom-btn:hover { background: var(--border); border-color: var(--accent); color: var(--accent); }*/
 
 /* ── STATUS BAR ── */
-/*#statusBar {
+#statusBar {
   position: fixed;
   bottom: 14px; left: 14px;
   z-index: 9000;
@@ -411,7 +411,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   padding: 4px 10px; border-radius: var(--radius);
   border: 1px solid var(--border);
   pointer-events: none;
-}*/
+}
 
 /* ── TOAST ── */
 #toastContainer {
