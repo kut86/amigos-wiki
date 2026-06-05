@@ -163,8 +163,22 @@ function initPanzoom() {
 }
 
 /* ── Zoom buttons ── */
-document.getElementById("zoomIn").onclick    = () => pz && pz.zoomIn();
-document.getElementById("zoomOut").onclick   = () => pz && pz.zoomOut();
+document.getElementById("zoomIn").onclick = () => {
+  if (!pz) return;
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const scale = pz.getScale() * 1.3;
+  pz.zoomToPoint(scale, { clientX: cx, clientY: cy });
+};
+
+document.getElementById("zoomOut").onclick = () => {
+  if (!pz) return;
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const scale = pz.getScale() / 1.3;
+  pz.zoomToPoint(scale, { clientX: cx, clientY: cy });
+};
+
 document.getElementById("zoomReset").onclick = () => {
   if (!pz) return;
   const iw = mapImg.naturalWidth;
