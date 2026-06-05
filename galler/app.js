@@ -466,5 +466,4 @@ delBtn.onclick = () => {
 
 /* ── Init ── */
 switchMap("woods");
-initPanzoom();
-  
+
