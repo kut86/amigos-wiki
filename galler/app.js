@@ -141,7 +141,7 @@ function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
-    maxScale: 5,
+    maxScale: 8,
     minScale: 0.5,
     contain: "outside",
   });
@@ -155,7 +155,7 @@ function initPanzoom() {
     const scale = Math.min(
       window.innerWidth  / iw,
       window.innerHeight / ih
-    ) * 0.8;
+    ) * 0.7;
 
     pz.zoom(scale, { animate: false });
     pz.pan(
