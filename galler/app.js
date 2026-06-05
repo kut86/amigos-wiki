@@ -155,7 +155,7 @@ function initPanzoom() {
 
   pz = Panzoom(mapEl, {
     maxScale: 5,
-   minScale: 0.5,
+    minScale: 0.5,
     contain:  "outside"
   });
 
@@ -165,11 +165,15 @@ function initPanzoom() {
     const scale = Math.min(
       window.innerWidth  / mapImg.width,
       window.innerHeight / mapImg.height
-    ) * 0.2;
+    ) * 0.8;
 
     pz.zoom(scale, { animate: false });
-    pz.pan(0,0, { animate: false });
-  });
+    pz.pan(
+      (window.innerWidth  - mapImg.width  * scale) / 2,
+      (window.innerHeight - mapImg.height * scale) / 2,
+      { animate: false }
+    );
+  }); // ← вот эта скобка закрывает requestAnimationFrame
 }
 /*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
