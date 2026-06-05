@@ -147,8 +147,36 @@ function switchMap(id) {
 }
 
 /* ───────────────── PANZOOM ───────────────── */
-
 let pz = null;
+
+/* колесо — один раз, не внутри initPanzoom */
+mapEl.parentElement.addEventListener("wheel", e => {
+  if (pz) pz.zoomWithWheel(e);
+});
+
+function initPanzoom() {
+  if (pz) { pz.destroy(); pz = null; }
+
+  pz = Panzoom(mapEl, {
+    maxScale: 5,
+    minScale: 0.1,
+  });
+
+  requestAnimationFrame(() => {
+    const scale = Math.min(
+      window.innerWidth  / mapImg.naturalWidth,
+      window.innerHeight / mapImg.naturalHeight
+    ) * 0.8;
+
+    pz.zoom(scale, { animate: false });
+    pz.pan(
+      (window.innerWidth  - mapImg.naturalWidth  * scale) / 2,
+      (window.innerHeight - mapImg.naturalHeight * scale) / 2,
+      { animate: false }
+    );
+  });
+}
+/*let pz = null;
 
 function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
@@ -173,8 +201,8 @@ function initPanzoom() {
       (window.innerHeight - mapImg.height * scale) / 2,
       { animate: false }
     );
-  }); // ← вот эта скобка закрывает requestAnimationFrame
-}
+  }); 
+}*/
 /*function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
