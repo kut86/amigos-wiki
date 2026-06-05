@@ -191,7 +191,19 @@ document.getElementById("zoomReset").onclick = () => {
     { animate: true }
   );
 };
-
+/* ── Пересчёт позиции при изменении размера экрана (поворот, режим ПК) ── */
+window.addEventListener("resize", () => {
+  if (!pz) return;
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih) * 0.8;
+  pz.zoom(s, { animate: false });
+  pz.pan(
+    (window.innerWidth  - iw * s) / 2,
+    (window.innerHeight - ih * s) / 2,
+    { animate: false }
+  );
+});
 /* ── Firebase ── */
 function subscribe() {
   currentRef = ref(db, `maps/${currentMap}/markers`);
