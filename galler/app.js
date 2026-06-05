@@ -135,27 +135,20 @@ function switchMap(id) {
   allMarkers = {};
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
-  mapImg.src = MAPS[id].imgUrl;
-
-  if (mapImg.complete && mapImg.naturalWidth) {
+  mapImg.onload = () => {
     subscribe();
+
+    if (!pz) initPanzoom();
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         resetView();
       });
     });
-  } else {
-    mapImg.onload = () => {
-      subscribe();
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          resetView();
-        });
-      });
-    };
-  }
-}
+  };
 
+  mapImg.src = MAPS[id].imgUrl;
+}
 
 /* ── Panzoom старый── */
 /*let pz = null;*/
@@ -473,4 +466,5 @@ delBtn.onclick = () => {
 
 /* ── Init ── */
 switchMap("woods");
+initPanzoom();
   
