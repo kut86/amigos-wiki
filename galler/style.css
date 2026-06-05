@@ -140,33 +140,25 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   position: fixed;
   inset: 0;
 }
+
 #map {
   position: absolute;
   top: 0; left: 0;
-  transform-origin: 0 , 0;
-  translate: ( 0, 0);
-  will-change: transform;  
+  transform-origin: 0 0;
+  will-change: transform;
+  user-select: none;
+  touch-action: none;
 }
-#map {
-  left: -0 ;
-  top: -0 ;
-  move; user-select: none; 
-  touch-action: none; 
-  transform-origin: 50% 50%; 
-  
-  
-}
+
 #map img {
   display: block;
   width: auto;
   height: auto;
   max-width: none;
   max-height: none;
-
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-
   image-rendering: auto;
 }
 
