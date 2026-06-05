@@ -124,7 +124,7 @@ function switchMap(id) {
     mapImg.onload = () => { initPanzoom(); subscribe(); };
   }
 }*/
-/* ── Map switch ── */
+/* ── Map switch лучшая версия ── */
 /*mapSelect.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
@@ -231,7 +231,7 @@ function initPanzoom() {
   }));
 }*/
 
-/* ── Panzoom новый  ── */
+/* ── Panzoom новый  тоже лучше работал ── */
 /*let pz = null;
 */
 /* колесо — один раз */
@@ -304,10 +304,11 @@ function initPanzoom() {
     contain: "outside",
   });
 
+  // ЖДЁМ кадр + потом ещё один после применения transform
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       resetView();
-    });
+    }, 0);
   });
 }
 
@@ -320,16 +321,15 @@ function resetView() {
   const ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
 
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vw = mapEl.clientWidth;
+  const vh = mapEl.clientHeight;
 
   const scale = Math.min(vw / iw, vh / ih);
 
-  const x = Math.round((vw - iw * scale) / 2);
-  const y = Math.round((vh - ih * scale) / 2);
+  const x = (vw - iw * scale) / 2;
+  const y = (vh - ih * scale) / 2;
 
   pz.zoom(scale, { animate: false });
-
   pz.pan(x, y, { animate: false });
 }
 
