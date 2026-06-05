@@ -128,6 +128,9 @@ function switchMap(id) {
 /* ── Panzoom ── */
 let pz = null;
 
+/* ── Panzoom ── */
+let pz = null;
+
 /* колесо — один раз */
 mapEl.parentElement.addEventListener("wheel", e => {
   e.preventDefault();
@@ -138,12 +141,13 @@ function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
-  maxScale: 5,
-  minScale: 0.5,
-  contain: "outside",
-});
+    maxScale: 5,
+    minScale: 0.5,
+    contain: "outside",
+  });
 
-  requestAnimationFrame(() => {
+  /* двойной rAF — гарантирует что браузер отрендерил картинку */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;
@@ -159,7 +163,7 @@ function initPanzoom() {
       (window.innerHeight - ih * scale) / 2,
       { animate: false }
     );
-  });
+  }));
 }
 
 /* ── Zoom buttons ── */
