@@ -140,7 +140,7 @@ function initPanzoom() {
 
   pz = Panzoom(mapEl, {
     maxScale: 8,
-    minScale: 0.5,
+    minScale: 0.05,
     contain: "outside",
   });
 /* старая версия*/
@@ -155,10 +155,16 @@ function initPanzoom() {
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;
 
-    const scale = Math.min(
+    const scale = Math.max(
+  0.5,
+  Math.min(
+    window.innerWidth / iw,
+    window.innerHeight / ih
+  ) * 0.2);
+    /*const scale = Math.min(
       window.innerWidth  / iw,
       window.innerHeight / ih
-    ) * 0.2;
+    ) * 0.2;*/
 
     pz.zoom(scale, { animate: false });
     pz.pan(
