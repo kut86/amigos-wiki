@@ -108,8 +108,8 @@ onAuthStateChanged(auth, user => {
   if (!isAdmin) exitAddMode();
 });
 
-/* ── Map switch ── */
-mapSelect.addEventListener("change", e => switchMap(e.target.value));
+/* ── Map switch с пересозданием pamzoom ── */
+/*mapSelect.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
   currentMap = id;
@@ -123,14 +123,45 @@ function switchMap(id) {
   } else {
     mapImg.onload = () => { initPanzoom(); subscribe(); };
   }
+}*/
+/* ── Map switch ── */
+mapSelect.addEventListener("change", e => switchMap(e.target.value));
+
+function switchMap(id) {
+  currentMap = id;
+
+  if (offFn) offFn();
+
+  allMarkers = {};
+  document.querySelectorAll(".marker").forEach(m => m.remove());
+
+  mapImg.src = MAPS[id].imgUrl;
+
+  if (mapImg.complete && mapImg.naturalWidth) {
+    subscribe();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resetView();
+      });
+    });
+  } else {
+    mapImg.onload = () => {
+      subscribe();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resetView();
+        });
+      });
+    };
+  }
 }
 
 
-/* ── Panzoom ── */
-let pz = null;
+/* ── Panzoom старый── */
+/*let pz = null;*/
 
 /* колесо — один раз */
-mapEl.parentElement.addEventListener("wheel", e => {
+/*mapEl.parentElement.addEventListener("wheel", e => {
   e.preventDefault();
   if (pz) pz.zoomWithWheel(e);
 }, { passive: false });
@@ -142,15 +173,16 @@ function initPanzoom() {
     maxScale: 8,
     minScale: 0.5,
     contain: "outside",
-  });
-/* старая версия*/
+  });*/
+
+/* старая версия 1*/
  /* requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;*/
-      /*новая */
+      /*новая 2*/
   /* двойной rAF — гарантирует что браузер отрендерил картинку НЕ РАБОТАЕТ С OUTSIDE */
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+ /* requestAnimationFrame(() => requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;
@@ -160,19 +192,71 @@ function initPanzoom() {
   Math.min(
     window.innerWidth / iw,
     window.innerHeight / ih
-  ) * 1);
+  ) * 1);*/
+  
     /*const scale = Math.min(
       window.innerWidth  / iw,
       window.innerHeight / ih
     ) * 0.2;*/
 
-    pz.zoom(scale, { animate: false });
+  /*  pz.zoom(scale, { animate: false });
     pz.pan(
       (window.innerWidth  - iw * scale) / 2,
       (window.innerHeight - ih * scale) / 2,
       { animate: false }
     );
   }));
+}*/
+
+/* ── Panzoom новый  ── */
+let pz = null;
+
+/* колесо — один раз */
+mapEl.parentElement.addEventListener("wheel", e => {
+  e.preventDefault();
+  if (pz) pz.zoomWithWheel(e);
+}, { passive: false });
+
+function initPanzoom() {
+  if (pz) {
+    pz.destroy();
+    pz = null;
+  }
+
+  pz = Panzoom(mapEl, {
+    maxScale: 8,
+    minScale: 0.5,
+    contain: "outside",
+  });
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      resetView();
+    });
+  });
+}
+
+
+/* ── RESET VIEW ── */
+function resetView() {
+  if (!pz) return;
+
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+  if (!iw || !ih) return;
+
+  const scale = Math.min(
+    window.innerWidth / iw,
+    window.innerHeight / ih
+  );
+
+  pz.zoom(scale, { animate: false });
+
+  pz.pan(
+    (window.innerWidth - iw * scale) / 2,
+    (window.innerHeight - ih * scale) / 2,
+    { animate: false }
+  );
 }
 
 /* ── Zoom buttons ── */
