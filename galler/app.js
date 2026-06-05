@@ -160,7 +160,7 @@ function initPanzoom() {
   Math.min(
     window.innerWidth / iw,
     window.innerHeight / ih
-  ) * 0.2);
+  ) * 1);
     /*const scale = Math.min(
       window.innerWidth  / iw,
       window.innerHeight / ih
