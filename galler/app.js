@@ -125,8 +125,6 @@ function switchMap(id) {
   }
 }
 
-/* ── Panzoom ── */
-let pz = null;
 
 /* ── Panzoom ── */
 let pz = null;
@@ -145,17 +143,17 @@ function initPanzoom() {
     minScale: 0.5,
     contain: "outside",
   });
-
-  requestAnimationFrame(() => {
-    const iw = mapImg.naturalWidth;
-    const ih = mapImg.naturalHeight;
-    if (!iw || !ih) return;
-      
-  /* двойной rAF — гарантирует что браузер отрендерил картинку НЕ РАБОТАЕТ С OUTSIDE */
- /* requestAnimationFrame(() => requestAnimationFrame(() => {
+/* старая версия*/
+ /* requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;*/
+      /*новая */
+  /* двойной rAF — гарантирует что браузер отрендерил картинку НЕ РАБОТАЕТ С OUTSIDE */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const iw = mapImg.naturalWidth;
+    const ih = mapImg.naturalHeight;
+    if (!iw || !ih) return;
 
     const scale = Math.min(
       window.innerWidth  / iw,
