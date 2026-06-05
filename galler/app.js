@@ -155,7 +155,7 @@ function initPanzoom() {
     const scale = Math.min(
       window.innerWidth  / iw,
       window.innerHeight / ih
-    ) * 2.8;
+    ) * 0.8;
 
     pz.zoom(scale, { animate: false });
     pz.pan(
