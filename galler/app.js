@@ -138,9 +138,10 @@ function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
 
   pz = Panzoom(mapEl, {
-    maxScale: 5,
-    minScale: 0.1,
-  });
+  maxScale: 5,
+  minScale: 0.5,
+  contain: "outside",
+});
 
   requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
