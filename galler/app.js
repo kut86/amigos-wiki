@@ -146,11 +146,16 @@ function initPanzoom() {
     contain: "outside",
   });
 
-  /* двойной rAF — гарантирует что браузер отрендерил картинку */
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
     const iw = mapImg.naturalWidth;
     const ih = mapImg.naturalHeight;
     if (!iw || !ih) return;
+      
+  /* двойной rAF — гарантирует что браузер отрендерил картинку НЕ РАБОТАЕТ С OUTSIDE */
+ /* requestAnimationFrame(() => requestAnimationFrame(() => {
+    const iw = mapImg.naturalWidth;
+    const ih = mapImg.naturalHeight;
+    if (!iw || !ih) return;*/
 
     const scale = Math.min(
       window.innerWidth  / iw,
