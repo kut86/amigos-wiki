@@ -42,7 +42,7 @@
 
 .menu-panel {
   position: fixed;
-  top: 8px;
+  top: 18px;
   left: 90px;
   
   background: rgba(20, 20, 40, 0.98);
@@ -268,8 +268,8 @@ select option {
 
 @media (max-width: 1024px) {
   .menu-panel.open {
-    max-width: 90vw;
-    left: 70px;
+    max-width: 10vw;
+    left: 10px;
   }
   
   select {
@@ -279,9 +279,9 @@ select option {
 
 @media (max-width: 768px) {
   .menu-panel.open {
-    max-width: 90vw;
-    left: 70px;
-    top: 70px;
+    max-width: 20vw;
+    left: 10px;
+    top: 10px;
   }
 
   .hud-panel {
@@ -303,8 +303,8 @@ select option {
 @media (max-width: 480px) {
   .menu-toggle {
     width: 15px;
-    height: 35px;
-    font-size: 14px;
+    height: 15px;
+    font-size: 5px;
     top: 15px;
     left: 2px;
   }
@@ -371,7 +371,7 @@ select:focus {
 
 /* Стилизация скроллбара */
 .menu-panel::-webkit-scrollbar {
-  width: 8px;
+  width: 18px;
 }
 
 .menu-panel::-webkit-scrollbar-track {
