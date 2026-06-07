@@ -164,21 +164,7 @@
 <!-- Panzoom -->
 <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 <script type="module" src="app.js"></script>
-
-
-<script>
-  (function(){
-    const editForm  = document.getElementById('editForm');
-    const saveBtn   = document.getElementById('saveBtn');
-    const cancelBtn = document.getElementById('cancelEdit');
-    const obs = new MutationObserver(() => {
-      const show = editForm.style.display !== 'none';
-      saveBtn.style.display   = show ? '' : 'none';
-      cancelBtn.style.display = show ? '' : 'none';
-    });
-    obs.observe(editForm, { attributes: true, attributeFilter: ['style'] });
-  })();
-</script>
+<script src="form-visibility.js"></script>
 <script src="menu.js"></script>
 </body>
 </html>
