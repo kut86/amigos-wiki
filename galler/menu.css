@@ -1,100 +1,359 @@
-.map-container {
-            width: 100%;
-            height: 100vh;
-            /*background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><rect fill="%23164e63" width="800" height="600"/><circle cx="150" cy="150" r="80" fill="%23ffd700" opacity="0.6"/><circle cx="650" cy="400" r="100" fill="%23ffd700" opacity="0.6"/></svg>');*/
-            background-size: cover;
-            position: relative;
-        }
- 
-        /* КНОПКА МЕНЮ (БУРГЕР) */
-        .menu-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: #ff6600;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
- 
-        .menu-toggle:hover {
-            background: #ff8533;
-        }
- 
-        /* КОНТЕЙНЕР МЕНЮ (СКРЫТО ПО УМОЛЧАНИЮ) */
-        .menu-panel {
-            position: absolute;
-            top: 20px;
-            left: 80px;
-            background: rgba(20, 20, 30, 0.95);
-            border: 2px solid #ff6600;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            max-width: 500px;
-            
-            /* СКРЫТО ПО УМОЛЧАНИЮ */
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
- 
-        /* КОГДА ОТКРЫТО */
-        .menu-panel.open {
-            max-height: 300px;
-            opacity: 1;
-        }
- 
-        /* КНОПКИ В МЕНЮ */
-         .hud-panel {
-            padding: 10px 15px;
-            background: transparent;
-            border: 2px solid #ff6600;
-            color: #ff6600;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
- 
-        .hud-panel:hover {
-            background: #ff6600;
-            color: white;
-        } 
- 
-        /* СЕЛЕКТЫ В МЕНЮ */
-         .hud-label {
-            padding: 8px 12px;
-            background: transparent;
-            border: 2px solid #ff6600;
-            color: #ff6600;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
- 
-        .hud-label option {
-            background: #1a1a1a;
-            color: white;
-        } 
- 
-       /* ЗЕЛЕНАЯ КНОПКА */
-         .btn btn-primary {
-            border: 2px solid #4CAF50 !important;
-            color: #4CAF50 !important;
-        }
- 
-        .btn btn-primary:hover {
-            background: #4CAF50 !important;
-            color: white !important;
-        }
+/* menu.css - Стили для меню карты */
+
+/* ══════════════════════════════════════════════════════════════ */
+/* КНОПКА БУРГЕР (ВСЕГДА ВИДНА) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  
+  width: 50px;
+  height: 50px;
+  
+  background: #ff6600;
+  border: 2px solid #ff8533;
+  border-radius: 8px;
+  
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+}
+
+.menu-toggle:hover {
+  background: #ff8533;
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(255, 102, 0, 0.5);
+}
+
+.menu-toggle:active {
+  transform: scale(0.96);
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* МЕНЮ ПАНЕЛЬ (СКРЫТО ПО УМОЛЧАНИЮ) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-panel {
+  position: fixed;
+  top: 20px;
+  left: 80px;
+  
+  background: rgba(20, 20, 40, 0.98);
+  border: 2px solid #ff6600;
+  border-radius: 10px;
+  
+  padding: 20px;
+  z-index: 999;
+  
+  /* Фоновое свечение */
+  box-shadow: 
+    0 8px 24px rgba(255, 102, 0, 0.2),
+    inset 0 0 20px rgba(255, 102, 0, 0.1);
+  
+  /* СКРЫТО ПО УМОЛЧАНИЮ */
+  max-width: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* КОГДА МЕНЮ ОТКРЫТО */
+.menu-panel.open {
+  max-width: 400px;
+  max-height: 600px;
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* HUD ПАНЕЛИ (БЛОКИ ВНУТРИ МЕНЮ) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.hud-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  margin-bottom: 15px;
+  padding: 12px;
+  
+  background: rgba(30, 30, 50, 0.7);
+  border: 1px solid #ff6600;
+  border-radius: 6px;
+  
+  transition: all 0.3s ease;
+}
+
+.hud-panel:hover {
+  background: rgba(40, 40, 60, 0.9);
+  border-color: #ff8533;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* HUD ПОДПИСИ/МЕТКИ */
+/* ══════════════════════════════════════════════════════════════ */
+
+.hud-label {
+  color: #ff6600;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* СЕЛЕКТЫ (ВЫПАДАЮЩИЕ СПИСКИ) */
+/* ══════════════════════════════════════════════════════════════ */
+
+select {
+  width: 100%;
+  padding: 10px 12px;
+  
+  background: rgba(20, 20, 40, 0.8);
+  color: #ffffff;
+  border: 2px solid #ff6600;
+  border-radius: 5px;
+  
+  font-size: 14px;
+  cursor: pointer;
+  
+  transition: all 0.3s ease;
+}
+
+select:hover {
+  border-color: #ff8533;
+  background: rgba(30, 30, 50, 0.9);
+}
+
+select:focus {
+  outline: none;
+  border-color: #ff8533;
+  box-shadow: 0 0 12px rgba(255, 102, 0, 0.3);
+}
+
+/* Опции в селекте */
+select option {
+  background: #1a1a2e;
+  color: #ffffff;
+  padding: 10px;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* КНОПКИ */
+/* ══════════════════════════════════════════════════════════════ */
+
+.btn {
+  padding: 10px 16px;
+  
+  background: transparent;
+  border: 2px solid #ff6600;
+  color: #ff6600;
+  border-radius: 6px;
+  
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: #ff6600;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* ── Кнопка ВОЙТИ ── */
+.btn-login {
+  width: 100%;
+}
+
+/* ── Кнопка ВЫЙТИ ── */
+.btn-logout {
+  width: 100%;
+}
+
+/* ── Кнопка + Маркер (зеленая) ── */
+.btn-primary {
+  width: 100%;
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+.btn-primary:hover {
+  background: #4CAF50 !important;
+  color: white !important;
+}
+
+/* ── Опасная кнопка (красная) ── */
+.btn-danger {
+  border-color: #f44336 !important;
+  color: #f44336 !important;
+}
+
+.btn-danger:hover {
+  background: #f44336 !important;
+  color: white !important;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* ADMIN BADGE (ЗНАЧОК АДМИНА) */
+/* ══════════════════════════════════════════════════════════════ */
+
+#adminBadge {
+  display: none;
+  padding: 6px 12px;
+  
+  background: #ff6600;
+  color: white;
+  border-radius: 4px;
+  
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* АДАПТИВНОСТЬ (МОБИЛЬНЫЕ ТЕЛЕФОНЫ) */
+/* ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .menu-panel.open {
+    max-width: 100vw;
+    left: 70px;
+    right: 20px;
+    top: 80px;
+  }
+
+  .hud-panel {
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+
+  .btn {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+    top: 15px;
+    left: 15px;
+  }
+
+  .menu-panel.open {
+    left: 65px;
+    right: 15px;
+    top: 75px;
+    max-width: none;
+  }
+
+  .hud-label {
+    font-size: 11px;
+  }
+
+  select {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* АНИМАЦИЯ ПОЯВЛЕНИЯ (NICE TO HAVE) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-panel {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* ФОКУС И ДОСТУПНОСТЬ */
+/* ══════════════════════════════════════════════════════════════ */
+
+.btn:focus,
+select:focus {
+  outline: 2px solid #ff6600;
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* СКРОЛЛ (если меню переполняется) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-panel {
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+/* Стилизация скроллбара */
+.menu-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-panel::-webkit-scrollbar-track {
+  background: rgba(255, 102, 0, 0.1);
+  border-radius: 4px;
+}
+
+.menu-panel::-webkit-scrollbar-thumb {
+  background: #ff6600;
+  border-radius: 4px;
+}
+
+.menu-panel::-webkit-scrollbar-thumb:hover {
+  background: #ff8533;
+}
