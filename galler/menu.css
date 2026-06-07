@@ -302,7 +302,7 @@ select option {
 
 @media (max-width: 480px) {
   .menu-toggle {
-    width: 75px;
+    width: 150px;
     height: 35px;
     font-size: 14px;
     top: 90px;
@@ -310,9 +310,9 @@ select option {
   }
 
   .menu-panel.open {
-    left: 55px;
+    left: 35px;
     right: 5px;
-    top: 65px;
+    top: 55px;
     max-width: none;
   }
 
@@ -366,7 +366,7 @@ select:focus {
 
 .menu-panel {
   overflow-y: auto;
-  max-height: 80vh;
+  max-height: 30vh;
 }
 
 /* Стилизация скроллбара */
