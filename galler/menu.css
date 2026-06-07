@@ -277,7 +277,7 @@ select option {
 .menu-panel {
   position: fixed;
   top: 18px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
+  left: 60px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 35px;
@@ -312,7 +312,7 @@ select option {
 .menu-panel {
   position: fixed;
   top: 18px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
+  left: 60px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 35px;
@@ -347,7 +347,7 @@ select option {
 .menu-panel {
   position: fixed;
   top: 18px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
+  left: 50px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 35px;
