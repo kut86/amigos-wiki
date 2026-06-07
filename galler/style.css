@@ -53,9 +53,6 @@ body::after {
 
 /* ── HUD / UI BAR ──────────────────────────────────────────── */
 #ui {
-  position: fixed;
-  top: 14px; left: 14px;
-  z-index: 9000;
   display: flex;
   gap: 8px;
   align-items: center;
