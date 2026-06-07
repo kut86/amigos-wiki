@@ -8,7 +8,7 @@
   position: fixed;
   top: 150px;
   left: 20px;
-  z-index: 1000;
+  z-index: 9500;
   
   width: 50px;
   height: 50px;
@@ -41,7 +41,7 @@
 /* ══════════════════════════════════════════════════════════════ */
 
 .menu-panel {
-  position: ;
+  position: fixed;
   top: 20px;
   left: 8px;
   
@@ -50,7 +50,7 @@
   border-radius: 10px;
   
   padding: 45px;
-  z-index: 999;
+  z-index: 9500;
   
   /* Фоновое свечение */
   box-shadow: 
@@ -335,7 +335,7 @@ select option {
 /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
 /* ══════════════════════════════════════════════════════════════ */
 
-.menu-panel {
+.menu-panel.open {
   animation: slideIn 0.4s ease;
 }
 
