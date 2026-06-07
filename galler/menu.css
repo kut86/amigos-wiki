@@ -49,13 +49,20 @@
   border: 2px solid #ff6600;
   border-radius: 10px;
   
-  padding: 20px;
+  padding: 15px;
   z-index: 999;
   
   /* Фоновое свечение */
   box-shadow: 
     0 8px 24px rgba(255, 102, 0, 0.2),
     inset 0 0 20px rgba(255, 102, 0, 0.1);
+  
+  /* FLEXBOX - выровнять элементы в одну строку */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
   
   /* СКРЫТО ПО УМОЛЧАНИЮ */
   max-width: 0;
@@ -68,8 +75,8 @@
 
 /* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
-  max-width: 400px;
-  max-height: 600px;
+  max-width: 800px;
+  max-height: 200px;
   opacity: 1;
 }
 
@@ -79,17 +86,18 @@
 
 .hud-panel {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
+  align-items: center;
   
-  margin-bottom: 15px;
-  padding: 12px;
+  padding: 8px 12px;
   
   background: rgba(30, 30, 50, 0.7);
   border: 1px solid #ff6600;
   border-radius: 6px;
   
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .hud-panel:hover {
@@ -103,11 +111,13 @@
 
 .hud-label {
   color: #ff6600;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   opacity: 0.8;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 /* ══════════════════════════════════════════════════════════════ */
@@ -115,18 +125,19 @@
 /* ══════════════════════════════════════════════════════════════ */
 
 select {
-  width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   
   background: rgba(20, 20, 40, 0.8);
   color: #ffffff;
   border: 2px solid #ff6600;
   border-radius: 5px;
   
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   
   transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
 }
 
 select:hover {
@@ -152,20 +163,21 @@ select option {
 /* ══════════════════════════════════════════════════════════════ */
 
 .btn {
-  padding: 10px 16px;
+  padding: 8px 12px;
   
   background: transparent;
   border: 2px solid #ff6600;
   color: #ff6600;
   border-radius: 6px;
   
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   text-transform: uppercase;
   cursor: pointer;
   
   transition: all 0.3s ease;
   white-space: nowrap;
+  height: fit-content;
 }
 
 .btn:hover {
@@ -189,9 +201,17 @@ select option {
   width: 100%;
 }
 
+/* ── UI контейнер ── */
+#ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
 /* ── Кнопка + Маркер (зеленая) ── */
 .btn-primary {
-  width: 100%;
   border-color: #4CAF50 !important;
   color: #4CAF50 !important;
 }
@@ -246,27 +266,37 @@ select option {
 /* АДАПТИВНОСТЬ (МОБИЛЬНЫЕ ТЕЛЕФОНЫ) */
 /* ══════════════════════════════════════════════════════════════ */
 
+@media (max-width: 1024px) {
+  .menu-panel.open {
+    max-width: 90vw;
+    left: 70px;
+  }
+  
+  select {
+    min-width: 100px;
+  }
+}
+
 @media (max-width: 768px) {
   .menu-panel.open {
-    max-width: 100vw;
+    max-width: 90vw;
     left: 70px;
-    right: 20px;
     top: 80px;
   }
 
   .hud-panel {
-    margin-bottom: 10px;
-    padding: 10px;
+    padding: 8px;
   }
 
   .btn {
-    padding: 12px 14px;
-    font-size: 12px;
+    padding: 8px 10px;
+    font-size: 11px;
   }
 
   select {
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
+    min-width: 80px;
   }
 }
 
