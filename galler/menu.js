@@ -1,4 +1,4 @@
-// menu.js - ИСПРАВЛЕННЫЙ
+// menu.js  
 
 const menuToggle = document.getElementById('menuToggle');
 const menuPanel = document.getElementById('menuPanel');
