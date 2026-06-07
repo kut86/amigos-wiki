@@ -267,13 +267,7 @@ select option {
 /* ══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-  .menu-toggle {
-    width: 35px;
-    height: 35px;
-    font-size: 5px;
-    top: 15px;
-    left: 2px;
-  }
+   
 
   .menu-panel.open {
     left: 35px;
@@ -298,13 +292,7 @@ select option {
 }
 
 @media (max-width: 768px) {
-  .menu-toggle {
-    width: 35px;
-    height: 35px;
-    font-size: 5px;
-    top: 15px;
-    left: 2px;
-  }
+   
 
   .menu-panel.open {
     left: 35px;
