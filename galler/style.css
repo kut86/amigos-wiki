@@ -15,11 +15,14 @@
   --text-dim:  #7a8090;
   --radius:    6px;
 
-  /* marker type colors */
-  --loot-color:  #c8a84b;
-  --boss-color:  #c0392b;
-  --quest-color: #2e86c1;
-  --custom-color:#9b59b6;
+   /* marker type colors */
+ --loot-color:      #c8a84b;
+  --boss-color:      #c0392b;
+  --quest-color:     #2e86c1;
+  --custom-color:    #9b59b6;
+  --bot-color:       #e67e22;
+  --exit-color:      #27ae60;
+  --structure-color: #8e44ad;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -188,10 +191,13 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
 .marker-icon span { rotate: 45deg; line-height: 1; }
 
-.marker-icon.loot   { background: var(--loot-color); }
-.marker-icon.boss   { background: var(--boss-color);  }
-.marker-icon.quest  { background: var(--quest-color); }
-.marker-icon.custom { background: var(--custom-color); }
+.marker-icon.loot      { background: var(--loot-color); }
+.marker-icon.boss      { background: var(--boss-color); }
+.marker-icon.quest     { background: var(--quest-color); }
+.marker-icon.custom    { background: var(--custom-color); }
+.marker-icon.bot       { background: var(--bot-color); }
+.marker-icon.exit      { background: var(--exit-color); }
+.marker-icon.structure { background: var(--structure-color); }
 
 /* Photo marker */
 .marker-photo {
@@ -300,10 +306,13 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   font-weight: 400;
   text-transform: uppercase;
 }
-.badge-loot  { background: rgba(200,168,75,.2);  color: var(--loot-color);  border: 1px solid rgba(200,168,75,.4); }
-.badge-boss  { background: rgba(192,57,43,.2);   color: var(--boss-color);  border: 1px solid rgba(192,57,43,.4); }
-.badge-quest { background: rgba(46,134,193,.2);  color: var(--quest-color); border: 1px solid rgba(46,134,193,.4); }
-.badge-custom{ background: rgba(155,89,182,.2);  color: var(--custom-color);border: 1px solid rgba(155,89,182,.4); }
+.badge-loot      { background: rgba(200,168,75,.2);  color: var(--loot-color);      border: 1px solid rgba(200,168,75,.4); }
+.badge-boss      { background: rgba(192,57,43,.2);   color: var(--boss-color);      border: 1px solid rgba(192,57,43,.4); }
+.badge-quest     { background: rgba(46,134,193,.2);  color: var(--quest-color);     border: 1px solid rgba(46,134,193,.4); }
+.badge-custom    { background: rgba(155,89,182,.2);  color: var(--custom-color);    border: 1px solid rgba(155,89,182,.4); }
+.badge-bot       { background: rgba(230,126,34,.2);  color: var(--bot-color);       border: 1px solid rgba(230,126,34,.4); }
+.badge-exit      { background: rgba(39,174,96,.2);   color: var(--exit-color);      border: 1px solid rgba(39,174,96,.4); }
+.badge-structure { background: rgba(142,68,173,.2);  color: var(--structure-color); border: 1px solid rgba(142,68,173,.4); }
 
 .modal-close {
   background: none; border: none; color: var(--text-dim);
@@ -403,8 +412,8 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   max-width: 240px;
 }
 .toast.err { border-left-color: var(--danger); }
-@keyframes toastIn  { from { opacity:0; transform: translateX(20px) } to { opacity:1; transform: translateX(0) } }
-@keyframes toastOut { from { opacity:1 } to { opacity:0 } }
+@keyframes toastIn  { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; } }
 
 /* ── CROSSHAIR CURSOR when adding ──────────────────────────── */
 #mapWrapper.adding { cursor: crosshair; }
