@@ -8,47 +8,46 @@
   <link rel="stylesheet" href="menu.css">
 </head>
 <body>
-<div class="map-container">
+ <div class="map-container">
         <!-- КНОПКА БУРГЕР (ВСЕГДА ВИДНА) -->
         <button class="menu-toggle" id="menuToggle">☰</button>
  
         <!-- МЕНЮ (СКРЫТО ПО УМОЛЧАНИЮ) -->
         <div class="menu-panel" id="menuPanel">
-<div id="ui">
-
-  <div class="hud-panel">
-    <span class="hud-label">ТАКТИК</span>
-    <button id="loginBtn"  class="btn btn-login">Войти</button>
-    <button id="logoutBtn" class="btn btn-logout" style="display:none">Выйти</button>
-    <span id="adminBadge">ADMIN</span>
-  </div>
-
-  <div class="hud-panel">
-    <span class="hud-label">Карта</span>
-    <select id="mapSelect">
-      <option value="woods">🌲 Лес</option>
-      <option value="customs">🏭 Таможня</option>
-      <option value="interchange">🏬 Развязка</option>
-    </select>
-  </div>
-
-  <div class="hud-panel">
-    <span class="hud-label">Фильтр</span>
-    <select id="filter">
-      <option value="all">Все</option>
-      <option value="loot">Лут</option>
-      <option value="bot">Снайпер</option>
-      <option value="boss">Босс</option>
-      <option value="quest">Квесты</option>
-      <option value="exit">Выходы</option>
-      <option value="structure">Точки интересов</option>
-    </select>
-  </div>
-
-  <button id="addModeBtn" class="btn btn-primary" style="display:none">+ Маркер</button>
-
-</div>
-</div>
+            <div id="ui">
+                <div class="hud-panel">
+                    <span class="hud-label">ЧВК</span>
+                    <button id="loginBtn" class="btn btn-login">Войти</button>
+                    <button id="logoutBtn" class="btn btn-logout" style="display:none">Выйти</button>
+                    <span id="adminBadge">ADMIN</span>
+                </div>
+                
+                <div class="hud-panel">
+                    <span class="hud-label">Карта</span>
+                    <select id="mapSelect">
+                        <option value="woods">🌲 Лес</option>
+                        <option value="customs">🏭 Таможня</option>
+                        <option value="interchange">🏬 Развязка</option>
+                    </select>
+                </div>
+                
+                <div class="hud-panel">
+                    <span class="hud-label">Фильтр</span>
+                    <select id="filter">
+                        <option value="all">Все</option>
+                        <option value="loot">Лут</option>
+                        <option value="bot">Снайпер</option>
+                        <option value="boss">Босс</option>
+                        <option value="quest">Квесты</option>
+                        <option value="exit">Выходы</option>
+                        <option value="structure">Точки интересов</option>
+                    </select>
+                </div>
+                
+                <button id="addModeBtn" class="btn btn-primary" style="display:none">+ Маркер</button>
+            </div>
+        </div>
+    </div>
 <div id="mapWrapper">
   <div id="map">
     <img id="mapImage" alt="Tarkov Map" draggable="false">
