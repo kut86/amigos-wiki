@@ -7,7 +7,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<div class="map-container">
+        <!-- КНОПКА БУРГЕР (ВСЕГДА ВИДНА) -->
+        <button class="menu-toggle" id="menuToggle">☰</button>
+ 
+        <!-- МЕНЮ (СКРЫТО ПО УМОЛЧАНИЮ) -->
+        <div class="menu-panel" id="menuPanel">
 <div id="ui">
 
   <div class="hud-panel">
@@ -79,6 +84,9 @@
       <option value="structure">🧩 Точки интересов</option>
     </select>
   </div>
+
+
+  
   <div class="form-group">
     <label class="form-label">URL фото (опционально)</label>
     <input id="addImgUrl" type="url" placeholder="https://...">
