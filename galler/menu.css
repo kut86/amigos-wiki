@@ -43,13 +43,13 @@
 .menu-panel {
   position: fixed;
   top: 20px;
-  left: 80px;
+  left: 8px;
   
   background: rgba(20, 20, 40, 0.98);
   border: 2px solid #ff6600;
   border-radius: 10px;
   
-  padding: 15px;
+  padding: 150px;
   z-index: 999;
   
   /* Фоновое свечение */
@@ -75,7 +75,7 @@
 
 /* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
-  max-width: 800px;
+  max-width: 1000px;
   max-height: 200px;
   opacity: 1;
 }
@@ -87,10 +87,10 @@
 .hud-panel {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 50px;
   align-items: center;
   
-  padding: 8px 12px;
+  padding: 6px 10px;
   
   background: rgba(30, 30, 50, 0.7);
   border: 1px solid #ff6600;
@@ -111,7 +111,7 @@
 
 .hud-label {
   color: #ff6600;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -132,12 +132,12 @@ select {
   border: 2px solid #ff6600;
   border-radius: 5px;
   
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   
   transition: all 0.3s ease;
   white-space: nowrap;
-  min-width: 120px;
+  min-width: 12px;
 }
 
 select:hover {
@@ -155,7 +155,7 @@ select:focus {
 select option {
   background: #1a1a2e;
   color: #ffffff;
-  padding: 10px;
+  padding: 8px;
 }
 
 /* ══════════════════════════════════════════════════════════════ */
@@ -302,17 +302,17 @@ select option {
 
 @media (max-width: 480px) {
   .menu-toggle {
-    width: 45px;
-    height: 45px;
-    font-size: 24px;
-    top: 15px;
-    left: 15px;
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+    top: 5px;
+    left: 5px;
   }
 
   .menu-panel.open {
-    left: 65px;
-    right: 15px;
-    top: 75px;
+    left: 55px;
+    right: 5px;
+    top: 65px;
     max-width: none;
   }
 
