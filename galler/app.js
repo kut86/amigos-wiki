@@ -393,6 +393,7 @@ function enterAddMode() {
   addMode = true;
   addModeBtn.textContent = "✕ Отмена";
   addModeBtn.classList.add("btn-danger");
+  mapWrapper.style.cursor = 'crosshair'; /* добавить */
   toast("Нажмите на карту для добавления маркера");
 }
 
@@ -402,6 +403,7 @@ function exitAddMode() {
   addModeBtn.textContent = "+ Маркер";
   addModeBtn.classList.remove("btn-danger");
   addForm.style.display  = "none";
+  mapWrapper.style.cursor = 'grab'; /* добавить */
 }
 
 mapEl.addEventListener("click", e => {
@@ -481,9 +483,7 @@ function createMarker(id, m) {
 function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
-/*Update Cursor*/
-function updateCursor() {
-  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
+
 }
 /* ── Modal ── */
 function openModal(id, m) {
