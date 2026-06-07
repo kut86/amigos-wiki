@@ -62,6 +62,7 @@ const cancelEdit = document.getElementById("cancelEdit");
 const editBtn    = document.getElementById("editBtn");
 const delBtn     = document.getElementById("delBtn");
 const modalClose = document.getElementById("modalClose");
+const mapWrapper = document.getElementById("mapWrapper");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -484,7 +485,7 @@ function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-}
+
 /* ── Modal ── */
 function openModal(id, m) {
   current = { id, ...m };
