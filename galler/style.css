@@ -58,7 +58,7 @@ body::after {
   flex-wrap: wrap;
 }
 
-.hud-panel {
+/*.hud-panel {
   background: rgba(10,11,12,.88);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -75,10 +75,10 @@ body::after {
   letter-spacing: .12em;
   color: var(--text-dim);
   text-transform: uppercase;
-}
+}*/
 
 /* Buttons */
-.btn {
+/*.btn {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 600;
   font-size: 13px;
@@ -102,9 +102,9 @@ body::after {
 .btn-primary { border-color: var(--accent); color: var(--accent); }
 .btn-primary:hover { background: var(--accent); color: #000; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
-
+*/
 /* Select / Input */
-select, input[type="text"], input[type="url"], textarea {
+/*select, input[type="text"], input[type="url"], textarea {
   font-family: 'Rajdhani', sans-serif;
   font-size: 13px;
   font-weight: 500;
@@ -119,9 +119,9 @@ select, input[type="text"], input[type="url"], textarea {
 select:focus, input:focus, textarea:focus { border-color: var(--accent); }
 select { cursor: pointer; }
 textarea { resize: vertical; min-height: 70px; width: 100%; }
-
+*/
 /* Admin badge */
-#adminBadge {
+/*#adminBadge {
   display: none;
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
@@ -131,7 +131,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   color: var(--accent);
   padding: 4px 10px;
   border-radius: var(--radius);
-}
+}*/
 
 /* ── MAP CONTAINER ── */
 #mapWrapper {
