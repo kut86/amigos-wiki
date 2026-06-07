@@ -55,7 +55,7 @@
         }
  
         /* КНОПКИ В МЕНЮ */
-        /* .menu-button {
+         .hud-panel {
             padding: 10px 15px;
             background: transparent;
             border: 2px solid #ff6600;
@@ -67,13 +67,13 @@
             white-space: nowrap;
         }
  
-        .menu-button:hover {
+        .hud-panel:hover {
             background: #ff6600;
             color: white;
-        }*/
+        } 
  
         /* СЕЛЕКТЫ В МЕНЮ */
-       /*  .menu-select {
+         .hud-label {
             padding: 8px 12px;
             background: transparent;
             border: 2px solid #ff6600;
@@ -83,18 +83,18 @@
             font-weight: bold;
         }
  
-        .menu-select option {
+        .hud-label option {
             background: #1a1a1a;
             color: white;
-        }*/
+        } 
  
        /* ЗЕЛЕНАЯ КНОПКА */
-       /*  .btn-primary {
+         .btn btn-primary {
             border: 2px solid #4CAF50 !important;
             color: #4CAF50 !important;
         }
  
-        .btn-primary:hover {
+        .btn btn-primary:hover {
             background: #4CAF50 !important;
             color: white !important;
-        }*/
+        }
