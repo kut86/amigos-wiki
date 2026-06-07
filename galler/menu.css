@@ -43,13 +43,13 @@
 .menu-panel {
   position: fixed;
   top: 20px;
-  left: 100px;
+  left: 80px;
   
-  background: rgb(15 15 30 / 98%);
+  background: rgba(20, 20, 40, 0.98);
   border: 2px solid #ff6600;
   border-radius: 10px;
   
-  padding: 100px;
+  padding: 15px;
   z-index: 999;
   
   /* Фоновое свечение */
@@ -241,14 +241,14 @@ select option {
   padding: 6px 12px;
   
   background: #ff6600;
-  color: #ca1414;
+  color: white;
   border-radius: 5px;
   
   font-size: 10px;
   font-weight: bold;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 10px;
+  letter-spacing: 1px;
   
   animation: pulse 2s infinite;
 }
@@ -332,7 +332,7 @@ select option {
 }
 
 /* ══════════════════════════════════════════════════════════════ */
-/* АНИМАЦИЯ ПОЯВЛЕНИЯ (NICE TO HAVE) */
+/* АНИМАЦИЯ ПОЯВЛЕНИЯ */
 /* ══════════════════════════════════════════════════════════════ */
 
 .menu-panel {
