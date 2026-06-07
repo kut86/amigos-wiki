@@ -43,13 +43,13 @@
 .menu-panel {
   position: fixed;
   top: 20px;
-  left: 80px;
+  left: 100px;
   
-  background: rgba(20, 20, 40, 0.98);
+  background: rgb(15 15 30 / 98%);
   border: 2px solid #ff6600;
   border-radius: 10px;
   
-  padding: 15px;
+  padding: 100px;
   z-index: 999;
   
   /* Фоновое свечение */
@@ -205,7 +205,7 @@ select option {
 #ui {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 5px;
   align-items: center;
   width: 100%;
 }
@@ -241,14 +241,14 @@ select option {
   padding: 6px 12px;
   
   background: #ff6600;
-  color: white;
-  border-radius: 4px;
+  color: #ca1414;
+  border-radius: 5px;
   
-  font-size: 11px;
+  font-size: 10px;
   font-weight: bold;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 10px;
   
   animation: pulse 2s infinite;
 }
