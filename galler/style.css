@@ -58,7 +58,7 @@ body::after {
   flex-wrap: wrap;
 }
 
-/*.hud-panel {
+.hud-panel {
   background: rgba(10,11,12,.88);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -75,7 +75,7 @@ body::after {
   letter-spacing: .12em;
   color: var(--text-dim);
   text-transform: uppercase;
-}*/
+}
 
 /* Buttons */
 .btn {
