@@ -481,7 +481,10 @@ function createMarker(id, m) {
 function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
-
+/*Update Cursor*/
+function updateCursor() {
+  mapWrapper.style.cursor = addMode ? 'crosshair' : 'grab';
+}
 /* ── Modal ── */
 function openModal(id, m) {
   current = { id, ...m };
