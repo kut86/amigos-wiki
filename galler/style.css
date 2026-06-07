@@ -415,3 +415,148 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
 /* ── CROSSHAIR CURSOR when adding ──────────────────────────── */
 #mapWrapper.adding { cursor: crosshair; }
+
+/* ── MOBILE ADAPTATIONS ─────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* HUD bar — wrap and shrink */
+  #ui {
+    gap: 5px;
+    padding: 4px 8px;
+  }
+
+  .hud-panel {
+    padding: 4px 7px;
+    gap: 4px;
+  }
+
+  .hud-label {
+    font-size: 9px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .btn-sm {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  select, input[type="text"], input[type="url"], textarea {
+    font-size: 16px; /* предотвращает авто-зум iOS */
+  }
+
+  /* Admin badge */
+  #adminBadge {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+
+  /* Markers — чуть крупнее для пальца */
+  .marker-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .marker-photo {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Tooltip — ниже и крупнее */
+  .marker-tooltip {
+    font-size: 11px;
+    padding: 5px 10px;
+    max-width: 160px;
+  }
+
+  /* Скрываем превью фото на мобиле (мешает) */
+  .marker-preview {
+    display: none;
+  }
+
+  /* Modal — на весь экран снизу */
+  #modal {
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    gap: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 12px 14px 0;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    gap: 10px;
+  }
+
+  .modal-type-badge {
+    font-size: 13px;
+  }
+
+  .modal-body {
+    padding: 0 14px;
+  }
+
+  .modal-photo {
+    height: 140px;
+  }
+
+  .modal-footer {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+  }
+
+  /* Zoom controls — меньше и дальше от края */
+  #zoomControls {
+    bottom: 60px;
+    right: 12px;
+  }
+
+  .zoom-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+
+  /* Status bar — совсем мелкий */
+  #statusBar {
+    font-size: 10px;
+    padding: 3px 8px;
+    bottom: 10px;
+    left: 10px;
+  }
+
+  /* Toast — сверху по центру */
+  #toastContainer {
+    top: auto;
+    bottom: 70px;
+    right: 8px;
+    left: 8px;
+    align-items: center;
+  }
+
+  .toast {
+    max-width: 100%;
+    text-align: center;
+    font-size: 12px;
+  }
+}
+
+/* Очень маленькие экраны (<=380px) */
+@media (max-width: 380px) {
+  .btn { padding: 3px 8px; font-size: 11px; }
+  .modal-title { font-size: 15px; }
+  .zoom-btn { width: 36px; height: 36px; font-size: 20px; }
+}
