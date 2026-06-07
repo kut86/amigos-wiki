@@ -6,8 +6,8 @@
 
 .menu-toggle {
   position: fixed;
-  top: 15px;/*вниз*/
-  left: 2px; /*сдвиг от левого края*/
+  top: 25px;/*вниз*/
+  left: 5px; /*сдвиг от левого края*/
   z-index: 9500;
   
   width: 50px;/*размел  в право*/
@@ -267,8 +267,18 @@ select option {
 /* ══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-   
-
+    .menu-toggle {
+    width: 35px;
+    height: 35px;
+    font-size: 5px;
+    top: 35px;
+    left: 3px;
+  }
+.menu-panel {
+  position: fixed;
+  top: 18px; /*сдвиг в низ*/
+  left: 90px; /*сдвиг в право*/
+}
   .menu-panel.open {
     left: 35px;
     right: 5px;
@@ -292,8 +302,18 @@ select option {
 }
 
 @media (max-width: 768px) {
-   
-
+   .menu-toggle {
+    width: 35px;
+    height: 35px;
+    font-size: 5px;
+    top: 35px;
+    left: 3px;
+  } 
+.menu-panel {
+  position: fixed;
+  top: 18px; /*сдвиг в низ*/
+  left: 90px; /*сдвиг в право*/
+}
   .menu-panel.open {
     left: 35px;
     right: 5px;
@@ -321,10 +341,14 @@ select option {
     width: 35px;
     height: 35px;
     font-size: 5px;
-    top: 15px;
-    left: 2px;
+    top: 35px;
+    left: 3px;
   }
-
+.menu-panel {
+  position: fixed;
+  top: 18px; /*сдвиг в низ*/
+  left: 90px; /*сдвиг в право*/
+}
   .menu-panel.open {
     left: 35px;
     right: 5px;
