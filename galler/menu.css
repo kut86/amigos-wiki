@@ -6,7 +6,7 @@
 
 .menu-toggle {
   position: fixed;
-  top: 150px;
+  top: 15px;
   left: 20px;
   z-index: 9500;
   
@@ -43,7 +43,7 @@
 .menu-panel {
   position: fixed;
   top: 20px;
-  left: 8px;
+  left: 90px;
   
   background: rgba(20, 20, 40, 0.98);
   border: 2px solid #ff6600;
@@ -76,7 +76,7 @@
 /* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
   max-width: 800px;
-  max-height: 200px;
+  max-height: 150px;
   opacity: 1;
 }
 
@@ -281,7 +281,7 @@ select option {
   .menu-panel.open {
     max-width: 90vw;
     left: 70px;
-    top: 80px;
+    top: 70px;
   }
 
   .hud-panel {
