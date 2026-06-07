@@ -87,7 +87,7 @@
 .hud-panel {
   display: flex;
   flex-direction: row;
-  gap: 60px;
+  gap: 8px;
   align-items: center;
   
   padding: 7px 10px;
@@ -367,7 +367,7 @@ select:focus {
 .menu-panel.open {
   overflow-y: auto;
 }
-}
+
 
 /* Стилизация скроллбара */
 .menu-panel::-webkit-scrollbar {
