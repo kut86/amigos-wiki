@@ -276,12 +276,12 @@ select option {
   }
 .menu-panel {
   position: fixed;
-  top: 28px; /*сдвиг в низ*/
+  top: 55px; /*сдвиг в низ*/
   left: 120px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 95px;
-    right: 5px;
+    right: 15px;
     top: 55px;
     max-width: 600px;
   }
@@ -305,17 +305,17 @@ select option {
    .menu-toggle {
     width: 55px;
     height: 55px;
-    font-size: 15px;
-    top: 35px;
-    left: 3px;
+    font-size: 25px;
+    top: 90px;
+    left: 13px;
   } 
 .menu-panel {
   position: fixed;
-  top: 18px; /*сдвиг в низ*/
-  left: 60px; /*сдвиг в право*/
+  top: 55px; /*сдвиг в низ*/
+  left: 90px; /*сдвиг в право*/
 }
   .menu-panel.open {
-    left: 35px;
+    left: 55px;
     right: 5px;
     top: 55px;
     max-width: none;
@@ -340,9 +340,9 @@ select option {
   .menu-toggle {
     width: 35px;
     height: 35px;
-    font-size: 5px;
-    top: 35px;
-    left: 3px;
+    font-size: 25px;
+    top: 55px;
+    left: 13px;
   }
 .menu-panel {
   position: fixed;
@@ -353,7 +353,7 @@ select option {
     left: 35px;
     right: 5px;
     top: 55px;
-    max-width: none;
+    max-width: 100px;
   }
 
   .hud-label {
