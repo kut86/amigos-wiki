@@ -456,14 +456,14 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
   /* Markers — чуть крупнее для пальца */
   .marker-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    width: 12px;
+    height: 12px;
+    font-size: 6px;
   }
 
   .marker-photo {
-    width: 40px;
-    height: 40px;
+    width: 12px;
+    height: 12px;
   }
 
   /* Tooltip — ниже и крупнее */
