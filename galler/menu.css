@@ -7,7 +7,7 @@
 .menu-toggle {
   position: fixed;
   top: 55px;/*вниз*/
-  left: 5px; /*сдвиг от левого края*/
+  left: 15px; /*сдвиг от левого края*/
   z-index: 9500;
   
   width: 50px;/*размел  в право*/
@@ -42,7 +42,7 @@
 
 .menu-panel {
   position: fixed;
-  top: 18px; /*сдвиг в низ*/
+  top: 60px; /*сдвиг в низ*/
   left: 90px; /*сдвиг в право*/
   
   background: rgba(20, 20, 40, 0.98);
