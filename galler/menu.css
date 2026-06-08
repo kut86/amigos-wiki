@@ -1,475 +1,264 @@
-/* menu.css - Стили для меню карты */
+/* menu.css */
 
-/* ══════════════════════════════════════════════════════════════ */
-/* КНОПКА БУРГЕР (ВСЕГДА ВИДНА) */
-/* ══════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════
+   BURGER BUTTON
+═══════════════════════════════════════════════════════════════ */
 .menu-toggle {
   position: fixed;
-  top: 55px;/*вниз*/
-  left: 15px; /*сдвиг от левого края*/
+  top: 14px; left: 14px;
   z-index: 9500;
-  
-  width: 50px;/*размел  в право*/
-  height: 50px;/*размер в низ*/
-  
-  background: #ff6600;
-  border: 2px solid #ff8533;
+  width: 44px; height: 44px;
+  background: rgba(8,10,8,.92);
+  border: 1px solid #3a4838;
   border-radius: 8px;
-  
-  color: white;
+  color: #ff6600;
   font-size: 18px;
-  font-weight: bold;
   cursor: pointer;
-  
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, border-color .2s, transform .15s, box-shadow .2s;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0,0,0,.5);
 }
-
 .menu-toggle:hover {
-  background: #ff8533;
-  transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(255, 102, 0, 0.5);
+  background: rgba(255,102,0,.12);
+  border-color: #ff6600;
+  box-shadow: 0 0 0 3px rgba(255,102,0,.15), 0 4px 16px rgba(0,0,0,.6);
+  transform: scale(1.06);
 }
+.menu-toggle:active { transform: scale(.96); }
 
-.menu-toggle:active {
-  transform: scale(0.96);
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* МЕНЮ ПАНЕЛЬ (СКРЫТО ПО УМОЛЧАНИЮ) */
-/* ══════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════
+   MENU PANEL
+═══════════════════════════════════════════════════════════════ */
 .menu-panel {
   position: fixed;
-  top: 60px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
-  
-  background: rgba(20, 20, 40, 0.98);
-  border: 2px solid #ff6600;
+  top: 14px;
+  left: 68px;
+  z-index: 9400;
+  background: rgba(8,10,8,.95);
+  border: 1px solid #3a4838;
+  border-top: 2px solid #ff6600;
   border-radius: 10px;
-  
-  padding: 4px; /*размер подложки панели*/
-  z-index: 9500;
-  
-  /* Фоновое свечение */
-  box-shadow: 
-    0 8px 24px rgba(255, 102, 0, 0.2),
-    inset 0 0 20px rgba(255, 102, 0, 0.1);
-  
-  /* FLEXBOX - выровнять элементы в одну строку */
+  padding: 8px 10px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
-  justify-content: flex-start;
-  
-  /* СКРЫТО ПО УМОЛЧАНИЮ */
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.6), 0 0 40px rgba(255,102,0,.04);
+
+  /* hidden state */
   max-width: 0;
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+  border-width: 0;
+  transition:
+    max-width .35s cubic-bezier(.34,1.56,.64,1),
+    max-height .35s cubic-bezier(.34,1.56,.64,1),
+    opacity .25s ease,
+    padding .25s ease,
+    border-width .1s ease;
 }
 
-/* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
-  max-width: 700px;
-  max-height: 150px;
+  max-width: 800px;
+  max-height: 200px;
   opacity: 1;
+  padding: 8px 10px;
+  border-width: 1px;
+  border-top-width: 2px;
+  overflow: visible;
 }
 
-/* ══════════════════════════════════════════════════════════════ */
-/* HUD ПАНЕЛИ (БЛОКИ ВНУТРИ МЕНЮ) */
-/* ══════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════
+   HUD PANELS
+═══════════════════════════════════════════════════════════════ */
 .hud-panel {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 7px;
   align-items: center;
-  
-  padding: 7px 10px;
-  
-  background: rgba(30, 30, 50, 0.7);
-  border: 1px solid #ff6600;
+  padding: 6px 10px;
+  background: rgba(22,28,24,.8);
+  border: 1px solid #2a3428;
   border-radius: 6px;
-  
-  transition: all 0.3s ease;
   white-space: nowrap;
+  transition: border-color .2s, background .2s;
 }
-
 .hud-panel:hover {
-  background: rgba(40, 40, 60, 0.9);
-  border-color: #ff8533;
+  background: rgba(30,38,32,.9);
+  border-color: rgba(255,102,0,.4);
 }
 
-/* ══════════════════════════════════════════════════════════════ */
-/* HUD ПОДПИСИ/МЕТКИ */
-/* ══════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════
+   HUD LABELS
+═══════════════════════════════════════════════════════════════ */
 .hud-label {
-  color: #ff6600;
+  font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.8;
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* СЕЛЕКТЫ (ВЫПАДАЮЩИЕ СПИСКИ) */
-/* ══════════════════════════════════════════════════════════════ */
-
-select {
-  padding: 3px 5px;
-  
-  background: rgba(20, 20, 40, 0.8);
-  color: #ffffff;
-  border: 2px solid #ff6600;
-  border-radius: 5px;
-  
-  font-size: 8px;
-  cursor: pointer;
-  
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  min-width: 12px;
-}
-
-select:hover {
-  border-color: #ff8533;
-  background: rgba(30, 30, 50, 0.9);
-}
-
-select:focus {
-  outline: none;
-  border-color: #ff8533;
-  box-shadow: 0 0 12px rgba(255, 102, 0, 0.3);
-}
-
-/* Опции в селекте */
-select option {
-  background: #1a1a2e;
-  color: #ffffff;
-  padding: 8px;
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* КНОПКИ */
-/* ══════════════════════════════════════════════════════════════ */
-
-.btn {
-  padding: 3px 5px;
-  
-  background: transparent;
-  border: 2px solid #ff6600;
+  font-weight: 400;
+  letter-spacing: .12em;
   color: #ff6600;
-  border-radius: 6px;
-  
-  font-size: 8px;
-  font-weight: bold;
   text-transform: uppercase;
-  cursor: pointer;
-  
-  transition: all 0.3s ease;
+  opacity: .85;
   white-space: nowrap;
-  height: fit-content;
 }
 
-.btn:hover {
+/* ═══════════════════════════════════════════════════════════════
+   SELECTS
+═══════════════════════════════════════════════════════════════ */
+.menu-panel select {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: rgba(14,18,16,.9);
+  color: #d0ccc0;
+  border: 1px solid #3a4838;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  white-space: nowrap;
+}
+.menu-panel select:hover  { border-color: rgba(255,102,0,.5); }
+.menu-panel select:focus  {
+  border-color: #ff6600;
+  box-shadow: 0 0 0 3px rgba(255,102,0,.12);
+}
+.menu-panel select option {
+  background: #0e1210;
+  color: #d0ccc0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS (menu)
+═══════════════════════════════════════════════════════════════ */
+.menu-panel .btn {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .07em;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #3a4838;
+  border-radius: 6px;
+  color: #d0ccc0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s, border-color .2s, color .2s, transform .1s;
+}
+.menu-panel .btn:hover {
+  background: rgba(255,102,0,.1);
+  border-color: #ff6600;
+  color: #ff6600;
+  transform: translateY(-1px);
+}
+.menu-panel .btn:active { transform: translateY(0); }
+
+.menu-panel .btn-login {
+  border-color: #ff6600;
+  color: #ff6600;
+}
+.menu-panel .btn-login:hover {
   background: #ff6600;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+  color: #000;
+  box-shadow: 0 4px 14px rgba(255,102,0,.3);
 }
 
-.btn:active {
-  transform: translateY(0);
+.menu-panel .btn-logout {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+.menu-panel .btn-logout:hover {
+  background: #c0392b;
+  color: #fff;
 }
 
-/* ── Кнопка ВОЙТИ ── */
-.btn-login {
-  width: 100%;
+.menu-panel .btn-primary {
+  border-color: #4a9e5c;
+  color: #4a9e5c;
+}
+.menu-panel .btn-primary:hover {
+  background: #4a9e5c;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(74,158,92,.25);
 }
 
-/* ── Кнопка ВЫЙТИ ── */
-.btn-logout {
-  width: 100%;
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN BADGE
+═══════════════════════════════════════════════════════════════ */
+#adminBadge {
+  display: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  background: rgba(255,102,0,.12);
+  border: 1px solid #ff6600;
+  color: #ff6600;
+  padding: 3px 9px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  animation: pulseBadge 2.5s ease infinite;
+}
+@keyframes pulseBadge {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,102,0,.3); }
+  50%      { box-shadow: 0 0 0 5px transparent; }
 }
 
-/* ── UI контейнер ── */
+/* ═══════════════════════════════════════════════════════════════
+   UI CONTAINER
+═══════════════════════════════════════════════════════════════ */
 #ui {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
   align-items: center;
   width: 100%;
 }
 
-/* ── Кнопка + Маркер (зеленая) ── */
-.btn-primary {
-  border-color: #4CAF50 !important;
-  color: #4CAF50 !important;
-}
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════════════ */
+.menu-panel::-webkit-scrollbar { width: 6px; }
+.menu-panel::-webkit-scrollbar-track { background: rgba(255,102,0,.05); border-radius: 3px; }
+.menu-panel::-webkit-scrollbar-thumb { background: rgba(255,102,0,.4); border-radius: 3px; }
+.menu-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,102,0,.7); }
 
-.btn-primary:hover {
-  background: #4CAF50 !important;
-  color: white !important;
-}
-
-/* ── Опасная кнопка (красная) ── */
-.btn-danger {
-  border-color: #f44336 !important;
-  color: #f44336 !important;
-}
-
-.btn-danger:hover {
-  background: #f44336 !important;
-  color: white !important;
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* ADMIN BADGE (ЗНАЧОК АДМИНА) */
-/* ══════════════════════════════════════════════════════════════ */
-
-#adminBadge {
-  display: none;
-  padding: 6px 12px;
-  
-  background: #ff6600;
-  color: white;
-  border-radius: 5px;
-  
-  font-size: 10px;
-  font-weight: bold;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* АДАПТИВНОСТЬ (МОБИЛЬНЫЕ ТЕЛЕФОНЫ) */
-/* ══════════════════════════════════════════════════════════════ */
-
-@media (max-width: 1024px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
-
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
+  .menu-toggle {
+    top: 12px; left: 12px;
+    width: 42px; height: 42px;
+    font-size: 17px;
+  }
+
+  .menu-panel {
+    top: 12px;
+    left: 64px;
+    right: 12px;
   }
 
   .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
+    max-width: 100vw;
+    max-height: 50dvh;
+    overflow-y: auto;
   }
 
-  .hud-label {
-    font-size: 100%;
-  }
+  .hud-label { font-size: 9px; }
 
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
+  .menu-panel select,
+  .menu-panel .btn { font-size: 14px; } /* блокирует зум iOS */
 
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-@media (max-width: 430px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
-
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-@media (max-width: 375px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
-
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-@media (max-width: 320px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
-
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-/* ══════════════════════════════════════════════════════════════ */
-/* АНИМАЦИЯ ПОЯВЛЕНИЯ */
-/* ══════════════════════════════════════════════════════════════ */
-
-.menu-panel.open {
-  animation: slideIn 0.4s ease;
+  .hud-panel { padding: 5px 8px; gap: 6px; }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* ФОКУС И ДОСТУПНОСТЬ */
-/* ══════════════════════════════════════════════════════════════ */
-
-.btn:focus,
-select:focus {
-  outline: 2px solid #ff6600;
-  outline-offset: 2px;
-}
-
-/* ══════════════════════════════════════════════════════════════ */
-/* СКРОЛЛ (если меню переполняется) */
-/* ══════════════════════════════════════════════════════════════ */
-
-.menu-panel.open {
-  overflow-y: auto;
-}
-
-
-/* Стилизация скроллбара */
-.menu-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.menu-panel::-webkit-scrollbar-track {
-  background: rgba(255, 102, 0, 0.1);
-  border-radius: 4px;
-}
-
-.menu-panel::-webkit-scrollbar-thumb {
-  background: #ff6600;
-  border-radius: 4px;
-}
-
-.menu-panel::-webkit-scrollbar-thumb:hover {
-  background: #ff8533;
+@media (max-width: 380px) {
+  .menu-panel.open { max-height: 60dvh; }
+  .menu-panel select,
+  .menu-panel .btn { font-size: 13px; }
 }
