@@ -190,7 +190,7 @@ body::after {
   font-family: 'Share Tech Mono', monospace;
   letter-spacing: .04em;
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
   transition: opacity .15s, transform .15s;
   max-width: 180px;
   text-align: center;
