@@ -462,13 +462,13 @@ function createMarker(id, m) {
 
   if (m.imgUrl) {
     div.innerHTML = `
-      <div class="marker-photo"><img src="${esc(m.imgUrl)}" alt="" onerror="this.src='${fallback}'"></div>
-      ${isMobile() ? "" : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt=""></div>`}
+      <div class="marker-photo"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false" onerror="this.src='${fallback}'"></div>
+      ${isMobile() ? "" : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false"></div>`}
       <div class="marker-tooltip">${esc(m.text)}</div>`;
   } else if (m.iconUrl) {
     div.innerHTML = `
       <div class="marker-photo" style="border-color:var(--${m.type}-color,var(--accent))">
-        <img src="${esc(m.iconUrl)}" alt="" onerror="this.src='${fallback}'">
+        <img src="${esc(m.iconUrl)}" alt="" draggable="false" oncontextmenu="return false" onerror="this.src='${fallback}'">
       </div>
       <div class="marker-tooltip">${esc(m.text)}</div>`;
   } else {
