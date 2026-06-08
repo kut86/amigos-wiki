@@ -268,7 +268,7 @@ select option {
 
 @media (max-width: 1024px) {
     .menu-toggle {
-    width: 15px;
+    width: 35px;
     height: 45px;
     font-size: 25px;
     top: 5px;
@@ -303,7 +303,7 @@ select option {
 
 @media (max-width: 768px) {
    .menu-toggle {
-    width: 15px;
+    width: 35px;
     height: 55px;
     font-size: 25px;
     top: 120px;
@@ -338,7 +338,7 @@ select option {
 
 @media (max-width: 480px) {
   .menu-toggle {
-    width: 15px;
+    width: 35px;
     height: 35px;
     font-size: 25px;
     top: 55px;
