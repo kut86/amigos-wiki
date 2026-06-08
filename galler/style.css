@@ -103,17 +103,30 @@ body::after {
 #mapWrapper.dragging { cursor: grabbing; }
 #mapWrapper.adding   { cursor: crosshair; }
 
+/* ── MAP CONTAINER ─────────────────────────────────────────── */
+#mapWrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  z-index: 1;
+}
+#mapWrapper.dragging { cursor: grabbing; }
+
 #map {
   position: absolute;
   top: 0; left: 0;
   transform-origin: 0 0;
+  /* size set by JS */
 }
+
 #map img {
   display: block;
   width: 100%;
   pointer-events: none;
   image-rendering: crisp-edges;
 }
+
 
 /* ═══════════════════════════════════════════════════════════════
    MARKERS
