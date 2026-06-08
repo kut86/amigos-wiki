@@ -307,7 +307,10 @@ function initPanzoom() {
 
   // ЖДЁМ кадр + потом ещё один после применения transform
   setTimeout(() => {
-    resetView();
+  resetView();
+
+  const scale = pz.getScale();
+  pz.zoom(scale, { animate: false });
 }, 200);
 }
 /* ── RESET VIEW ── */
