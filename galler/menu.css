@@ -271,8 +271,8 @@ select option {
     width: 60px;
     height: 60px;
     font-size: 35px;
-    top: 990px;
-    left: 950px;
+    top: 9px;
+    left: 9px;
   }
 
   .menu-panel.open {
@@ -302,19 +302,19 @@ select option {
     width: 55px;
     height: 55px;
     font-size: 15px;
-    top: 980px;
-    left: 699px;
+    top: 9px;
+    left: 9px;
   } 
 .menu-panel {
   position: fixed;
-  top: 25px; /*сдвиг в низ*/
-  left: 50px; /*сдвиг в право*/
+  top: 5px; /*сдвиг в низ*/
+  left: 5px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 55px;
     right: 5px;
     top: 55px;
-    max-width: 600;
+    max-width: 700;
   }
 
   .hud-label {
@@ -332,13 +332,13 @@ select option {
   }
 }
 
-@media (max-width: 458px) {
+@media (max-width: 425px) {
   .menu-toggle {
     width: 58px;
     height: 58px;
     font-size: 25px;
-    top: 996px;
-    left: 392px;
+    top: 7px;
+    left: 7px;
   }
 .menu-panel {
   position: fixed;
@@ -346,10 +346,10 @@ select option {
   left: 5px; /*сдвиг в право*/
 }
   .menu-panel.open {
-    left: 5px;
+    left: 3px;
     right: 3px;
     top: 100px;
-    max-width: 570px;
+    max-width: 425px;
   }
 
   .hud-label {
@@ -366,7 +366,74 @@ select option {
     font-size: 6px;
   }
 }
+@media (max-width: 375px) {
+  .menu-toggle {
+    width: 58px;
+    height: 58px;
+    font-size: 25px;
+    top: 7px;
+    left: 7px;
+  }
+.menu-panel {
+  position: fixed;
+  top: 3px; /*сдвиг в низ*/
+  left: 5px; /*сдвиг в право*/
+}
+  .menu-panel.open {
+    left: 3px;
+    right: 3px;
+    top: 100px;
+    max-width: 375px;
+  }
 
+  .hud-label {
+    font-size: 9px;
+  }
+
+  select {
+    padding: 5px 10px;
+    font-size: 8px;
+  }
+
+  .btn {
+    padding: 5px 10px;
+    font-size: 6px;
+  }
+}
+@media (max-width: 320px) {
+  .menu-toggle {
+    width: 58px;
+    height: 58px;
+    font-size: 25px;
+    top: 10px;
+    left: 10px;
+  }
+.menu-panel {
+  position: fixed;
+  top: 3px; /*сдвиг в низ*/
+  left: 5px; /*сдвиг в право*/
+}
+  .menu-panel.open {
+    left: 1px;
+    right: 1px;
+    top: 100px;
+    max-width: 320px;
+  }
+
+  .hud-label {
+    font-size: 9px;
+  }
+
+  select {
+    padding: 5px 10px;
+    font-size: 8px;
+  }
+
+  .btn {
+    padding: 5px 10px;
+    font-size: 6px;
+  }
+}
 /* ══════════════════════════════════════════════════════════════ */
 /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
 /* ══════════════════════════════════════════════════════════════ */
