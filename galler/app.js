@@ -408,7 +408,7 @@ function exitAddMode() {
   addModeBtn.textContent = "+ Маркер";
   addModeBtn.classList.remove("btn-danger");
   addForm.style.display  = "none";
-  mapWrapper.style.cursor = 'grab'; /* добавить */
+  mapWrapper.style.cursor = 'crosshair'; /* добавить */
 }
 
 mapEl.addEventListener("click", e => {
