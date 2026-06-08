@@ -268,57 +268,53 @@ select option {
 
 @media (max-width: 1024px) {
     .menu-toggle {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
     font-size: 35px;
-    top: 55px;
-    left: 23px;
+    top: 990px;
+    left: 950px;
   }
-.menu-panel {
-  position: fixed;
-  top: 115px; /*сдвиг в низ*/
-  left: 130px; /*сдвиг в право*/
-}
+
   .menu-panel.open {
-    left: 95px;
-    right: 15px;
-    top: 125px;
-    max-width: 650px;
+    left: 55px;
+    right: 5px;
+    top: 55px;
+    max-width: 660px;
   }
 
   .hud-label {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   select {
-    padding: 8px;
+    padding:10px 13px;
     font-size: 12px;
   }
 
   .btn {
-    padding: 10px 12px;
-    font-size: 11px;
+    padding: 10px 13px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 768px) {
    .menu-toggle {
-    width: 65px;
-    height: 65px;
-    font-size: 35px;
-    top: 200px;
-    left: 20px;
+    width: 55px;
+    height: 55px;
+    font-size: 15px;
+    top: 980px;
+    left: 699px;
   } 
 .menu-panel {
   position: fixed;
-  top: 125px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
+  top: 25px; /*сдвиг в низ*/
+  left: 50px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 55px;
     right: 5px;
     top: 55px;
-    max-width: none;
+    max-width: 600;
   }
 
   .hud-label {
@@ -326,7 +322,7 @@ select option {
   }
 
   select {
-    padding: 8px;
+    padding:  10px 12px;
     font-size: 12px;
   }
 
@@ -336,38 +332,38 @@ select option {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 458px) {
   .menu-toggle {
-    width: 55px;
-    height: 55px;
+    width: 58px;
+    height: 58px;
     font-size: 25px;
-    top: 200px;
-    left: 13px;
+    top: 996px;
+    left: 392px;
   }
 .menu-panel {
   position: fixed;
-  top: 18px; /*сдвиг в низ*/
-  left: 50px; /*сдвиг в право*/
+  top: 3px; /*сдвиг в низ*/
+  left: 5px; /*сдвиг в право*/
 }
   .menu-panel.open {
-    left: 25px;
-    right: 5px;
-    top: 60px;
-    max-width: 600px;
+    left: 5px;
+    right: 3px;
+    top: 100px;
+    max-width: 570px;
   }
 
   .hud-label {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   select {
-    padding: 8px;
-    font-size: 12px;
+    padding: 5px 10px;
+    font-size: 8px;
   }
 
   .btn {
-    padding: 10px 12px;
-    font-size: 11px;
+    padding: 5px 10px;
+    font-size: 6px;
   }
 }
 
@@ -411,7 +407,7 @@ select:focus {
 
 /* Стилизация скроллбара */
 .menu-panel::-webkit-scrollbar {
-  width: 18px;
+  width: 8px;
 }
 
 .menu-panel::-webkit-scrollbar-track {
