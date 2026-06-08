@@ -6,7 +6,7 @@
 
 .menu-toggle {
   position: fixed;
-  top: 55px;/*вниз*/
+  top: 155px;/*вниз*/
   left: 5px; /*сдвиг от левого края*/
   z-index: 9500;
   
@@ -283,7 +283,7 @@ select option {
     left: 35px;
     right: 5px;
     top: 55px;
-    max-width: 350px;
+    max-width: 650px;
   }
 
   .hud-label {
