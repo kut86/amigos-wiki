@@ -398,7 +398,7 @@ function enterAddMode() {
   addMode = true;
   addModeBtn.textContent = "✕ Отмена";
   addModeBtn.classList.add("btn-danger");
-  mapWrapper.style.cursor = 'crosshair'; /* добавить */
+  mapWrapper.style.cursor = 'grabbing'; /* добавить */
   toast("Нажмите на карту для добавления маркера");
 }
 
