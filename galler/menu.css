@@ -277,13 +277,13 @@ select option {
 .menu-panel {
   position: fixed;
   top: 18px; /*сдвиг в низ*/
-  left: 60px; /*сдвиг в право*/
+  left: 90px; /*сдвиг в право*/
 }
   .menu-panel.open {
     left: 35px;
     right: 5px;
     top: 55px;
-    max-width: 550px;
+    max-width: 600px;
   }
 
   .hud-label {
