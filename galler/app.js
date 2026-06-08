@@ -306,12 +306,9 @@ function initPanzoom() {
   });
 
   // ЖДЁМ кадр + потом ещё один после применения transform
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      resetView();
-    }, 0);
-  });
-}
+  setTimeout(() => {
+    resetView();
+}, 200);
 
 
 /* ── RESET VIEW ── */
