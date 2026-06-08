@@ -75,7 +75,7 @@
 
 /* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
-  max-width: 800px;
+  max-width: 600px;
   max-height: 150px;
   opacity: 1;
 }
@@ -283,7 +283,7 @@ select option {
     left: 35px;
     right: 5px;
     top: 55px;
-    max-width: none;
+    max-width: 50px;
   }
 
   .hud-label {
