@@ -90,16 +90,7 @@ body::after {
    MAP CONTAINER & WRAPPER
 ═══════════════════════════════════════════════════════════════ */
 
-#mapWrapper {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  cursor: grab;
-  z-index: 1;
-  touch-action: none;
-  width: 100vw;
-  height: 100dvh;
-}
+ 
 #mapWrapper.dragging { cursor: grabbing; }
 #mapWrapper.adding   { cursor: crosshair; }
 
