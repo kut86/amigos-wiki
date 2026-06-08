@@ -418,42 +418,6 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
 /* ── MOBILE ADAPTATIONS ─────────────────────────────────────── */
 @media (max-width: 768px) {
-
-  /* HUD bar — wrap and shrink */
-  #ui {
-    gap: 5px;
-    padding: 4px 8px;
-  }
-
-  .hud-panel {
-    padding: 4px 7px;
-    gap: 4px;
-  }
-
-  .hud-label {
-    font-size: 9px;
-  }
-
-  .btn {
-    font-size: 12px;
-    padding: 4px 10px;
-  }
-
-  .btn-sm {
-    padding: 3px 8px;
-    font-size: 11px;
-  }
-
-  select, input[type="text"], input[type="url"], textarea {
-    font-size: 16px; /* предотвращает авто-зум iOS */
-  }
-
-  /* Admin badge */
-  #adminBadge {
-    font-size: 9px;
-    padding: 3px 7px;
-  }
-
   /* Markers — чуть крупнее для пальца */
   .marker-icon {
     width: 8px;
@@ -517,7 +481,72 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
     padding: 12px 14px;
     flex-wrap: wrap;
   }
+@media (max-width: 430px) {
+ 
+  .marker-icon {
+    width: 8px;
+    height: 8px;
+    font-size: 6px;
+  }
 
+  .marker-photo {
+    width: 12px;
+    height: 12px;
+  }
+
+   
+  .marker-tooltip {
+    font-size: 11px;
+    padding: 15px 10px;
+    max-width: 160px;
+  }
+
+   
+  .marker-preview {
+    display: none;
+  }
+
+  /* Modal — на весь экран снизу */
+  /*#modal {*/
+    /* align-items: flex-end;
+  }*/
+
+  .modal-box {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    gap: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 12px 14px 0;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    gap: 10px;
+  }
+
+  .modal-type-badge {
+    font-size: 13px;
+  }
+
+  .modal-body {
+    padding: 0 14px;
+  }
+
+  .modal-photo {
+    height: 120px;
+  }
+
+  .modal-footer {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+  }
+
+    
   /* Zoom controls — меньше и дальше от края */
   #zoomControls {
     bottom: 60px;
