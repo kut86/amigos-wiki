@@ -75,7 +75,7 @@
 
 /* КОГДА МЕНЮ ОТКРЫТО */
 .menu-panel.open {
-  max-width: 600px;
+  max-width: 700px;
   max-height: 150px;
   opacity: 1;
 }
@@ -87,7 +87,7 @@
 .hud-panel {
   display: flex;
   flex-direction: row;
-  gap: 18px;
+  gap: 8px;
   align-items: center;
   
   padding: 7px 10px;
@@ -125,14 +125,14 @@
 /* ══════════════════════════════════════════════════════════════ */
 
 select {
-  padding: 8px 10px;
+  padding: 3px 5px;
   
   background: rgba(20, 20, 40, 0.8);
   color: #ffffff;
   border: 2px solid #ff6600;
   border-radius: 5px;
   
-  font-size: 12px;
+  font-size: 8px;
   cursor: pointer;
   
   transition: all 0.3s ease;
@@ -163,14 +163,14 @@ select option {
 /* ══════════════════════════════════════════════════════════════ */
 
 .btn {
-  padding: 8px 12px;
+  padding: 3px 5px;
   
   background: transparent;
   border: 2px solid #ff6600;
   color: #ff6600;
   border-radius: 6px;
   
-  font-size: 12px;
+  font-size: 8px;
   font-weight: bold;
   text-transform: uppercase;
   cursor: pointer;
