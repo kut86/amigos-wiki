@@ -270,7 +270,7 @@ select option {
     .menu-toggle {
     width: 45px;
     height: 45px;
-    font-size: 25px;
+    font-size: 35px;
     top: 15px;
     left: 23px;
   }
@@ -305,8 +305,8 @@ select option {
    .menu-toggle {
     width: 65px;
     height: 65px;
-    font-size: 25px;
-    top: 120px;
+    font-size: 35px;
+    top: 200px;
     left: 20px;
   } 
 .menu-panel {
