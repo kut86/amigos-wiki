@@ -217,6 +217,15 @@ body::after {
   opacity: 0;
   transition: opacity .2s, transform .2s;
   z-index: 300;
+  background: var(--surface); /* фон под отступами */
+  padding: 3px;
+}
+
+.marker-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* вся картинка целиком */
+  border-radius: calc(var(--radius) - 3px);
 }
 .marker:hover .marker-preview {
   opacity: 1;
