@@ -309,8 +309,7 @@ function initPanzoom() {
   setTimeout(() => {
     resetView();
 }, 200);
-
-
+}
 /* ── RESET VIEW ── */
 function resetView() {
   if (!pz) return;
