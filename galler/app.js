@@ -25,9 +25,9 @@ const provider = new GoogleAuthProvider();
 
 /* ── Карты ── */
 const MAPS = {
-  woods:       { label: "Лес",      imgUrl: "https://gspics.org/images/2026/06/03/IDigvX.jpg" },
-  customs:     { label: "Таможня",  imgUrl: "https://i.imgur.com/FKY4S2W.jpg" },
-  interchange: { label: "Развязка", imgUrl: "https://i.imgur.com/FKY4S2W.jpg" }
+  woods:       { label: "Лес",      imgUrl: "images/woods.png",       fallback: "https://gspics.org/images/2026/06/03/IDigvX.jpg" },
+  customs:     { label: "Таможня",  imgUrl: "images/customs.jpg",     fallback: "https://i.imgur.com/FKY4S2W.jpg" },
+  interchange: { label: "Развязка", imgUrl: "images/interchange.jpg", fallback: "https://i.imgur.com/FKY4S2W.jpg" }
 };
 
 /* ── DOM ── */
@@ -179,7 +179,12 @@ function switchMap(id) {
     initPanzoom();
   };
 
-  mapImg.src = MAPS[id].imgUrl;
+  // пробуем локальную картинку, при ошибке — fallback
+mapImg.onerror = () => {
+  mapImg.onerror = null; // чтобы не зациклиться
+  mapImg.src = MAPS[id].fallback;
+};
+mapImg.src = MAPS[id].imgUrl;
 }
 /* ── Panzoom старый── */
 /*let pz = null;*/
