@@ -235,36 +235,220 @@
 
 /* ═══════════════════════════════════════════════════════════════
    MOBILE
-═══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .menu-toggle {
-    top: 12px; left: 12px;
-    width: 42px; height: 42px;
-    font-size: 17px;
-  }
+/* ══════════════════════════════════════════════════════════════ */
+/* АДАПТИВНОСТЬ (МОБИЛЬНЫЕ ТЕЛЕФОНЫ) */
+/* ══════════════════════════════════════════════════════════════ */
 
-  .menu-panel {
-    top: 12px;
-    left: 64px;
-    right: 12px;
+@media (max-width: 1024px) {
+ .menu-toggle {
+    width: 5dvh;;
+    height: 5dvh;
+    font-size: 100%;
+    top: 1%;
+    left: 1%;
   }
 
   .menu-panel.open {
-    max-width: 100vw;
-    max-height: 50dvh;
-    overflow-y: auto;
+    left: 1%;
+    right: 1%;
+    top: 7%;
+    max-width: 100dvh;
   }
 
-  .hud-label { font-size: 9px; }
+  .hud-label {
+    font-size: 100%;
+  }
+
+  select {
+    padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+
+  .btn {
+   padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+ .menu-toggle {
+    width: 5dvh;;
+    height: 5dvh;
+    font-size: 100%;
+    top: 1%;
+    left: 1%;
+  }
+
+  .menu-panel.open {
+    left: 1%;
+    right: 1%;
+    top: 7%;
+    max-width: 100dvh;
+  }
+
+  .hud-label {
+    font-size: 100%;
+  }
+
+  select {
+    padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+
+  .btn {
+   padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+}
+@media (max-width: 430px) {
+ .menu-toggle {
+    width: 5dvh;;
+    height: 5dvh;
+    font-size: 100%;
+    top: 1%;
+    left: 1%;
+  }
+
+  .menu-panel.open {
+    left: 1%;
+    right: 1%;
+    top: 7%;
+    max-width: 100dvh;
+  }
+
+  .hud-label {
+    font-size: 100%;
+  }
+
+  select {
+    padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+
+  .btn {
+   padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+}
+@media (max-width: 375px) {
+ .menu-toggle {
+    width: 5dvh;;
+    height: 5dvh;
+    font-size: 100%;
+    top: 1%;
+    left: 1%;
+  }
+
+  .menu-panel.open {
+    left: 1%;
+    right: 1%;
+    top: 7%;
+    max-width: 100dvh;
+  }
+
+  .hud-label {
+    font-size: 100%;
+  }
+
+  select {
+    padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+
+  .btn {
+   padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+}
+@media (max-width: 320px) {
+ .menu-toggle {
+    width: 5dvh;;
+    height: 5dvh;
+    font-size: 100%;
+    top: 1%;
+    left: 1%;
+  }
+
+  .menu-panel.open {
+    left: 1%;
+    right: 1%;
+    top: 7%;
+    max-width: 100dvh;
+  }
+
+  .hud-label {
+    font-size: 100%;
+  }
+
+  select {
+    padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+
+  .btn {
+   padding: inherit 9% 9%;
+    font-size: 70%;
+  }
+}
+/* ══════════════════════════════════════════════════════════════ */
+/* АНИМАЦИЯ ПОЯВЛЕНИЯ */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-panel.open {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* ФОКУС И ДОСТУПНОСТЬ */
+/* ══════════════════════════════════════════════════════════════ */
+
+.btn:focus,
+select:focus {
+  outline: 2px solid #ff6600;
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* СКРОЛЛ (если меню переполняется) */
+/* ══════════════════════════════════════════════════════════════ */
+
+.menu-panel.open {
+  overflow-y: auto;
+}
+
+
+/* Стилизация скроллбара */
+.menu-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-panel::-webkit-scrollbar-track {
+  background: rgba(255, 102, 0, 0.1);
+  border-radius: 4px;
+}
+
+.menu-panel::-webkit-scrollbar-thumb {
+  background: #ff6600;
+  border-radius: 4px;
+}
+
+.menu-panel::-webkit-scrollbar-thumb:hover {
+  background: #ff8533;
+}
 
   .menu-panel select,
   .menu-panel .btn { font-size: 14px; } /* блокирует зум iOS */
 
   .hud-panel { padding: 5px 8px; gap: 6px; }
-}
-
-@media (max-width: 380px) {
-  .menu-panel.open { max-height: 60dvh; }
-  .menu-panel select,
-  .menu-panel .btn { font-size: 13px; }
 }
