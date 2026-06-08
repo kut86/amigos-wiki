@@ -480,8 +480,8 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
 
   /* Modal — на весь экран снизу */
   #modal {
-    align-items: flex-end;
-  }
+   /* align-items: flex-end;
+  }*/
 
   .modal-box {
     width: 100%;
@@ -510,7 +510,7 @@ textarea { resize: vertical; min-height: 70px; width: 100%; }
   }
 
   .modal-photo {
-    height: 140px;
+    height: 120px;
   }
 
   .modal-footer {
