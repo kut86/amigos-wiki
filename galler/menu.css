@@ -268,10 +268,10 @@ select option {
 
 @media (max-width: 1024px) {
     .menu-toggle {
-    width: 35px;
+    width: 45px;
     height: 45px;
     font-size: 25px;
-    top: 5px;
+    top: 15px;
     left: 23px;
   }
 .menu-panel {
@@ -303,11 +303,11 @@ select option {
 
 @media (max-width: 768px) {
    .menu-toggle {
-    width: 35px;
-    height: 55px;
+    width: 65px;
+    height: 65px;
     font-size: 25px;
     top: 120px;
-    left: 13px;
+    left: 20px;
   } 
 .menu-panel {
   position: fixed;
