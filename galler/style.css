@@ -98,7 +98,7 @@ body::after {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  cursor: grab;
+  cursor: crosshair;
   z-index: 1;
   touch-action: none;
   width: 100vw;
