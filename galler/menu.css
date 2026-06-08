@@ -268,19 +268,19 @@ select option {
 
 @media (max-width: 1024px) {
     .menu-toggle {
-    width: 55px;
-    height: 55px;
-    font-size: 15px;
-    top: 35px;
-    left: 13px;
+    width: 45px;
+    height: 45px;
+    font-size: 25px;
+    top: 125px;
+    left: 23px;
   }
 .menu-panel {
   position: fixed;
-  top: 18px; /*сдвиг в низ*/
-  left: 90px; /*сдвиг в право*/
+  top: 28px; /*сдвиг в низ*/
+  left: 120px; /*сдвиг в право*/
 }
   .menu-panel.open {
-    left: 35px;
+    left: 95px;
     right: 5px;
     top: 55px;
     max-width: 600px;
