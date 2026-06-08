@@ -89,11 +89,6 @@ body::after {
 /* ═══════════════════════════════════════════════════════════════
    MAP CONTAINER & WRAPPER
 ═══════════════════════════════════════════════════════════════ */
-.map-container {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
 
 #mapWrapper {
   position: fixed;
