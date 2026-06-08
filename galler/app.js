@@ -62,7 +62,7 @@ const cancelEdit = document.getElementById("cancelEdit");
 const editBtn    = document.getElementById("editBtn");
 const delBtn     = document.getElementById("delBtn");
 const modalClose = document.getElementById("modalClose");
-/*const mapWrapper = document.getElementById("mapWrapper");*/
+const mapWrapper = document.getElementById("mapWrapper"); 
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
