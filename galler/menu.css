@@ -271,12 +271,12 @@ select option {
     width: 45px;
     height: 45px;
     font-size: 35px;
-    top: 15px;
+    top: 55px;
     left: 23px;
   }
 .menu-panel {
   position: fixed;
-  top: 125px; /*сдвиг в низ*/
+  top: 115px; /*сдвиг в низ*/
   left: 130px; /*сдвиг в право*/
 }
   .menu-panel.open {
@@ -338,10 +338,10 @@ select option {
 
 @media (max-width: 480px) {
   .menu-toggle {
-    width: 35px;
-    height: 35px;
+    width: 55px;
+    height: 55px;
     font-size: 25px;
-    top: 55px;
+    top: 200px;
     left: 13px;
   }
 .menu-panel {
@@ -350,9 +350,9 @@ select option {
   left: 50px; /*сдвиг в право*/
 }
   .menu-panel.open {
-    left: 35px;
+    left: 25px;
     right: 5px;
-    top: 55px;
+    top: 60px;
     max-width: 600px;
   }
 
