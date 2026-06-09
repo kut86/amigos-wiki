@@ -1,5 +1,10 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
+import {
+  onAuthChange,
+  ensureUser,
+  getUserRole
+} from "./firebase.js";
 
 /* ─────────────────────────
    DOM
@@ -11,8 +16,12 @@ const mapImage = document.getElementById("mapImage");
 const mapSelect = document.getElementById("mapSelect");
 const filterSel = document.getElementById("filter");
 
+const modal = document.getElementById("confirmModal");
+const confirmBtn = document.getElementById("confirmEnter");
+const cancelBtn = document.getElementById("cancelEnter");
+
 /* ─────────────────────────
-   MAP DATA
+   MAP DATA (ТВОЯ ЛОГИКА СОХРАНЕНА)
 ───────────────────────── */
 
 const MAPS = {
@@ -40,7 +49,32 @@ const MAPS = {
 state.hydrate();
 
 /* ─────────────────────────
-   LOAD MAP
+   AUTH + ROLE SYSTEM
+───────────────────────── */
+
+onAuthChange(async (user) => {
+  if (!user) return;
+
+  await ensureUser(user);
+
+  const role = await getUserRole(user.uid);
+
+  state.setUser(user, role);
+
+  if (role === "admin") {
+    document.body.classList.add("admin");
+    console.log("ADMIN MODE ENABLED (MAP)");
+  }
+});
+
+/* ─────────────────────────
+   CURRENT MAP STATE
+───────────────────────── */
+
+let selectedMap = null;
+
+/* ─────────────────────────
+   LOAD MAP (твоя функция — улучшенная)
 ───────────────────────── */
 
 function loadMap(mapId, silent = false) {
@@ -55,15 +89,15 @@ function loadMap(mapId, silent = false) {
     mapImage.src = map.fallback;
   };
 
+  mapSelect.value = mapId;
+
   if (!silent) {
     bus.emit("map:change", mapId);
   }
-
-  mapSelect.value = mapId;
 }
 
 /* ─────────────────────────
-   SWITCH MAP (UI)
+   SELECT UI
 ───────────────────────── */
 
 mapSelect.addEventListener("change", (e) => {
@@ -73,7 +107,7 @@ mapSelect.addEventListener("change", (e) => {
 });
 
 /* ─────────────────────────
-   CONFIRM SWITCH (логика)
+   CONFIRM SWITCH FLOW (твой подход сохранён)
 ───────────────────────── */
 
 bus.on("map:requestChange", (mapId) => {
@@ -81,36 +115,43 @@ bus.on("map:requestChange", (mapId) => {
 
   if (current === mapId) return;
 
-  const confirmSwitch = confirm(
-    `Перейти на карту: ${MAPS[mapId].title}?`
-  );
+  selectedMap = mapId;
 
-  if (!confirmSwitch) {
-    mapSelect.value = current;
-    return;
-  }
+  document.getElementById("confirmTitle").textContent =
+    `Перейти на ${MAPS[mapId].title}?`;
 
-  loadMap(mapId);
+  modal.classList.remove("hidden");
 });
 
 /* ─────────────────────────
-   SYNC FROM STATE
+   CONFIRM
 ───────────────────────── */
 
-state.on("mapId", (mapId) => {
-  loadMap(mapId, true);
+confirmBtn.addEventListener("click", () => {
+  if (!selectedMap) return;
+
+  loadMap(selectedMap);
+
+  bus.emit("map:confirmed", selectedMap);
+
+  modal.classList.add("hidden");
+  selectedMap = null;
+
+  // переход в wiki
+  window.location.href = `wiki.html?map=${state.get("mapId")}`;
 });
 
 /* ─────────────────────────
-   GLOBAL EVENTS (для wiki.js и других)
+   CANCEL
 ───────────────────────── */
 
-bus.on("map:change", (mapId) => {
-  console.log("Map changed globally:", mapId);
+cancelBtn.addEventListener("click", () => {
+  modal.classList.add("hidden");
+  selectedMap = null;
 });
 
 /* ─────────────────────────
    INIT
 ───────────────────────── */
 
-loadMap(state.get("mapId"));
+loadMap(state.get("mapId") || "woods", true);
