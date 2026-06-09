@@ -1,135 +1,182 @@
-import { bus } from "./eventBus.js";
 import { state } from "./stateManager.js";
+import { bus } from "./eventBus.js";
 
-export class UIEngine {
-  constructor() {
-    /* MODAL */
-    this.modal = document.getElementById("modal");
-    this.modalTitle = document.getElementById("modalTitle");
-    this.modalBadge = document.getElementById("modalBadge");
-    this.modalPhoto = document.getElementById("modalPhoto");
-    this.modalDesc = document.getElementById("modalDesc");
+export function initUIEngine() {
+  /* ─────────────────────────
+     DOM
+  ───────────────────────── */
 
-    this.editForm = document.getElementById("editForm");
-    this.editBtn = document.getElementById("editBtn");
-    this.delBtn = document.getElementById("delBtn");
+  const modal = document.getElementById("modal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBadge = document.getElementById("modalBadge");
+  const modalDesc = document.getElementById("modalDesc");
+  const modalPhoto = document.getElementById("modalPhoto");
 
-    this.current = null;
+  const editForm = document.getElementById("editForm");
+  const editText = document.getElementById("editText");
+  const editType = document.getElementById("editType");
+  const editImgUrl = document.getElementById("editImgUrl");
+  const editIcon = document.getElementById("editIcon");
+
+  const editBtn = document.getElementById("editBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const cancelEdit = document.getElementById("cancelEdit");
+
+  const delBtn = document.getElementById("delBtn");
+  const modalClose = document.getElementById("modalClose");
+
+  let currentMarker = null;
+
+  /* ─────────────────────────
+     OPEN MODAL
+  ───────────────────────── */
+
+  function openModal(marker) {
+    currentMarker = marker;
+
+    state.setCurrentMarker(marker);
+
+    modalTitle.textContent = marker.text || "Маркер";
+    modalBadge.textContent = marker.type || "unknown";
+
+    modalDesc.textContent = marker.text || "";
+
+    if (marker.imgUrl) {
+      modalPhoto.style.display = "";
+      modalPhoto.src = marker.imgUrl;
+    } else {
+      modalPhoto.style.display = "none";
+    }
+
+    editForm.style.display = "none";
+    editBtn.style.display = "";
+    saveBtn.style.display = "none";
+    cancelEdit.style.display = "none";
+
+    modal.classList.add("open");
+
+    bus.emit("ui:modalOpen", marker);
   }
 
   /* ─────────────────────────
-     INIT
+     CLOSE MODAL
   ───────────────────────── */
 
-  init() {
-    this._bindEvents();
-    this._bindBus();
+  function closeModal() {
+    modal.classList.remove("open");
+    currentMarker = null;
+    state.setCurrentMarker(null);
+
+    bus.emit("ui:modalClose");
+  }
+
+  /* ─────────────────────────
+     EDIT MODE
+  ───────────────────────── */
+
+  function enterEditMode() {
+    if (!currentMarker) return;
+
+    editText.value = currentMarker.text || "";
+    editType.value = currentMarker.type || "loot";
+    editImgUrl.value = currentMarker.imgUrl || "";
+    editIcon.value = currentMarker.iconUrl || "";
+
+    editForm.style.display = "flex";
+    editBtn.style.display = "none";
+    saveBtn.style.display = "";
+    cancelEdit.style.display = "";
+
+    bus.emit("ui:editMode", currentMarker);
+  }
+
+  function exitEditMode() {
+    editForm.style.display = "none";
+    editBtn.style.display = "";
+    saveBtn.style.display = "none";
+    cancelEdit.style.display = "none";
+
+    bus.emit("ui:editCancel");
+  }
+
+  /* ─────────────────────────
+     SAVE EDIT (только UI отдаёт данные наружу)
+  ───────────────────────── */
+
+  function saveEdit() {
+    if (!currentMarker) return;
+
+    const updated = {
+      text: editText.value.trim(),
+      type: editType.value,
+      imgUrl: editImgUrl.value.trim() || null,
+      iconUrl: editIcon.value.trim() || null
+    };
+
+    bus.emit("marker:updateRequest", {
+      id: currentMarker.id,
+      data: updated
+    });
+
+    exitEditMode();
+    closeModal();
+  }
+
+  /* ─────────────────────────
+     DELETE
+  ───────────────────────── */
+
+  function deleteMarker() {
+    if (!currentMarker) return;
+
+    if (!confirm("Удалить маркер?")) return;
+
+    bus.emit("marker:deleteRequest", currentMarker.id);
+
+    closeModal();
+  }
+
+  /* ─────────────────────────
+     ADD MODE UI (будущий конструктор)
+  ───────────────────────── */
+
+  function openAddForm(position) {
+    bus.emit("ui:addOpen", position);
+  }
+
+  function closeAddForm() {
+    bus.emit("ui:addClose");
   }
 
   /* ─────────────────────────
      EVENTS
   ───────────────────────── */
 
-  _bindEvents() {
-    document.getElementById("modalClose")
-      .addEventListener("click", () => this.closeModal());
+  editBtn.onclick = enterEditMode;
+  cancelEdit.onclick = exitEditMode;
+  saveBtn.onclick = saveEdit;
+  delBtn.onclick = deleteMarker;
+  modalClose.onclick = closeModal;
 
-    this.editBtn?.addEventListener("click", () => this.openEdit());
-
-    this.delBtn?.addEventListener("click", () => {
-      if (!this.current) return;
-
-      bus.emit("marker:delete", this.current.id);
-      this.closeModal();
-    });
-
-    document.getElementById("saveBtn")
-      ?.addEventListener("click", () => this.saveEdit());
-  }
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
 
   /* ─────────────────────────
-     EVENT BUS
+     PUBLIC API
   ───────────────────────── */
 
-  _bindBus() {
-    bus.on("marker:open", (marker) => {
-      this.openModal(marker);
-    });
+  return {
+    openModal,
+    closeModal,
 
-    bus.on("auth:update", (user) => {
-      state.setUser(user, user?.isAdmin);
-    });
-  }
+    enterEditMode,
+    exitEditMode,
 
-  /* ─────────────────────────
-     MODAL
-  ───────────────────────── */
+    saveEdit,
+    deleteMarker,
 
-  openModal(marker) {
-    this.current = marker;
-    state.setCurrentMarker(marker);
-
-    this.modalTitle.textContent = marker.text || "Marker";
-    this.modalDesc.textContent = marker.text || "";
-
-    this.modalBadge.textContent = marker.type || "unknown";
-    this.modalBadge.className = `modal-type-badge badge-${marker.type}`;
-
-    if (marker.imgUrl) {
-      this.modalPhoto.style.display = "";
-      this.modalPhoto.src = marker.imgUrl;
-    } else {
-      this.modalPhoto.style.display = "none";
-    }
-
-    this.modal.classList.add("open");
-  }
-
-  closeModal() {
-    this.modal.classList.remove("open");
-    this.current = null;
-    state.setCurrentMarker(null);
-  }
-
-  /* ─────────────────────────
-     EDIT MODE (заготовка конструктора)
-  ───────────────────────── */
-
-  openEdit() {
-    if (!this.current) return;
-
-    this.editForm.style.display = "flex";
-    this.editBtn.style.display = "none";
-
-    document.getElementById("editText").value = this.current.text || "";
-    document.getElementById("editType").value = this.current.type || "loot";
-  }
-
-  saveEdit() {
-    if (!this.current) return;
-
-    const updated = {
-      text: document.getElementById("editText").value,
-      type: document.getElementById("editType").value,
-      imgUrl: document.getElementById("editImgUrl")?.value || null,
-      iconUrl: document.getElementById("editIcon")?.value || null,
-    };
-
-    bus.emit("marker:update", {
-      id: this.current.id,
-      data: updated
-    });
-
-    this.closeModal();
-  }
+    openAddForm,
+    closeAddForm
+  };
 }
-
-/* ─────────────────────────
-   INIT HELPER
-───────────────────────── */
-
-export function initUIEngine() {
-  const ui = new UIEngine();
-  ui.init();
-  return ui;
-      }
