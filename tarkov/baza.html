@@ -1,73 +1,17 @@
-import {
-  loginWithGoogle,
-  onAuthChange,
-  ensureUser,
-  getUserRole
-} from "./firebase.js";
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Baza Login</title>
+</head>
 
-/* ─────────────────────────
-   DOM
-───────────────────────── */
+<body>
 
-const loginBtn = document.getElementById("loginBtn");
-const statusText = document.getElementById("status"); // можно добавить в HTML
+  <h2 id="status">Авторизация</h2>
 
-/* ─────────────────────────
-   LOGIN CLICK
-───────────────────────── */
+  <button id="loginBtn">Войти через Google</button>
 
-loginBtn.addEventListener("click", async () => {
-  try {
-    statusText && (statusText.textContent = "Вход...");
+  <script type="module" src="./baza.js"></script>
 
-    await loginWithGoogle();
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    statusText && (statusText.textContent = "Ошибка входа");
-  }
-});
-
-/* ─────────────────────────
-   AUTH LISTENER (ГЛАВНАЯ ЛОГИКА)
-───────────────────────── */
-
-onAuthChange(async (user) => {
-  if (!user) {
-    statusText && (statusText.textContent = "Не авторизован");
-    return;
-  }
-
-  statusText && (statusText.textContent = "Проверка пользователя...");
-
-  try {
-    // создаём пользователя если его нет
-    await ensureUser(user);
-
-    // получаем роль
-    const role = await getUserRole(user.uid);
-
-    // сохраняем локально (временно, для map/wiki)
-    localStorage.setItem("role", role);
-    localStorage.setItem("uid", user.uid);
-
-    console.log("[AUTH] role:", role);
-
-    statusText && (statusText.textContent = "Успешный вход");
-
-    /* ─────────────────────────
-       REDIRECT LOGIC
-    ───────────────────────── */
-
-    setTimeout(() => {
-      if (role === "admin") {
-        window.location.href = "map.html";
-      } else {
-        window.location.href = "map.html";
-      }
-    }, 500);
-
-  } catch (err) {
-    console.error("AUTH ERROR:", err);
-    statusText && (statusText.textContent = "Ошибка авторизации");
-  }
-});
+</body>
+</html>
