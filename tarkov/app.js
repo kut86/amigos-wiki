@@ -8,7 +8,7 @@ import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
 /* ─────────────────────────
-   ENGINE LAYERS
+   ENGINES
 ───────────────────────── */
 
 import { initMapEngine } from "./mapEngine.js";
@@ -17,6 +17,7 @@ import { initUIEngine } from "./uiEngine.js";
 import { initGraphRenderer } from "./graphRenderer.js";
 import { initInteractionLayer } from "./interactionLayer.js";
 import { initMarkerBuilder } from "./markerBuilder.js";
+import { initTimeEngine } from "./timeEngine.js";
 
 /* ─────────────────────────
    DOM
@@ -27,7 +28,7 @@ const mapContainer = document.getElementById("map");
 const filterSel = document.getElementById("filter");
 
 /* ─────────────────────────
-   STATE INIT
+   INIT STATE
 ───────────────────────── */
 
 state.setMap("woods");
@@ -42,11 +43,16 @@ const mapEngine = initMapEngine({
 });
 
 /* ─────────────────────────
+   TIME ENGINE
+───────────────────────── */
+
+const timeEngine = initTimeEngine();
+
+/* ─────────────────────────
    MARKER ENGINE
 ───────────────────────── */
 
 let markerEngine = new MarkerEngine(db, state.get("mapId"));
-
 let markersCache = {};
 
 markerEngine.subscribe((markers) => {
@@ -88,7 +94,7 @@ const interaction = initInteractionLayer({
 const builder = initMarkerBuilder();
 
 /* ─────────────────────────
-   ZOOM CONTROLS
+   ZOOM
 ───────────────────────── */
 
 document.getElementById("zoomIn").onclick = () => mapEngine.zoomIn();
@@ -107,15 +113,25 @@ bus.on("map:change", (mapId) => {
   mapEngine.switchMap(mapId, {
     imgUrl: `images/${mapId}.png`
   });
+
+  timeEngine.switchMap(mapId);
 });
 
 /* ─────────────────────────
-   CONNECT SYSTEM HOOKS
+   TIME → STATE
+───────────────────────── */
+
+bus.on("time:update", ({ time, isNight }) => {
+  state.setTime(time);
+  state.setNight(isNight);
+});
+
+/* ─────────────────────────
+   CONNECT SYSTEM
 ───────────────────────── */
 
 bus.on("marker:linkRequest", ({ from, to }) => {
   const marker = markersCache[from];
-
   if (!marker) return;
 
   const links = marker.links || [];
@@ -129,15 +145,7 @@ bus.on("marker:linkRequest", ({ from, to }) => {
 });
 
 /* ─────────────────────────
-   UI → BUILDER
-───────────────────────── */
-
-bus.on("ui:addOpen", () => {
-  builder.open();
-});
-
-/* ─────────────────────────
-   MARKER ADD
+   ADD MARKER
 ───────────────────────── */
 
 bus.on("marker:addRequest", (data) => {
@@ -145,7 +153,15 @@ bus.on("marker:addRequest", (data) => {
 });
 
 /* ─────────────────────────
-   INIT DEFAULT MAP
+   OPEN BUILDER
+───────────────────────── */
+
+bus.on("ui:addOpen", () => {
+  builder.open();
+});
+
+/* ─────────────────────────
+   INIT
 ───────────────────────── */
 
 mapEngine.switchMap("woods", {
