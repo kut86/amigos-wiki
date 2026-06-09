@@ -1,163 +1,109 @@
-// mapEngine.js
+import { db, ref, push, onValue, update, remove } from "./firebase.js";
+import { eventBus } from "./eventBus.js";
 
-import Panzoom from "https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js";
+export function initMarkerEngine({
+  db,
+  mapId,
+  container,
+  filterFn = () => "all",
+  isMobile = () => false
+}) {
+  const currentRef = ref(db, `maps/${mapId}/markers`);
 
-/* ─────────────────────────────
-   STATE
-───────────────────────────── */
+  let markers = {};
+  let unsubscribe = null;
 
-let pz = null;
-let currentMap = null;
-let mapImg = null;
-let mapContainer = null;
+  /* ───────────────
+     SUBSCRIBE FIREBASE
+  ─────────────── */
+  function subscribe() {
+    unsubscribe = onValue(currentRef, snap => {
+      markers = {};
 
-/* ─────────────────────────────
-   INIT MAP ENGINE
-───────────────────────────── */
+      snap.forEach(i => {
+        markers[i.key] = i.val();
+      });
 
-export function initMapEngine(config) {
-  /*
-    config:
-    {
-      mapImg: HTMLImageElement,
-      mapContainer: HTMLElement,
-      onMapChange?: (mapId) => void
-    }
-  */
+      render();
+    });
+  }
 
-  mapImg = config.mapImg;
-  mapContainer = config.mapContainer;
+  /* ───────────────
+     RENDER MARKERS
+  ─────────────── */
+  function render() {
+    container.querySelectorAll(".marker").forEach(m => m.remove());
 
-  /* wheel zoom */
-  mapContainer.parentElement.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    if (pz) pz.zoomWithWheel(e);
-  }, { passive: false });
+    const filter = filterFn();
+
+    Object.entries(markers).forEach(([id, m]) => {
+      if (filter !== "all" && m.type !== filter) return;
+
+      const div = document.createElement("div");
+      div.className = "marker";
+      div.dataset.id = id;
+
+      div.style.left = m.x + "%";
+      div.style.top = m.y + "%";
+
+      if (isMobile()) div.classList.add("no-hover");
+
+      if (m.imgUrl) {
+        div.innerHTML = `
+          <div class="marker-photo">
+            <img src="${m.imgUrl}" draggable="false">
+          </div>
+          <div class="marker-tooltip">${m.text}</div>
+        `;
+      } else {
+        div.innerHTML = `
+          <div class="marker-icon">${m.text}</div>
+        `;
+      }
+
+      /* ───────────────
+         CLICK → EVENTBUS
+      ─────────────── */
+      div.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        eventBus.emit("marker:open", {
+          id,
+          marker: m
+        });
+      });
+
+      container.appendChild(div);
+    });
+  }
+
+  /* ───────────────
+     PUBLIC API
+  ─────────────── */
+  function add(marker) {
+    return push(currentRef, marker);
+  }
+
+  function updateMarker(id, data) {
+    return update(ref(db, `maps/${mapId}/markers/${id}`), data);
+  }
+
+  function deleteMarker(id) {
+    return remove(ref(db, `maps/${mapId}/markers/${id}`));
+  }
+
+  function destroy() {
+    if (unsubscribe) unsubscribe();
+    container.innerHTML = "";
+  }
+
+  /* init */
+  subscribe();
 
   return {
-    switchMap,
-    resetView,
-    zoomIn,
-    zoomOut,
-    destroy: () => {
-      if (pz) pz.destroy();
-      pz = null;
-    }
+    add,
+    update: updateMarker,
+    delete: deleteMarker,
+    destroy
   };
-}
-
-/* ─────────────────────────────
-   SWITCH MAP
-───────────────────────────── */
-
-export function switchMap(mapId, mapConfig) {
-  /*
-    mapConfig:
-    {
-      imgUrl,
-      fallbackUrl
-    }
-  */
-
-  currentMap = mapId;
-
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
-
-  mapImg.onload = null;
-
-  mapImg.onload = () => {
-    initPanzoom();
-  };
-
-  mapImg.onerror = () => {
-    mapImg.onerror = null;
-    mapImg.src = mapConfig.fallbackUrl;
-  };
-
-  mapImg.src = mapConfig.imgUrl;
-}
-
-/* ─────────────────────────────
-   PANZOOM INIT
-───────────────────────────── */
-
-function initPanzoom() {
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
-
-  pz = Panzoom(mapImg, {
-    maxScale: 8,
-    minScale: 0.5,
-    contain: "outside"
-  });
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      resetView();
-    });
-  });
-}
-
-/* ─────────────────────────────
-   RESET VIEW (центр + масштаб)
-───────────────────────────── */
-
-export function resetView() {
-  if (!pz || !mapImg) return;
-
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-
-  const vw = mapContainer.clientWidth;
-  const vh = mapContainer.clientHeight;
-
-  if (!iw || !ih) return;
-
-  const scale = Math.min(vw / iw, vh / ih);
-
-  const x = (vw - iw * scale) / 2;
-  const y = (vh - ih * scale) / 2;
-
-  pz.zoom(scale, { animate: false });
-  pz.pan(x, y, { animate: false });
-}
-
-/* ─────────────────────────────
-   ZOOM CONTROLS
-───────────────────────────── */
-
-export function zoomIn() {
-  if (!pz) return;
-
-  const scale = pz.getScale() * 1.3;
-
-  pz.zoomToPoint(scale, {
-    clientX: window.innerWidth / 2,
-    clientY: window.innerHeight / 2
-  });
-}
-
-export function zoomOut() {
-  if (!pz) return;
-
-  const scale = pz.getScale() / 1.3;
-
-  pz.zoomToPoint(scale, {
-    clientX: window.innerWidth / 2,
-    clientY: window.innerHeight / 2
-  });
-}
-
-/* ─────────────────────────────
-   RESIZE FIX
-───────────────────────────── */
-
-window.addEventListener("resize", () => {
-  if (!pz || !mapImg) return;
-  resetView();
-});
+       }
