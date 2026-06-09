@@ -1,169 +1,105 @@
-import { db } from "./firebase.js";
-
-/* ─────────────────────────
-   CORE
-───────────────────────── */
-
+import { onAuthChange, getUserRole, ensureUser } from "./firebase.js";
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
+import { syncEngine } from "./syncEngine.js";
 
 /* ─────────────────────────
-   ENGINES
+   DETECT PAGE
 ───────────────────────── */
 
-import { initMapEngine } from "./mapEngine.js";
-import { MarkerEngine } from "./markerEngine.js";
-import { initUIEngine } from "./uiEngine.js";
-import { initGraphRenderer } from "./graphRenderer.js";
-import { initInteractionLayer } from "./interactionLayer.js";
-import { initMarkerBuilder } from "./markerBuilder.js";
-import { initTimeEngine } from "./timeEngine.js";
+const isMapPage = !!document.getElementById("map");
+const isWikiPage = !!document.getElementById("wiki");
 
 /* ─────────────────────────
-   DOM
+   INIT STATE (если нужно)
 ───────────────────────── */
 
-const mapImg = document.getElementById("mapImage");
-const mapContainer = document.getElementById("map");
-const filterSel = document.getElementById("filter");
-
-/* ─────────────────────────
-   INIT STATE
-───────────────────────── */
-
-state.setMap("woods");
-
-/* ─────────────────────────
-   MAP ENGINE
-───────────────────────── */
-
-const mapEngine = initMapEngine({
-  mapImg,
-  mapContainer
+state.patch({
+  addMode: false,
+  editMode: false,
+  currentMarker: null
 });
 
 /* ─────────────────────────
-   TIME ENGINE
+   AUTH BOOTSTRAP
 ───────────────────────── */
 
-const timeEngine = initTimeEngine();
+onAuthChange(async (user) => {
+  if (!user) {
+    console.log("[APP] not logged in");
+    return;
+  }
 
-/* ─────────────────────────
-   MARKER ENGINE
-───────────────────────── */
+  console.log("[APP] user:", user.uid);
 
-let markerEngine = new MarkerEngine(db, state.get("mapId"));
-let markersCache = {};
+  /* ensure user exists in DB */
+  await ensureUser(user);
 
-markerEngine.subscribe((markers) => {
-  markersCache = markers;
+  /* get role */
+  const role = await getUserRole(user.uid);
 
-  bus.emit("markers:update", markers);
-  bus.emit("graph:render");
+  localStorage.setItem("uid", user.uid);
+  localStorage.setItem("role", role);
+
+  state.setUser(user, role === "admin");
+
+  /* ─────────────────────────
+     START WORLD SYNC
+  ───────────────────────── */
+
+  const mapId = state.get("mapId") || "woods";
+
+  syncEngine.init(mapId);
+
+  /* ─────────────────────────
+     PAGE ROUTING LOGIC
+  ───────────────────────── */
+
+  if (isMapPage) {
+    startMapApp();
+  }
+
+  if (isWikiPage) {
+    startWikiApp();
+  }
 });
 
 /* ─────────────────────────
-   UI ENGINE
+   MAP BOOT
 ───────────────────────── */
 
-const ui = initUIEngine();
+function startMapApp() {
+  console.log("[APP] MAP MODE");
+
+  import("./map.js").then((mod) => {
+    if (mod.initMapPage) {
+      mod.initMapPage();
+    }
+  });
+}
 
 /* ─────────────────────────
-   GRAPH RENDERER
+   WIKI BOOT
 ───────────────────────── */
 
-const graph = initGraphRenderer({
-  mapContainer,
-  getMarkers: () => markersCache
-});
+function startWikiApp() {
+  console.log("[APP] WIKI MODE");
+
+  import("./wiki.js").then((mod) => {
+    if (mod.initWikiPage) {
+      mod.initWikiPage();
+    }
+  });
+}
 
 /* ─────────────────────────
-   INTERACTION LAYER
+   GLOBAL EVENTS
 ───────────────────────── */
 
-const interaction = initInteractionLayer({
-  mapContainer,
-  getMarkerElementById: (id) =>
-    document.querySelector(`[data-id="${id}"]`)
-});
-
-/* ─────────────────────────
-   BUILDER
-───────────────────────── */
-
-const builder = initMarkerBuilder();
-
-/* ─────────────────────────
-   ZOOM
-───────────────────────── */
-
-document.getElementById("zoomIn").onclick = () => mapEngine.zoomIn();
-document.getElementById("zoomOut").onclick = () => mapEngine.zoomOut();
-document.getElementById("zoomReset").onclick = () => mapEngine.reset();
-
-/* ─────────────────────────
-   MAP SWITCH
-───────────────────────── */
-
+/* синхронизация карты */
 bus.on("map:change", (mapId) => {
   state.setMap(mapId);
-
-  markerEngine.switchMap(mapId);
-
-  mapEngine.switchMap(mapId, {
-    imgUrl: `images/${mapId}.png`
-  });
-
-  timeEngine.switchMap(mapId);
 });
 
-/* ─────────────────────────
-   TIME → STATE
-───────────────────────── */
-
-bus.on("time:update", ({ time, isNight }) => {
-  state.setTime(time);
-  state.setNight(isNight);
-});
-
-/* ─────────────────────────
-   CONNECT SYSTEM
-───────────────────────── */
-
-bus.on("marker:linkRequest", ({ from, to }) => {
-  const marker = markersCache[from];
-  if (!marker) return;
-
-  const links = marker.links || [];
-
-  links.push({
-    targetId: to,
-    type: "generic"
-  });
-
-  markerEngine.update(from, { links });
-});
-
-/* ─────────────────────────
-   ADD MARKER
-───────────────────────── */
-
-bus.on("marker:addRequest", (data) => {
-  markerEngine.add(data);
-});
-
-/* ─────────────────────────
-   OPEN BUILDER
-───────────────────────── */
-
-bus.on("ui:addOpen", () => {
-  builder.open();
-});
-
-/* ─────────────────────────
-   INIT
-───────────────────────── */
-
-mapEngine.switchMap("woods", {
-  imgUrl: "images/woods.png"
-});
+/* UI debug */
+console.log("[APP] bootstrap loaded");
