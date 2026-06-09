@@ -1,50 +1,44 @@
 export class StateManager {
   constructor() {
     this.state = {
+      /* ─────────────────────
+         APP CORE
+      ───────────────────── */
+
       mapId: "woods",
+
       user: null,
       isAdmin: false,
 
-      // режимы
+      /* ─────────────────────
+         MODES
+      ───────────────────── */
+
       addMode: false,
       editMode: false,
+      connectMode: false,
 
-      // выбранный маркер
+      /* ─────────────────────
+         MARKERS
+      ───────────────────── */
+
       currentMarker: null,
+
+      /* ─────────────────────
+         TIME SYSTEM
+      ───────────────────── */
+
+      time: 12,
+      isNight: false,
+
+      /* ─────────────────────
+         UI STATE
+      ───────────────────── */
+
+      selectedTool: null
     };
 
-    this.listeners = new Map(); // eventName -> Set(callback)
-  }
-
-  /* ─────────────────────────
-     INIT SYNC
-  ───────────────────────── */
-
-  hydrate() {
-    const saved = localStorage.getItem("appState");
-    if (!saved) return;
-
-    try {
-      const data = JSON.parse(saved);
-
-      // аккуратно мержим, чтобы не ломать структуру
-      this.state = {
-        ...this.state,
-        ...data
-      };
-
-      this.emit("stateHydrated", this.state);
-    } catch (e) {
-      console.warn("StateManager hydrate error:", e);
-    }
-  }
-
-  persist() {
-    try {
-      localStorage.setItem("appState", JSON.stringify(this.state));
-    } catch (e) {
-      console.warn("StateManager persist error:", e);
-    }
+    this.listeners = new Map();
   }
 
   /* ─────────────────────────
@@ -65,17 +59,12 @@ export class StateManager {
 
   set(key, value) {
     this.state[key] = value;
-
-    this.persist(); // 🔥 синхронизация
-
     this.emit(key, value);
     this.emit("stateChange", this.state);
   }
 
   patch(obj) {
     Object.assign(this.state, obj);
-
-    this.persist(); // 🔥 синхронизация
 
     for (const key in obj) {
       this.emit(key, obj[key]);
@@ -95,7 +84,6 @@ export class StateManager {
 
     this.listeners.get(event).add(callback);
 
-    // unsubscribe
     return () => this.off(event, callback);
   }
 
@@ -116,10 +104,7 @@ export class StateManager {
   }
 
   setUser(user, isAdmin = false) {
-    this.patch({
-      user,
-      isAdmin
-    });
+    this.patch({ user, isAdmin });
   }
 
   setAddMode(value) {
@@ -130,26 +115,21 @@ export class StateManager {
     this.set("editMode", value);
   }
 
+  setConnectMode(value) {
+    this.set("connectMode", value);
+  }
+
   setCurrentMarker(marker) {
     this.set("currentMarker", marker);
   }
 
-  /* ─────────────────────────
-     RESET (полезно для logout)
-  ───────────────────────── */
+  setTime(time) {
+    this.set("time", time);
+    this.set("isNight", time >= 20 || time < 6);
+  }
 
-  reset() {
-    this.state = {
-      mapId: "woods",
-      user: null,
-      isAdmin: false,
-      addMode: false,
-      editMode: false,
-      currentMarker: null,
-    };
-
-    this.persist();
-    this.emit("stateChange", this.state);
+  setNight(isNight) {
+    this.set("isNight", isNight);
   }
 }
 
