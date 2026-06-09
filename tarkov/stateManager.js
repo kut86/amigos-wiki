@@ -1,126 +1,103 @@
-class StateManager {
+export class StateManager {
   constructor() {
     this.state = {
+      mapId: "woods",
       user: null,
       isAdmin: false,
 
-      currentMap: "woods",
+      // режимы
+      addMode: false,
+      editMode: false,
 
-      mode: "view", // view | edit | add
-
-      dayNight: {
-        woods: "day",
-        customs: "day",
-        interchange: "day"
-      }
+      // выбранный маркер
+      currentMarker: null,
     };
 
-    this.listeners = {};
+    this.listeners = new Map(); // eventName -> Set(callback)
   }
 
-  /* ───────────────
-     GET STATE
-  ─────────────── */
+  /* ─────────────────────────
+     GETTERS
+  ───────────────────────── */
 
   get(key) {
     return this.state[key];
   }
 
-  getAll() {
+  getState() {
     return this.state;
   }
 
-  getMap() {
-    return this.state.currentMap;
-  }
-
-  isAdmin() {
-    return this.state.isAdmin;
-  }
-
-  getUser() {
-    return this.state.user;
-  }
-
-  getMode() {
-    return this.state.mode;
-  }
-
-  getTimeState(mapId = this.state.currentMap) {
-    return this.state.dayNight[mapId];
-  }
-
-  /* ───────────────
-     SET STATE
-  ─────────────── */
+  /* ─────────────────────────
+     SETTERS
+  ───────────────────────── */
 
   set(key, value) {
     this.state[key] = value;
     this.emit(key, value);
+    this.emit("stateChange", this.state);
   }
 
-  setUser(user) {
-    this.state.user = user;
-    this.emit("user", user);
+  patch(obj) {
+    Object.assign(this.state, obj);
+
+    for (const key in obj) {
+      this.emit(key, obj[key]);
+    }
+
+    this.emit("stateChange", this.state);
   }
 
-  setAdmin(isAdmin) {
-    this.state.isAdmin = isAdmin;
-    this.emit("isAdmin", isAdmin);
-  }
-
-  setMap(mapId) {
-    this.state.currentMap = mapId;
-    this.emit("currentMap", mapId);
-  }
-
-  setMode(mode) {
-    this.state.mode = mode;
-    this.emit("mode", mode);
-  }
-
-  setTimeState(mapId, value) {
-    this.state.dayNight[mapId] = value;
-    this.emit("dayNight", { mapId, value });
-  }
-
-  /* ───────────────
+  /* ─────────────────────────
      EVENTS
-  ─────────────── */
+  ───────────────────────── */
 
   on(event, callback) {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
     }
-    this.listeners[event].push(callback);
+
+    this.listeners.get(event).add(callback);
+
+    // вернуть unsubscribe
+    return () => this.off(event, callback);
+  }
+
+  off(event, callback) {
+    this.listeners.get(event)?.delete(callback);
   }
 
   emit(event, data) {
-    const list = this.listeners[event];
-    if (!list) return;
-
-    list.forEach(cb => cb(data));
+    this.listeners.get(event)?.forEach(cb => cb(data));
   }
 
-  /* ───────────────
+  /* ─────────────────────────
      HELPERS
-  ─────────────── */
+  ───────────────────────── */
 
-  toggleMode() {
-    this.setMode(this.state.mode === "view" ? "edit" : "view");
+  setMap(mapId) {
+    this.set("mapId", mapId);
   }
 
-  toggleDayNight(mapId = this.state.currentMap) {
-    const current = this.state.dayNight[mapId];
-    const next = current === "day" ? "night" : "day";
-    this.setTimeState(mapId, next);
+  setUser(user, isAdmin = false) {
+    this.patch({
+      user,
+      isAdmin
+    });
   }
 
-  reset() {
-    this.state.mode = "view";
-    this.emit("mode", "view");
+  setAddMode(value) {
+    this.set("addMode", value);
+  }
+
+  setEditMode(value) {
+    this.set("editMode", value);
+  }
+
+  setCurrentMarker(marker) {
+    this.set("currentMarker", marker);
   }
 }
 
-/* singleton */
-export const stateManager = new StateManager();
+/* singleton (один на всё приложение) */
+export const state = new StateManager();
