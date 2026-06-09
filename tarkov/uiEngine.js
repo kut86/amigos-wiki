@@ -1,120 +1,70 @@
-// uiEngine.js
-
-/* ─────────────────────────────
-   STATE
-───────────────────────────── */
-
-let modal = null;
-let toastContainer = null;
-
-/* ─────────────────────────────
-   INIT UI ENGINE
-───────────────────────────── */
+import { eventBus } from "./eventBus.js";
 
 export function initUIEngine() {
-  modal = document.getElementById("modal");
-  toastContainer = document.getElementById("toastContainer");
-
-  return {
-    openModal,
-    closeModal,
-    toast,
-    bindModalClose
-  };
-}
-
-/* ─────────────────────────────
-   MODAL
-───────────────────────────── */
-
-export function openModal(data = {}) {
-  if (!modal) return;
-
+  const modal = document.getElementById("modal");
   const title = document.getElementById("modalTitle");
-  const badge = document.getElementById("modalBadge");
   const desc  = document.getElementById("modalDesc");
   const photo = document.getElementById("modalPhoto");
 
-  modal.classList.add("open");
+  const closeBtn = document.getElementById("modalClose");
 
-  if (title) title.textContent = data.title || "Маркер";
-  if (badge) badge.textContent = data.type || "";
+  /* ─────────────────────────────
+     OPEN MODAL (EVENT)
+  ───────────────────────────── */
+  function openModal(marker) {
+    modal.classList.add("open");
 
-  if (desc) desc.textContent = data.text || "";
+    title.textContent = marker.type || "marker";
+    desc.textContent  = marker.text || "";
 
-  if (photo) {
-    if (data.imgUrl) {
-      photo.src = data.imgUrl;
+    if (marker.imgUrl) {
       photo.style.display = "";
+      photo.src = marker.imgUrl;
     } else {
       photo.style.display = "none";
     }
   }
-}
 
-/* ─────────────────────────────
-   CLOSE MODAL
-───────────────────────────── */
+  /* ─────────────────────────────
+     CLOSE MODAL
+  ───────────────────────────── */
+  function closeModal() {
+    modal.classList.remove("open");
 
-export function closeModal() {
-  if (!modal) return;
-
-  modal.classList.remove("open");
-
-  const editForm = document.getElementById("editForm");
-  if (editForm) editForm.style.display = "none";
-}
-
-/* ─────────────────────────────
-   MODAL CLOSE EVENTS
-───────────────────────────── */
-
-export function bindModalClose() {
-  const closeBtn = document.getElementById("modalClose");
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeModal);
+    eventBus.emit("modal:closed", {});
   }
 
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-  }
-}
+  /* ─────────────────────────────
+     EVENTS
+  ───────────────────────────── */
 
-/* ─────────────────────────────
-   TOAST SYSTEM
-───────────────────────────── */
+  eventBus.on("marker:open", ({ marker }) => {
+    openModal(marker);
+  });
 
-export function toast(message, isError = false) {
-  if (!toastContainer) return;
+  eventBus.on("marker:close", () => {
+    closeModal();
+  });
 
-  const el = document.createElement("div");
+  /* ─────────────────────────────
+     UI EVENTS (click)
+  ───────────────────────────── */
 
-  el.className = "toast" + (isError ? " err" : "");
-  el.textContent = message;
+  closeBtn?.addEventListener("click", () => {
+    eventBus.emit("marker:close");
+  });
 
-  toastContainer.appendChild(el);
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      eventBus.emit("marker:close");
+    }
+  });
 
-  setTimeout(() => {
-    el.remove();
-  }, 3000);
-}
-
-/* ─────────────────────────────
-   FORM HELPERS
-───────────────────────────── */
-
-export function showEditForm(show = true) {
-  const form = document.getElementById("editForm");
-  const saveBtn = document.getElementById("saveBtn");
-  const cancelBtn = document.getElementById("cancelEdit");
-
-  if (!form) return;
-
-  form.style.display = show ? "flex" : "none";
-
-  if (saveBtn) saveBtn.style.display = show ? "" : "none";
-  if (cancelBtn) cancelBtn.style.display = show ? "" : "none";
+  /* ─────────────────────────────
+     API (если понадобится напрямую)
+  ───────────────────────────── */
+  return {
+    openModal,
+    closeModal
+  };
 }
