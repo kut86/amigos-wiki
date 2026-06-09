@@ -1,109 +1,145 @@
-import { db, ref, push, onValue, update, remove } from "./firebase.js";
-import { eventBus } from "./eventBus.js";
+import { state } from "./stateManager.js";
+import { bus } from "./eventBus.js";
 
-export function initMarkerEngine({
-  db,
-  mapId,
-  container,
-  filterFn = () => "all",
-  isMobile = () => false
-}) {
-  const currentRef = ref(db, `maps/${mapId}/markers`);
+export class MapEngine {
+  constructor({ mapImg, mapContainer }) {
+    this.mapImg = mapImg;
+    this.mapContainer = mapContainer;
 
-  let markers = {};
-  let unsubscribe = null;
+    this.pz = null;
 
-  /* ───────────────
-     SUBSCRIBE FIREBASE
-  ─────────────── */
-  function subscribe() {
-    unsubscribe = onValue(currentRef, snap => {
-      markers = {};
+    this.mapId = state.get("mapId");
+  }
 
-      snap.forEach(i => {
-        markers[i.key] = i.val();
-      });
+  /* ─────────────────────────
+     INIT
+  ───────────────────────── */
 
-      render();
+  init() {
+    this._initPanzoom();
+
+    bus.on("map:change", (mapId) => {
+      this.switchMap(mapId);
     });
   }
 
-  /* ───────────────
-     RENDER MARKERS
-  ─────────────── */
-  function render() {
-    container.querySelectorAll(".marker").forEach(m => m.remove());
+  /* ─────────────────────────
+     PANZOOM
+  ───────────────────────── */
 
-    const filter = filterFn();
+  _initPanzoom() {
+    this.pz = Panzoom(this.mapContainer, {
+      maxScale: 8,
+      minScale: 0.5,
+      contain: "outside",
+    });
 
-    Object.entries(markers).forEach(([id, m]) => {
-      if (filter !== "all" && m.type !== filter) return;
+    this.mapContainer.parentElement.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        this.pz.zoomWithWheel(e);
+      },
+      { passive: false }
+    );
+  }
 
-      const div = document.createElement("div");
-      div.className = "marker";
-      div.dataset.id = id;
+  /* ─────────────────────────
+     SWITCH MAP
+  ───────────────────────── */
 
-      div.style.left = m.x + "%";
-      div.style.top = m.y + "%";
+  switchMap(mapId, options = {}) {
+    this.mapId = mapId;
+    state.setMap(mapId);
 
-      if (isMobile()) div.classList.add("no-hover");
+    const { imgUrl, fallbackUrl } = options;
 
-      if (m.imgUrl) {
-        div.innerHTML = `
-          <div class="marker-photo">
-            <img src="${m.imgUrl}" draggable="false">
-          </div>
-          <div class="marker-tooltip">${m.text}</div>
-        `;
-      } else {
-        div.innerHTML = `
-          <div class="marker-icon">${m.text}</div>
-        `;
+    this._clearPanzoom();
+
+    this.mapImg.onload = () => {
+      this._initPanzoom();
+      this.resetView();
+    };
+
+    this.mapImg.onerror = () => {
+      if (fallbackUrl) {
+        this.mapImg.src = fallbackUrl;
       }
+    };
 
-      /* ───────────────
-         CLICK → EVENTBUS
-      ─────────────── */
-      div.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        eventBus.emit("marker:open", {
-          id,
-          marker: m
-        });
-      });
-
-      container.appendChild(div);
-    });
+    this.mapImg.src = imgUrl;
   }
 
-  /* ───────────────
-     PUBLIC API
-  ─────────────── */
-  function add(marker) {
-    return push(currentRef, marker);
+  _clearPanzoom() {
+    if (this.pz) {
+      this.pz.destroy();
+      this.pz = null;
+    }
   }
 
-  function updateMarker(id, data) {
-    return update(ref(db, `maps/${mapId}/markers/${id}`), data);
+  /* ─────────────────────────
+     VIEW CONTROL
+  ───────────────────────── */
+
+  zoomIn() {
+    if (!this.pz) return;
+    const scale = this.pz.getScale() * 1.3;
+    this.pz.zoom(scale);
   }
 
-  function deleteMarker(id) {
-    return remove(ref(db, `maps/${mapId}/markers/${id}`));
+  zoomOut() {
+    if (!this.pz) return;
+    const scale = this.pz.getScale() / 1.3;
+    this.pz.zoom(scale);
   }
 
-  function destroy() {
-    if (unsubscribe) unsubscribe();
-    container.innerHTML = "";
+  resetView() {
+    if (!this.pz) return;
+
+    const iw = this.mapImg.naturalWidth;
+    const ih = this.mapImg.naturalHeight;
+
+    const vw = this.mapContainer.clientWidth;
+    const vh = this.mapContainer.clientHeight;
+
+    const scale = Math.min(vw / iw, vh / ih);
+
+    const x = (vw - iw * scale) / 2;
+    const y = (vh - ih * scale) / 2;
+
+    this.pz.zoom(scale, { animate: false });
+    this.pz.pan(x, y, { animate: false });
   }
+}
 
-  /* init */
-  subscribe();
+/* ─────────────────────────
+   HELPER EXPORT (удобство)
+───────────────────────── */
 
-  return {
-    add,
-    update: updateMarker,
-    delete: deleteMarker,
-    destroy
-  };
-       }
+export function initMapEngine(config) {
+  const engine = new MapEngine(config);
+  engine.init();
+  return engine;
+}
+
+/* ─────────────────────────
+   GLOBAL CONTROL WRAPPERS
+───────────────────────── */
+
+let instance = null;
+
+export function setMapEngine(i) {
+  instance = i;
+}
+
+export function zoomIn() {
+  instance?.zoomIn();
+}
+
+export function zoomOut() {
+  instance?.zoomOut();
+}
+
+export function resetView() {
+  instance?.resetView();
+}
