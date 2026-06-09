@@ -1,80 +1,107 @@
+import { db, ref, onValue, set, update } from "./firebase.js";
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
-/* ─────────────────────────
-   SYNC ENGINE
-   (центральный координатор)
-───────────────────────── */
+export class SyncEngine {
+  constructor() {
+    this.mapId = null;
+    this.listeners = [];
+    this.worldRef = null;
+  }
 
-export function initSyncEngine({
-  mapEngine,
-  markerEngine,
-  ui
-}) {
   /* ─────────────────────────
-     MAP → EVERYTHING
+     INIT WORLD
   ───────────────────────── */
 
-  bus.on("map:change", (mapId) => {
+  init(mapId) {
+    this.mapId = mapId;
+
     state.setMap(mapId);
 
-    markerEngine.switchMap(mapId);
+    this.worldRef = ref(db, `world/${mapId}`);
 
-    console.log("[SYNC] map changed:", mapId);
-  });
+    this.bindFirebase();
 
-  /* ─────────────────────────
-     STATE → MAP
-  ───────────────────────── */
-
-  state.on("mapId", (mapId) => {
-    mapEngine.loadMap(mapId);
-    markerEngine.switchMap(mapId);
-  });
+    this.bindLocalEvents();
+  }
 
   /* ─────────────────────────
-     MARKER EVENTS → FIREBASE
+     FIREBASE → LOCAL
   ───────────────────────── */
 
-  bus.on("marker:updateRequest", ({ id, data }) => {
-    markerEngine.update(id, data);
-  });
+  bindFirebase() {
+    if (!this.worldRef) return;
 
-  bus.on("marker:deleteRequest", (id) => {
-    markerEngine.delete(id);
-  });
+    onValue(this.worldRef, (snap) => {
+      const data = snap.val();
 
-  bus.on("marker:addRequest", (data) => {
-    markerEngine.add(data);
-  });
+      if (!data) return;
+
+      // синхронизация карты
+      if (data.mapId && data.mapId !== state.get("mapId")) {
+        state.setMap(data.mapId);
+        bus.emit("map:sync", data.mapId);
+      }
+
+      // синхронизация фильтра
+      if (data.filter) {
+        bus.emit("filter:sync", data.filter);
+      }
+
+      // синхронизация режима
+      if (data.mode) {
+        state.patch({ mode: data.mode });
+      }
+
+      // маркеры (если используешь глобально)
+      if (data.markers) {
+        bus.emit("markers:sync", data.markers);
+      }
+    });
+  }
 
   /* ─────────────────────────
-     UI → STATE
+     LOCAL → FIREBASE
   ───────────────────────── */
 
-  bus.on("ui:addOpen", (pos) => {
-    state.set("addMode", true);
-  });
+  bindLocalEvents() {
+    bus.on("map:change", (mapId) => {
+      this.update({ mapId });
+    });
 
-  bus.on("ui:addClose", () => {
-    state.set("addMode", false);
-  });
+    bus.on("filter:change", (filter) => {
+      this.update({ filter });
+    });
 
-  bus.on("ui:editMode", () => {
-    state.set("editMode", true);
-  });
+    bus.on("mode:change", (mode) => {
+      this.update({ mode });
+    });
 
-  bus.on("ui:editCancel", () => {
-    state.set("editMode", false);
-  });
+    bus.on("markers:update", (markers) => {
+      this.update({ markers });
+    });
+  }
 
   /* ─────────────────────────
-     MARKER → UI
+     UPDATE FIREBASE
   ───────────────────────── */
 
-  bus.on("marker:open", (marker) => {
-    state.setCurrentMarker(marker);
-  });
+  update(data) {
+    if (!this.worldRef) return;
 
-  console.log("[SYNC ENGINE] initialized");
+    update(this.worldRef, data);
+  }
+
+  /* ─────────────────────────
+     SET FULL STATE
+  ───────────────────────── */
+
+  setFullState(stateData) {
+    if (!this.worldRef) return;
+
+    set(this.worldRef, stateData);
+  }
 }
+
+/* singleton */
+export const syncEngine = new SyncEngine();
