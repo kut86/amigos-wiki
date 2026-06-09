@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Map</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="map.css">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="top-bar">
+    <div class="title">🌍 GLOBAL MAP</div>
+    <div id="userInfo"></div>
+  </div>
+
+  <!-- MAP GRID -->
+  <div id="mapGrid" class="map-grid">
+
+    <!-- WOODS -->
+    <div class="map-card" data-map="woods">
+      <img src="images/woods.png" />
+      <div class="map-info">
+        <h3>Woods</h3>
+        <p class="time">06:00 ☀️</p>
+        <button class="enter-btn">Войти</button>
+      </div>
+    </div>
+
+    <!-- CUSTOMS -->
+    <div class="map-card" data-map="customs">
+      <img src="images/customs.png" />
+      <div class="map-info">
+        <h3>Customs</h3>
+        <p class="time">22:00 🌙</p>
+        <button class="enter-btn">Войти</button>
+      </div>
+    </div>
+
+    <!-- INTERCHANGE -->
+    <div class="map-card" data-map="interchange">
+      <img src="images/interchange.png" />
+      <div class="map-info">
+        <h3>Interchange</h3>
+        <p class="time">14:00 ☀️</p>
+        <button class="enter-btn">Войти</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="confirmTitle">Войти в карту?</h3>
+      <p id="confirmDesc">Подтвердите переход</p>
+
+      <div class="modal-actions">
+        <button id="cancelEnter">Отмена</button>
+        <button id="confirmEnter">Войти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module" src="map.js"></script>
+
+</body>
+</html>
