@@ -14,7 +14,7 @@ export class EventBus {
 
     this.events.get(event).add(callback);
 
-    // unsubscribe функция
+    // вернуть функцию отписки
     return () => this.off(event, callback);
   }
 
@@ -24,18 +24,34 @@ export class EventBus {
 
   off(event, callback) {
     this.events.get(event)?.delete(callback);
+
+    if (this.events.get(event)?.size === 0) {
+      this.events.delete(event);
+    }
   }
 
   /* ─────────────────────────
      EMIT
   ───────────────────────── */
 
-  emit(event, payload) {
-    this.events.get(event)?.forEach(cb => cb(payload));
+  emit(event, data) {
+    this.events.get(event)?.forEach(cb => cb(data));
   }
 
   /* ─────────────────────────
-     ONCE (одноразовое событие)
+     CLEAR (редко нужно)
+  ───────────────────────── */
+
+  clear(event) {
+    if (event) {
+      this.events.delete(event);
+    } else {
+      this.events.clear();
+    }
+  }
+
+  /* ─────────────────────────
+     HELPERS (для архитектуры)
   ───────────────────────── */
 
   once(event, callback) {
@@ -46,19 +62,7 @@ export class EventBus {
 
     this.on(event, wrapper);
   }
-
-  /* ─────────────────────────
-     CLEAR
-  ───────────────────────── */
-
-  clear(event) {
-    if (event) {
-      this.events.delete(event);
-    } else {
-      this.events.clear();
-    }
-  }
 }
 
-/* singleton */
-export const bus = new EventBus();
+/* singleton (ОДИН на всё приложение) */
+export const eventBus = new EventBus();
