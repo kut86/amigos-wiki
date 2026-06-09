@@ -1,121 +1,99 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
+
+import {
+  db,
+  onAuthChange,
+  ensureUser,
+  getUserRole
+} from "./firebase.js";
+
+import { initMapEngine } from "./mapEngine.js";
 import { MarkerEngine } from "./markerEngine.js";
+import { initUIEngine } from "./uiEngine.js";
+
+/* ─────────────────────────
+   URL MAP
+───────────────────────── */
+
+const urlParams = new URLSearchParams(window.location.search);
+const mapId = urlParams.get("map") || state.get("mapId") || "woods";
+
+state.setMap(mapId);
 
 /* ─────────────────────────
    DOM
 ───────────────────────── */
 
+const mapImg = document.getElementById("mapImage");
 const mapContainer = document.getElementById("map");
 const filterSel = document.getElementById("filter");
 
 /* ─────────────────────────
-   STATE
+   AUTH + ROLE
 ───────────────────────── */
 
-state.hydrate();
+onAuthChange(async (user) => {
+  if (!user) return;
+
+  await ensureUser(user);
+
+  const role = await getUserRole(user.uid);
+
+  state.setUser(user, role);
+
+  if (role === "admin") {
+    document.body.classList.add("admin");
+
+    const addBtn = document.getElementById("addModeBtn");
+    if (addBtn) addBtn.style.display = "block";
+
+    console.log("ADMIN MODE ENABLED (WIKI)");
+  }
+});
+
+/* ─────────────────────────
+   MAP ENGINE
+───────────────────────── */
+
+const mapEngine = initMapEngine({
+  mapImg,
+  mapContainer
+});
+
+mapEngine.switchMap(mapId, {
+  imgUrl: `images/${mapId}.png`
+});
 
 /* ─────────────────────────
    MARKER ENGINE
 ───────────────────────── */
 
-let markerEngine = null;
+let markerEngine = new MarkerEngine(db, mapId);
+let markersCache = {};
 
-/* ─────────────────────────
-   INIT ENGINE
-───────────────────────── */
+markerEngine.subscribe((markers) => {
+  markersCache = markers;
 
-function initMarkers(mapId) {
-  if (markerEngine) {
-    markerEngine.destroy?.();
-  }
-
-  markerEngine = new MarkerEngine(mapId);
-
-  markerEngine.subscribe((markers) => {
-    render(markers);
-  });
-}
-
-/* ─────────────────────────
-   RENDER
-───────────────────────── */
-
-function render(markers) {
-  document.querySelectorAll(".marker").forEach(m => m.remove());
-
-  const filter = filterSel.value;
-
-  Object.entries(markers).forEach(([id, m]) => {
-    if (filter !== "all" && m.type !== filter) return;
-
-    const el = createMarker(id, m);
-    mapContainer.appendChild(el);
-  });
-}
-
-/* ─────────────────────────
-   CREATE MARKER
-───────────────────────── */
-
-function createMarker(id, m) {
-  const div = document.createElement("div");
-
-  div.className = "marker";
-  div.style.left = m.x + "%";
-  div.style.top = m.y + "%";
-
-  div.innerHTML = `
-    <div class="marker-inner">
-      ${m.iconUrl
-        ? `<img src="${m.iconUrl}" class="marker-icon">`
-        : `<span class="marker-text">${m.text}</span>`
-      }
-    </div>
-  `;
-
-  /* ── OPEN MODAL ── */
-
-  div.addEventListener("click", () => {
-    state.setCurrentMarker({ id, ...m });
-
-    bus.emit("marker:open", {
-      id,
-      ...m
-    });
-  });
-
-  return div;
-}
-
-/* ─────────────────────────
-   FILTER
-───────────────────────── */
-
-filterSel.addEventListener("change", () => {
-  if (markerEngine) {
-    markerEngine.reload?.();
-  }
+  bus.emit("markers:update", markers);
 });
 
 /* ─────────────────────────
-   MAP SYNC (из map.js)
+   UI ENGINE
 ───────────────────────── */
 
-bus.on("map:change", (mapId) => {
-  initMarkers(mapId);
-});
+const ui = initUIEngine();
 
 /* ─────────────────────────
-   STATE SYNC
+   MAP SWITCH SYNC (map ↔ wiki)
 ───────────────────────── */
 
-state.on("mapId", (mapId) => {
-  initMarkers(mapId);
+bus.on("map:change", (newMap) => {
+  if (state.get("mapId") !== newMap) return;
+
+  mapEngine.switchMap(newMap, {
+    imgUrl: `images/${newMap}.png`
+  });
+
+  markerEngine = new MarkerEngine(db, newMap);
 });
-
-/* ─────────────────────────
-   INIT
-───────────────────────── */
-
-initMarkers(state.get("mapId"));
