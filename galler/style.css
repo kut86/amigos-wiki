@@ -598,10 +598,6 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
 
-  @media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
   
   .marker-photo img,
   .marker-icon {
@@ -653,10 +649,6 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
 
-  @media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
   
   .marker-photo img,
   .marker-icon {
@@ -708,11 +700,7 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
   
-   @media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
-  
+   
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
@@ -762,11 +750,7 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-icon  { width: 0.9dvh; height: 0.9dvh; font-size: 0.5dvh; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
-@media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
-  
+
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
@@ -817,10 +801,7 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
 
-  @media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
+
   
   .marker-photo img,
   .marker-icon {
@@ -845,11 +826,7 @@ textarea { resize: vertical; min-height: 72px; }
   /* status bar */
   #statusBar { font-size: 9px; padding: 3px 8px; }
 }
-@media (hover: none) {
-  .marker:hover { transform: translate(-50%, -50%); } /* отключаем scale */
-  .marker:hover .marker-tooltip { opacity: 0; }       /* отключаем tooltip */
-  .marker:hover .marker-photo { box-shadow: 0 2px 10px rgba(0,0,0,.7); } /* убираем glow */
-  
+
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
