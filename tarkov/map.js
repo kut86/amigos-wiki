@@ -2,184 +2,115 @@ import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
 /* ─────────────────────────
-   CONFIG ЛОКАЦИЙ
+   DOM
 ───────────────────────── */
 
-const LOCATIONS = {
+const mapContainer = document.getElementById("map");
+const mapImage = document.getElementById("mapImage");
+
+const mapSelect = document.getElementById("mapSelect");
+const filterSel = document.getElementById("filter");
+
+/* ─────────────────────────
+   MAP DATA
+───────────────────────── */
+
+const MAPS = {
   woods: {
-    name: "Лес",
+    title: "Лес",
     img: "images/woods.png",
-    timeOffset: 0
+    fallback: "fallback.jpg"
   },
   customs: {
-    name: "Таможня",
-    img: "images/customs.jpg",
-    timeOffset: 2
+    title: "Таможня",
+    img: "images/customs.png",
+    fallback: "fallback.jpg"
   },
   interchange: {
-    name: "Развязка",
-    img: "images/interchange.jpg",
-    timeOffset: 4
+    title: "Развязка",
+    img: "images/interchange.png",
+    fallback: "fallback.jpg"
   }
 };
 
 /* ─────────────────────────
-   DOM
+   STATE INIT
 ───────────────────────── */
 
-const map = document.getElementById("map");
-const mapImg = document.getElementById("mapImage");
-
-const confirmModal = createConfirmModal();
-
-/* ─────────────────────────
-   STATE
-───────────────────────── */
-
-let currentLocation = null;
-
-/* ─────────────────────────
-   INIT
-───────────────────────── */
-
-init();
-
-/* ─────────────────────────
-   INIT FUNCTION
-───────────────────────── */
-
-function init() {
-  const saved = localStorage.getItem("lastLocation") || "woods";
-  loadMap(saved);
-
-  renderLocations();
-}
+state.hydrate();
 
 /* ─────────────────────────
    LOAD MAP
 ───────────────────────── */
 
-function loadMap(id) {
-  currentLocation = id;
-  state.setMap(id);
+function loadMap(mapId, silent = false) {
+  const map = MAPS[mapId];
+  if (!map) return;
 
-  mapImg.src = LOCATIONS[id].img;
+  state.setMap(mapId);
 
-  localStorage.setItem("lastLocation", id);
+  mapImage.src = map.img;
 
-  updateTime(id);
+  mapImage.onerror = () => {
+    mapImage.src = map.fallback;
+  };
+
+  if (!silent) {
+    bus.emit("map:change", mapId);
+  }
+
+  mapSelect.value = mapId;
 }
 
 /* ─────────────────────────
-   RENDER LOCATIONS
+   SWITCH MAP (UI)
 ───────────────────────── */
 
-function renderLocations() {
-  Object.entries(LOCATIONS).forEach(([id, loc]) => {
-    const el = document.createElement("div");
-    el.className = "location-marker";
-    el.dataset.id = id;
+mapSelect.addEventListener("change", (e) => {
+  const newMap = e.target.value;
 
-    el.innerHTML = `
-      <div class="location-dot"></div>
-      <div class="location-label">${loc.name}</div>
-    `;
-
-    el.style.position = "absolute";
-
-    /* 👉 временно рандом позиция (потом заменишь на координаты) */
-    el.style.left = Math.random() * 80 + 10 + "%";
-    el.style.top = Math.random() * 80 + 10 + "%";
-
-    el.addEventListener("click", () => {
-      openConfirm(id);
-    });
-
-    map.appendChild(el);
-  });
-}
+  bus.emit("map:requestChange", newMap);
+});
 
 /* ─────────────────────────
-   CONFIRM FLOW
+   CONFIRM SWITCH (логика)
 ───────────────────────── */
 
-function openConfirm(id) {
-  const loc = LOCATIONS[id];
+bus.on("map:requestChange", (mapId) => {
+  const current = state.get("mapId");
 
-  confirmModal.show(
-    `Перейти в ${loc.name}?`,
-    () => goToLocation(id)
+  if (current === mapId) return;
+
+  const confirmSwitch = confirm(
+    `Перейти на карту: ${MAPS[mapId].title}?`
   );
-}
 
-function goToLocation(id) {
-  state.setMap(id);
+  if (!confirmSwitch) {
+    mapSelect.value = current;
+    return;
+  }
 
-  localStorage.setItem("lastLocation", id);
-
-  window.location.href = `wiki.html?map=${id}`;
-}
-
-/* ─────────────────────────
-   TIME SYSTEM (заготовка)
-───────────────────────── */
-
-function updateTime(id) {
-  const offset = LOCATIONS[id].timeOffset || 0;
-
-  const baseHour = new Date().getHours();
-  const gameHour = (baseHour + offset) % 24;
-
-  const isNight = gameHour >= 21 || gameHour < 6;
-
-  bus.emit("time:update", {
-    mapId: id,
-    hour: gameHour,
-    isNight
-  });
-}
+  loadMap(mapId);
+});
 
 /* ─────────────────────────
-   SIMPLE CONFIRM MODAL
+   SYNC FROM STATE
 ───────────────────────── */
 
-function createConfirmModal() {
-  const el = document.createElement("div");
-  el.className = "confirm-modal";
-  el.style.display = "none";
+state.on("mapId", (mapId) => {
+  loadMap(mapId, true);
+});
 
-  el.innerHTML = `
-    <div class="confirm-box">
-      <p class="confirm-text"></p>
-      <div class="confirm-actions">
-        <button class="btn-yes">Да</button>
-        <button class="btn-no">Нет</button>
-      </div>
-    </div>
-  `;
+/* ─────────────────────────
+   GLOBAL EVENTS (для wiki.js и других)
+───────────────────────── */
 
-  document.body.appendChild(el);
+bus.on("map:change", (mapId) => {
+  console.log("Map changed globally:", mapId);
+});
 
-  const text = el.querySelector(".confirm-text");
-  const yes = el.querySelector(".btn-yes");
-  const no = el.querySelector(".btn-no");
+/* ─────────────────────────
+   INIT
+───────────────────────── */
 
-  let onConfirm = null;
-
-  yes.onclick = () => {
-    el.style.display = "none";
-    onConfirm?.();
-  };
-
-  no.onclick = () => {
-    el.style.display = "none";
-  };
-
-  return {
-    show(message, callback) {
-      text.textContent = message;
-      onConfirm = callback;
-      el.style.display = "flex";
-    }
-  };
-}
+loadMap(state.get("mapId"));
