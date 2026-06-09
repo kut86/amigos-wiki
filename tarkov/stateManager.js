@@ -17,6 +17,37 @@ export class StateManager {
   }
 
   /* ─────────────────────────
+     INIT SYNC
+  ───────────────────────── */
+
+  hydrate() {
+    const saved = localStorage.getItem("appState");
+    if (!saved) return;
+
+    try {
+      const data = JSON.parse(saved);
+
+      // аккуратно мержим, чтобы не ломать структуру
+      this.state = {
+        ...this.state,
+        ...data
+      };
+
+      this.emit("stateHydrated", this.state);
+    } catch (e) {
+      console.warn("StateManager hydrate error:", e);
+    }
+  }
+
+  persist() {
+    try {
+      localStorage.setItem("appState", JSON.stringify(this.state));
+    } catch (e) {
+      console.warn("StateManager persist error:", e);
+    }
+  }
+
+  /* ─────────────────────────
      GETTERS
   ───────────────────────── */
 
@@ -34,12 +65,17 @@ export class StateManager {
 
   set(key, value) {
     this.state[key] = value;
+
+    this.persist(); // 🔥 синхронизация
+
     this.emit(key, value);
     this.emit("stateChange", this.state);
   }
 
   patch(obj) {
     Object.assign(this.state, obj);
+
+    this.persist(); // 🔥 синхронизация
 
     for (const key in obj) {
       this.emit(key, obj[key]);
@@ -59,7 +95,7 @@ export class StateManager {
 
     this.listeners.get(event).add(callback);
 
-    // вернуть unsubscribe
+    // unsubscribe
     return () => this.off(event, callback);
   }
 
@@ -97,7 +133,25 @@ export class StateManager {
   setCurrentMarker(marker) {
     this.set("currentMarker", marker);
   }
+
+  /* ─────────────────────────
+     RESET (полезно для logout)
+  ───────────────────────── */
+
+  reset() {
+    this.state = {
+      mapId: "woods",
+      user: null,
+      isAdmin: false,
+      addMode: false,
+      editMode: false,
+      currentMarker: null,
+    };
+
+    this.persist();
+    this.emit("stateChange", this.state);
+  }
 }
 
-/* singleton (один на всё приложение) */
+/* singleton */
 export const state = new StateManager();
