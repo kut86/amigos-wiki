@@ -13,13 +13,11 @@ import { MarkerEngine } from "./markerEngine.js";
 import { initUIEngine } from "./uiEngine.js";
 
 /* ─────────────────────────
-   URL MAP
+   URL MAP ID
 ───────────────────────── */
 
 const urlParams = new URLSearchParams(window.location.search);
 const mapId = urlParams.get("map") || state.get("mapId") || "woods";
-
-state.setMap(mapId);
 
 /* ─────────────────────────
    DOM
@@ -27,10 +25,20 @@ state.setMap(mapId);
 
 const mapImg = document.getElementById("mapImage");
 const mapContainer = document.getElementById("map");
+
+const mapSelect = document.getElementById("mapSelect");
 const filterSel = document.getElementById("filter");
 
+const addBtn = document.getElementById("addModeBtn");
+
 /* ─────────────────────────
-   AUTH + ROLE
+   STATE INIT
+───────────────────────── */
+
+state.setMap(mapId);
+
+/* ─────────────────────────
+   AUTH + ROLE SYSTEM
 ───────────────────────── */
 
 onAuthChange(async (user) => {
@@ -45,7 +53,6 @@ onAuthChange(async (user) => {
   if (role === "admin") {
     document.body.classList.add("admin");
 
-    const addBtn = document.getElementById("addModeBtn");
     if (addBtn) addBtn.style.display = "block";
 
     console.log("ADMIN MODE ENABLED (WIKI)");
@@ -53,7 +60,7 @@ onAuthChange(async (user) => {
 });
 
 /* ─────────────────────────
-   MAP ENGINE
+   MAP ENGINE INIT
 ───────────────────────── */
 
 const mapEngine = initMapEngine({
@@ -61,21 +68,9 @@ const mapEngine = initMapEngine({
   mapContainer
 });
 
+/* загрузка карты */
 mapEngine.switchMap(mapId, {
   imgUrl: `images/${mapId}.png`
-});
-
-/* ─────────────────────────
-   MARKER ENGINE
-───────────────────────── */
-
-let markerEngine = new MarkerEngine(db, mapId);
-let markersCache = {};
-
-markerEngine.subscribe((markers) => {
-  markersCache = markers;
-
-  bus.emit("markers:update", markers);
 });
 
 /* ─────────────────────────
@@ -85,15 +80,113 @@ markerEngine.subscribe((markers) => {
 const ui = initUIEngine();
 
 /* ─────────────────────────
-   MAP SWITCH SYNC (map ↔ wiki)
+   MARKER ENGINE
 ───────────────────────── */
 
-bus.on("map:change", (newMap) => {
-  if (state.get("mapId") !== newMap) return;
+let markerEngine = new MarkerEngine(db, mapId);
+let markersCache = {};
+
+/* подписка на маркеры */
+function bindMarkers(engine) {
+  engine.subscribe((markers) => {
+    markersCache = markers;
+
+    bus.emit("markers:update", markers);
+  });
+}
+
+bindMarkers(markerEngine);
+
+/* ─────────────────────────
+   MAP SELECT SWITCH
+───────────────────────── */
+
+mapSelect.value = mapId;
+
+mapSelect.addEventListener("change", (e) => {
+  const newMap = e.target.value;
+
+  bus.emit("map:requestChange", newMap);
+});
+
+/* ─────────────────────────
+   CONFIRM MAP CHANGE
+───────────────────────── */
+
+bus.on("map:requestChange", (newMap) => {
+  if (state.get("mapId") === newMap) return;
+
+  const ok = confirm(`Перейти на карту: ${newMap}?`);
+
+  if (!ok) {
+    mapSelect.value = state.get("mapId");
+    return;
+  }
+
+  changeMap(newMap);
+});
+
+/* ─────────────────────────
+   CHANGE MAP FUNCTION
+───────────────────────── */
+
+function changeMap(newMap) {
+  state.setMap(newMap);
 
   mapEngine.switchMap(newMap, {
     imgUrl: `images/${newMap}.png`
   });
 
   markerEngine = new MarkerEngine(db, newMap);
+  bindMarkers(markerEngine);
+
+  bus.emit("map:change", newMap);
+}
+
+/* ─────────────────────────
+   FILTER (заготовка)
+───────────────────────── */
+
+filterSel.addEventListener("change", () => {
+  bus.emit("filter:change", filterSel.value);
 });
+
+/* ─────────────────────────
+   ADD MARKER MODE
+───────────────────────── */
+
+if (addBtn) {
+  addBtn.addEventListener("click", () => {
+    bus.emit("ui:addOpen");
+  });
+}
+
+/* ─────────────────────────
+   MARKER EVENTS (backend hook)
+───────────────────────── */
+
+bus.on("marker:addRequest", (data) => {
+  markerEngine.add(data);
+});
+
+/* ─────────────────────────
+   OPEN MARKER
+───────────────────────── */
+
+bus.on("marker:open", (id) => {
+  const marker = markersCache[id];
+  if (!marker) return;
+
+  ui.openModal({
+    title: marker.text || "Marker",
+    text: marker.text || "",
+    imgUrl: marker.imgUrl || "",
+    type: marker.type || "info"
+  });
+});
+
+/* ─────────────────────────
+   INIT COMPLETE
+───────────────────────── */
+
+console.log("WIKI LOADED:", mapId);
