@@ -1,82 +1,64 @@
-import { ref, push, onValue, update, remove } from "./firebase.js";
-import { bus } from "./eventBus.js";
-import { state } from "./stateManager.js";
+import { ref, push, onValue, update, remove } from "firebase/database";
+
+/* ─────────────────────────
+   MARKER ENGINE (CONSTRUCTOR VERSION)
+───────────────────────── */
 
 export class MarkerEngine {
-  constructor({ db, container, isMobile, filterFn }) {
+  constructor(db, mapId) {
     this.db = db;
-    this.container = container;
+    this.mapId = mapId;
 
-    this.isMobile = isMobile;
-    this.filterFn = filterFn;
-
-    this.mapId = state.get("mapId");
-
-    this.currentRef = null;
-    this.unsubscribe = null;
-
+    this.currentRef = ref(db, `maps/${mapId}/markers`);
     this.markers = {};
+    this.listeners = new Set();
   }
 
   /* ─────────────────────────
-     INIT / SWITCH MAP
+     SUBSCRIBE
   ───────────────────────── */
 
-  init(mapId) {
-    this.mapId = mapId;
-    state.setMap(mapId);
-
-    this._subscribe();
-  }
-
-  switchMap(mapId) {
-    this.mapId = mapId;
-    state.setMap(mapId);
-
-    this._unsubscribe();
-    this.clearDOM();
-    this._subscribe();
-  }
-
-  /* ─────────────────────────
-     FIREBASE SUBSCRIBE
-  ───────────────────────── */
-
-  _subscribe() {
-    this.currentRef = ref(this.db, `maps/${this.mapId}/markers`);
-
-    this.unsubscribe = onValue(this.currentRef, (snap) => {
+  subscribe(callback) {
+    const unsub = onValue(this.currentRef, (snap) => {
       this.markers = {};
 
-      snap.forEach(item => {
-        this.markers[item.key] = item.val();
+      snap.forEach((i) => {
+        this.markers[i.key] = {
+          id: i.key,
+          ...i.val()
+        };
       });
 
-      this.render();
+      callback(this.markers);
     });
-  }
 
-  _unsubscribe() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
+    return unsub;
   }
 
   /* ─────────────────────────
-     CRUD
+     CREATE (CONSTRUCTOR MODE)
   ───────────────────────── */
 
   add(marker) {
-    return push(this.currentRef, marker);
+    const normalized = this.normalize(marker);
+
+    return push(this.currentRef, normalized);
   }
+
+  /* ─────────────────────────
+     UPDATE
+  ───────────────────────── */
 
   update(id, data) {
     return update(
       ref(this.db, `maps/${this.mapId}/markers/${id}`),
-      data
+      this.normalize(data, true)
     );
   }
+
+  /* ─────────────────────────
+     DELETE
+  ───────────────────────── */
 
   delete(id) {
     return remove(
@@ -85,88 +67,108 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     RENDER
+     NORMALIZER (СЕРДЦЕ КОНСТРУКТОРА)
   ───────────────────────── */
 
-  render() {
-    this.clearDOM();
+  normalize(marker, isUpdate = false) {
+    const base = {
+      text: marker.text || "",
+      type: marker.type || "loot",
 
-    const filter = this.filterFn?.() || "all";
+      x: marker.x ?? 0,
+      y: marker.y ?? 0,
 
-    Object.entries(this.markers).forEach(([id, m]) => {
-      if (filter !== "all" && m.type !== filter) return;
+      imgUrl: marker.imgUrl || null,
+      iconUrl: marker.iconUrl || null,
 
-      const el = this._createMarker(id, m);
-      this.container.appendChild(el);
-    });
-  }
+      /* ── NEW: CONSTRUCTOR FIELDS ── */
 
-  clearDOM() {
-    this.container.querySelectorAll(".marker").forEach(el => el.remove());
+      fields: marker.fields || {}, 
+      // гибкие кастом поля:
+      // { key: value }
+
+      links: marker.links || [],
+      // цепочки: дверь → ключ → карта
+
+      meta: marker.meta || {},
+      // технические данные
+
+      conditions: marker.conditions || [],
+      // условия отображения
+
+      actions: marker.actions || []
+      // действия (например: перейти, открыть, подсветить)
+    };
+
+    /* при update не ломаем старые данные */
+    if (isUpdate) {
+      return {
+        ...base,
+        ...marker
+      };
+    }
+
+    return base;
   }
 
   /* ─────────────────────────
-     CREATE MARKER
+     HELPERS (БУДУЩИЕ ФИЧИ)
   ───────────────────────── */
 
-  _createMarker(id, m) {
-    const div = document.createElement("div");
-    div.className = "marker";
-    div.dataset.id = id;
+  addField(id, key, value) {
+    const marker = this.markers[id];
+    if (!marker) return;
 
-    div.style.left = m.x + "%";
-    div.style.top = m.y + "%";
+    const fields = marker.fields || {};
+    fields[key] = value;
 
-    if (this.isMobile()) {
-      div.classList.add("no-hover");
-    }
+    return this.update(id, { fields });
+  }
 
-    const fallback = this._fallbackIcon();
+  addLink(id, targetId, type = "generic") {
+    const marker = this.markers[id];
+    if (!marker) return;
 
-    if (m.imgUrl) {
-      div.innerHTML = `
-        <div class="marker-photo">
-          <img src="${m.imgUrl}" onerror="this.src='${fallback}'">
-        </div>
-        ${this.isMobile() ? "" : `
-        <div class="marker-preview">
-          <img src="${m.imgUrl}">
-        </div>`}
-        <div class="marker-tooltip">${m.text}</div>
-      `;
-    } else if (m.iconUrl) {
-      div.innerHTML = `
-        <div class="marker-photo">
-          <img src="${m.iconUrl}" onerror="this.src='${fallback}'">
-        </div>
-        <div class="marker-tooltip">${m.text}</div>
-      `;
-    } else {
-      div.innerHTML = `
-        <div class="marker-icon">
-          📍
-        </div>
-        <div class="marker-tooltip">${m.text}</div>
-      `;
-    }
+    const links = marker.links || [];
 
-    /* ─────────────────────────
-       CLICK → OPEN MODAL
-    ───────────────────────── */
-
-    div.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      bus.emit("marker:open", {
-        id,
-        ...m
-      });
+    links.push({
+      targetId,
+      type
     });
 
-    return div;
+    return this.update(id, { links });
   }
 
-  _fallbackIcon() {
-    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23333'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' fill='%23aaa'%3E?%3C/text%3E%3C/svg%3E";
+  setCondition(id, condition) {
+    const marker = this.markers[id];
+    if (!marker) return;
+
+    const conditions = marker.conditions || [];
+    conditions.push(condition);
+
+    return this.update(id, { conditions });
   }
-}
+
+  setAction(id, action) {
+    const marker = this.markers[id];
+    if (!marker) return;
+
+    const actions = marker.actions || [];
+    actions.push(action);
+
+    return this.update(id, { actions });
+  }
+
+  /* ─────────────────────────
+     SWITCH MAP
+  ───────────────────────── */
+
+  switchMap(mapId) {
+    this.mapId = mapId;
+
+    this.currentRef = ref(
+      this.db,
+      `maps/${mapId}/markers`
+    );
+  }
+      }
