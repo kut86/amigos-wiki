@@ -1,157 +1,95 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
-import {
-  onAuthChange,
-  ensureUser,
-  getUserRole
-} from "./firebase.js";
+import { initMapEngine } from "./mapEngine.js";
 
 /* ─────────────────────────
    DOM
 ───────────────────────── */
 
+const mapImg = document.getElementById("mapImage");
 const mapContainer = document.getElementById("map");
-const mapImage = document.getElementById("mapImage");
-
-const mapSelect = document.getElementById("mapSelect");
 const filterSel = document.getElementById("filter");
-
-const modal = document.getElementById("confirmModal");
-const confirmBtn = document.getElementById("confirmEnter");
-const cancelBtn = document.getElementById("cancelEnter");
+const mapSelect = document.getElementById("mapSelect");
 
 /* ─────────────────────────
-   MAP DATA (ТВОЯ ЛОГИКА СОХРАНЕНА)
+   ENGINE (только карта)
 ───────────────────────── */
 
-const MAPS = {
-  woods: {
-    title: "Лес",
-    img: "images/woods.png",
-    fallback: "fallback.jpg"
-  },
-  customs: {
-    title: "Таможня",
-    img: "images/customs.png",
-    fallback: "fallback.jpg"
-  },
-  interchange: {
-    title: "Развязка",
-    img: "images/interchange.png",
-    fallback: "fallback.jpg"
-  }
-};
-
-/* ─────────────────────────
-   STATE INIT
-───────────────────────── */
-
-state.hydrate();
-
-/* ─────────────────────────
-   AUTH + ROLE SYSTEM
-───────────────────────── */
-
-onAuthChange(async (user) => {
-  if (!user) return;
-
-  await ensureUser(user);
-
-  const role = await getUserRole(user.uid);
-
-  state.setUser(user, role);
-
-  if (role === "admin") {
-    document.body.classList.add("admin");
-    console.log("ADMIN MODE ENABLED (MAP)");
-  }
+const mapEngine = initMapEngine({
+  mapImg,
+  mapContainer
 });
 
 /* ─────────────────────────
-   CURRENT MAP STATE
+   INIT PAGE (вызывается из app.js)
 ───────────────────────── */
 
-let selectedMap = null;
+export function initMapPage() {
+  console.log("[MAP] init");
+
+  const currentMap = state.get("mapId") || "woods";
+
+  loadMap(currentMap);
+
+  bindUI();
+
+  bindEvents();
+}
 
 /* ─────────────────────────
-   LOAD MAP (твоя функция — улучшенная)
+   LOAD MAP
 ───────────────────────── */
 
-function loadMap(mapId, silent = false) {
-  const map = MAPS[mapId];
-  if (!map) return;
-
+function loadMap(mapId) {
   state.setMap(mapId);
 
-  mapImage.src = map.img;
+  mapEngine.switchMap(mapId, {
+    imgUrl: `images/${mapId}.png`,
+    fallbackUrl: "fallback.jpg"
+  });
 
-  mapImage.onerror = () => {
-    mapImage.src = map.fallback;
-  };
-
-  mapSelect.value = mapId;
-
-  if (!silent) {
-    bus.emit("map:change", mapId);
+  if (mapSelect) {
+    mapSelect.value = mapId;
   }
 }
 
 /* ─────────────────────────
-   SELECT UI
+   UI EVENTS
 ───────────────────────── */
 
-mapSelect.addEventListener("change", (e) => {
-  const newMap = e.target.value;
+function bindUI() {
+  document.getElementById("zoomIn")?.addEventListener("click", () => {
+    mapEngine.zoomIn();
+  });
 
-  bus.emit("map:requestChange", newMap);
-});
+  document.getElementById("zoomOut")?.addEventListener("click", () => {
+    mapEngine.zoomOut();
+  });
+
+  document.getElementById("zoomReset")?.addEventListener("click", () => {
+    mapEngine.reset();
+  });
+
+  mapSelect?.addEventListener("change", (e) => {
+    const newMap = e.target.value;
+    bus.emit("map:change", newMap);
+  });
+
+  filterSel?.addEventListener("change", () => {
+    bus.emit("filter:change", filterSel.value);
+  });
+}
 
 /* ─────────────────────────
-   CONFIRM SWITCH FLOW (твой подход сохранён)
+   EVENTS FROM SYSTEM
 ───────────────────────── */
 
-bus.on("map:requestChange", (mapId) => {
-  const current = state.get("mapId");
+function bindEvents() {
+  bus.on("map:sync", (mapId) => {
+    loadMap(mapId);
+  });
 
-  if (current === mapId) return;
-
-  selectedMap = mapId;
-
-  document.getElementById("confirmTitle").textContent =
-    `Перейти на ${MAPS[mapId].title}?`;
-
-  modal.classList.remove("hidden");
-});
-
-/* ─────────────────────────
-   CONFIRM
-───────────────────────── */
-
-confirmBtn.addEventListener("click", () => {
-  if (!selectedMap) return;
-
-  loadMap(selectedMap);
-
-  bus.emit("map:confirmed", selectedMap);
-
-  modal.classList.add("hidden");
-  selectedMap = null;
-
-  // переход в wiki
-  window.location.href = `wiki.html?map=${state.get("mapId")}`;
-});
-
-/* ─────────────────────────
-   CANCEL
-───────────────────────── */
-
-cancelBtn.addEventListener("click", () => {
-  modal.classList.add("hidden");
-  selectedMap = null;
-});
-
-/* ─────────────────────────
-   INIT
-───────────────────────── */
-
-loadMap(state.get("mapId") || "woods", true);
+  bus.on("filter:sync", (filter) => {
+    if (filterSel) filterSel.value = filter;
+  });
+    }
