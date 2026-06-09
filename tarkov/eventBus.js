@@ -1,49 +1,64 @@
-class EventBus {
+export class EventBus {
   constructor() {
-    this.events = {};
+    this.events = new Map();
   }
 
-  /* ───────────────
+  /* ─────────────────────────
      SUBSCRIBE
-  ─────────────── */
+  ───────────────────────── */
+
   on(event, callback) {
-    if (!this.events[event]) {
-      this.events[event] = [];
+    if (!this.events.has(event)) {
+      this.events.set(event, new Set());
     }
 
-    this.events[event].push(callback);
+    this.events.get(event).add(callback);
+
+    // unsubscribe функция
+    return () => this.off(event, callback);
   }
 
-  /* ───────────────
+  /* ─────────────────────────
      UNSUBSCRIBE
-  ─────────────── */
+  ───────────────────────── */
+
   off(event, callback) {
-    if (!this.events[event]) return;
-
-    this.events[event] = this.events[event].filter(cb => cb !== callback);
+    this.events.get(event)?.delete(callback);
   }
 
-  /* ───────────────
+  /* ─────────────────────────
      EMIT
-  ─────────────── */
-  emit(event, data) {
-    const listeners = this.events[event];
-    if (!listeners) return;
+  ───────────────────────── */
 
-    listeners.forEach(cb => cb(data));
+  emit(event, payload) {
+    this.events.get(event)?.forEach(cb => cb(payload));
   }
 
-  /* ───────────────
-     CLEAR EVENT
-  ─────────────── */
+  /* ─────────────────────────
+     ONCE (одноразовое событие)
+  ───────────────────────── */
+
+  once(event, callback) {
+    const wrapper = (data) => {
+      callback(data);
+      this.off(event, wrapper);
+    };
+
+    this.on(event, wrapper);
+  }
+
+  /* ─────────────────────────
+     CLEAR
+  ───────────────────────── */
+
   clear(event) {
     if (event) {
-      delete this.events[event];
+      this.events.delete(event);
     } else {
-      this.events = {};
+      this.events.clear();
     }
   }
 }
 
 /* singleton */
-export const eventBus = new EventBus();
+export const bus = new EventBus();
