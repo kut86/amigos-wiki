@@ -1,192 +1,107 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
-
-import {
-  db,
-  onAuthChange,
-  ensureUser,
-  getUserRole
-} from "./firebase.js";
-
-import { initMapEngine } from "./mapEngine.js";
-import { MarkerEngine } from "./markerEngine.js";
 import { initUIEngine } from "./uiEngine.js";
-
-/* ─────────────────────────
-   URL MAP ID
-───────────────────────── */
-
-const urlParams = new URLSearchParams(window.location.search);
-const mapId = urlParams.get("map") || state.get("mapId") || "woods";
 
 /* ─────────────────────────
    DOM
 ───────────────────────── */
 
-const mapImg = document.getElementById("mapImage");
-const mapContainer = document.getElementById("map");
-
-const mapSelect = document.getElementById("mapSelect");
-const filterSel = document.getElementById("filter");
-
-const addBtn = document.getElementById("addModeBtn");
+const wikiContainer = document.getElementById("wiki");
+const markerList = document.getElementById("markerList");
+const searchInput = document.getElementById("wikiSearch");
 
 /* ─────────────────────────
-   STATE INIT
-───────────────────────── */
-
-state.setMap(mapId);
-
-/* ─────────────────────────
-   AUTH + ROLE SYSTEM
-───────────────────────── */
-
-onAuthChange(async (user) => {
-  if (!user) return;
-
-  await ensureUser(user);
-
-  const role = await getUserRole(user.uid);
-
-  state.setUser(user, role);
-
-  if (role === "admin") {
-    document.body.classList.add("admin");
-
-    if (addBtn) addBtn.style.display = "block";
-
-    console.log("ADMIN MODE ENABLED (WIKI)");
-  }
-});
-
-/* ─────────────────────────
-   MAP ENGINE INIT
-───────────────────────── */
-
-const mapEngine = initMapEngine({
-  mapImg,
-  mapContainer
-});
-
-/* загрузка карты */
-mapEngine.switchMap(mapId, {
-  imgUrl: `images/${mapId}.png`
-});
-
-/* ─────────────────────────
-   UI ENGINE
+   UI ENGINE (только UI)
 ───────────────────────── */
 
 const ui = initUIEngine();
 
 /* ─────────────────────────
-   MARKER ENGINE
+   INIT PAGE (вызывается из app.js)
 ───────────────────────── */
 
-let markerEngine = new MarkerEngine(db, mapId);
-let markersCache = {};
+export function initWikiPage() {
+  console.log("[WIKI] init");
 
-/* подписка на маркеры */
-function bindMarkers(engine) {
-  engine.subscribe((markers) => {
-    markersCache = markers;
+  bindUI();
 
-    bus.emit("markers:update", markers);
-  });
-}
+  bindEvents();
 
-bindMarkers(markerEngine);
-
-/* ─────────────────────────
-   MAP SELECT SWITCH
-───────────────────────── */
-
-mapSelect.value = mapId;
-
-mapSelect.addEventListener("change", (e) => {
-  const newMap = e.target.value;
-
-  bus.emit("map:requestChange", newMap);
-});
-
-/* ─────────────────────────
-   CONFIRM MAP CHANGE
-───────────────────────── */
-
-bus.on("map:requestChange", (newMap) => {
-  if (state.get("mapId") === newMap) return;
-
-  const ok = confirm(`Перейти на карту: ${newMap}?`);
-
-  if (!ok) {
-    mapSelect.value = state.get("mapId");
-    return;
-  }
-
-  changeMap(newMap);
-});
-
-/* ─────────────────────────
-   CHANGE MAP FUNCTION
-───────────────────────── */
-
-function changeMap(newMap) {
-  state.setMap(newMap);
-
-  mapEngine.switchMap(newMap, {
-    imgUrl: `images/${newMap}.png`
-  });
-
-  markerEngine = new MarkerEngine(db, newMap);
-  bindMarkers(markerEngine);
-
-  bus.emit("map:change", newMap);
+  renderInitial();
 }
 
 /* ─────────────────────────
-   FILTER (заготовка)
+   INITIAL RENDER
 ───────────────────────── */
 
-filterSel.addEventListener("change", () => {
-  bus.emit("filter:change", filterSel.value);
-});
+function renderInitial() {
+  const markers = state.get("markers") || {};
+  renderMarkers(markers);
+}
 
 /* ─────────────────────────
-   ADD MARKER MODE
+   UI EVENTS
 ───────────────────────── */
 
-if (addBtn) {
-  addBtn.addEventListener("click", () => {
-    bus.emit("ui:addOpen");
+function bindUI() {
+  searchInput?.addEventListener("input", () => {
+    bus.emit("wiki:search", searchInput.value);
+  });
+
+  markerList?.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-id]");
+    if (!item) return;
+
+    const id = item.dataset.id;
+
+    bus.emit("marker:select", id);
   });
 }
 
 /* ─────────────────────────
-   MARKER EVENTS (backend hook)
+   SYSTEM EVENTS
 ───────────────────────── */
 
-bus.on("marker:addRequest", (data) => {
-  markerEngine.add(data);
-});
-
-/* ─────────────────────────
-   OPEN MARKER
-───────────────────────── */
-
-bus.on("marker:open", (id) => {
-  const marker = markersCache[id];
-  if (!marker) return;
-
-  ui.openModal({
-    title: marker.text || "Marker",
-    text: marker.text || "",
-    imgUrl: marker.imgUrl || "",
-    type: marker.type || "info"
+function bindEvents() {
+  bus.on("markers:update", (markers) => {
+    renderMarkers(markers);
   });
-});
+
+  bus.on("map:sync", () => {
+    // при смене карты очищаем/обновляем wiki
+    renderInitial();
+  });
+
+  bus.on("marker:open", (marker) => {
+    ui.openModal({
+      title: marker.text,
+      text: marker.text,
+      imgUrl: marker.imgUrl,
+      type: marker.type
+    });
+  });
+}
 
 /* ─────────────────────────
-   INIT COMPLETE
+   RENDER
 ───────────────────────── */
 
-console.log("WIKI LOADED:", mapId);
+function renderMarkers(markers) {
+  if (!markerList) return;
+
+  markerList.innerHTML = "";
+
+  Object.entries(markers).forEach(([id, m]) => {
+    const el = document.createElement("div");
+
+    el.className = "wiki-item";
+    el.dataset.id = id;
+
+    el.innerHTML = `
+      <div class="title">${m.text || "Без названия"}</div>
+      <div class="type">${m.type || "unknown"}</div>
+    `;
+
+    markerList.appendChild(el);
+  });
+}
