@@ -1,87 +1,185 @@
-// map.js
-import { MapEngine } from "./mapEngine.js";
+import { state } from "./stateManager.js";
+import { bus } from "./eventBus.js";
 
-/* ── список карт (глобальная карта мира) ── */
-const MAPS = {
+/* ─────────────────────────
+   CONFIG ЛОКАЦИЙ
+───────────────────────── */
+
+const LOCATIONS = {
   woods: {
     name: "Лес",
-    raidTime: "45 мин",
-    image: "images/woods.png"
+    img: "images/woods.png",
+    timeOffset: 0
   },
   customs: {
     name: "Таможня",
-    raidTime: "40 мин",
-    image: "images/customs.jpg"
+    img: "images/customs.jpg",
+    timeOffset: 2
   },
   interchange: {
     name: "Развязка",
-    raidTime: "50 мин",
-    image: "images/interchange.jpg"
+    img: "images/interchange.jpg",
+    timeOffset: 4
   }
 };
 
-/* ── engine ── */
-const engine = new MapEngine(MAPS);
+/* ─────────────────────────
+   DOM
+───────────────────────── */
 
-/* ── DOM ── */
-const mapNodes = document.querySelectorAll(".map-node");
-const currentMapLabel = document.getElementById("currentMapLabel");
-const timeLabel = document.getElementById("timeLabel");
-const previewImg = document.getElementById("mapPreview");
+const map = document.getElementById("map");
+const mapImg = document.getElementById("mapImage");
 
-/* ── состояние ── */
-let selectedMap = null;
+const confirmModal = createConfirmModal();
 
-/* ── обновление UI ── */
-function updateUI(mapId) {
-  const map = MAPS[mapId];
-  if (!map) return;
+/* ─────────────────────────
+   STATE
+───────────────────────── */
 
-  currentMapLabel.textContent = map.name;
-  timeLabel.textContent = `Рейд: ${map.raidTime}`;
-  previewImg.src = map.image;
+let currentLocation = null;
+
+/* ─────────────────────────
+   INIT
+───────────────────────── */
+
+init();
+
+/* ─────────────────────────
+   INIT FUNCTION
+───────────────────────── */
+
+function init() {
+  const saved = localStorage.getItem("lastLocation") || "woods";
+  loadMap(saved);
+
+  renderLocations();
 }
 
-/* ── клик по точке карты ── */
-mapNodes.forEach(node => {
-  node.addEventListener("click", () => {
-    const mapId = node.dataset.map;
+/* ─────────────────────────
+   LOAD MAP
+───────────────────────── */
 
-    if (!MAPS[mapId]) return;
+function loadMap(id) {
+  currentLocation = id;
+  state.setMap(id);
 
-    selectedMap = mapId;
-    updateUI(mapId);
+  mapImg.src = LOCATIONS[id].img;
 
-    openConfirm(mapId);
+  localStorage.setItem("lastLocation", id);
+
+  updateTime(id);
+}
+
+/* ─────────────────────────
+   RENDER LOCATIONS
+───────────────────────── */
+
+function renderLocations() {
+  Object.entries(LOCATIONS).forEach(([id, loc]) => {
+    const el = document.createElement("div");
+    el.className = "location-marker";
+    el.dataset.id = id;
+
+    el.innerHTML = `
+      <div class="location-dot"></div>
+      <div class="location-label">${loc.name}</div>
+    `;
+
+    el.style.position = "absolute";
+
+    /* 👉 временно рандом позиция (потом заменишь на координаты) */
+    el.style.left = Math.random() * 80 + 10 + "%";
+    el.style.top = Math.random() * 80 + 10 + "%";
+
+    el.addEventListener("click", () => {
+      openConfirm(id);
+    });
+
+    map.appendChild(el);
   });
-});
-
-/* ── подтверждение перехода ── */
-function openConfirm(mapId) {
-  const map = MAPS[mapId];
-
-  const ok = confirm(
-    `Перейти на карту: ${map.name}?\n` +
-    `Время рейда: ${map.raidTime}`
-  );
-
-  if (!ok) return;
-
-  engine.setMap(mapId);
-
-  // сохраняем выбор (чтобы wiki могла восстановить)
-  localStorage.setItem("selectedMap", mapId);
-
-  // переход на wiki
-  window.location.href = `/wiki.html?map=${mapId}`;
 }
 
-/* ── восстановление выбора при загрузке ── */
-window.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("selectedMap");
+/* ─────────────────────────
+   CONFIRM FLOW
+───────────────────────── */
 
-  if (saved && MAPS[saved]) {
-    selectedMap = saved;
-    updateUI(saved);
-  }
-});
+function openConfirm(id) {
+  const loc = LOCATIONS[id];
+
+  confirmModal.show(
+    `Перейти в ${loc.name}?`,
+    () => goToLocation(id)
+  );
+}
+
+function goToLocation(id) {
+  state.setMap(id);
+
+  localStorage.setItem("lastLocation", id);
+
+  window.location.href = `wiki.html?map=${id}`;
+}
+
+/* ─────────────────────────
+   TIME SYSTEM (заготовка)
+───────────────────────── */
+
+function updateTime(id) {
+  const offset = LOCATIONS[id].timeOffset || 0;
+
+  const baseHour = new Date().getHours();
+  const gameHour = (baseHour + offset) % 24;
+
+  const isNight = gameHour >= 21 || gameHour < 6;
+
+  bus.emit("time:update", {
+    mapId: id,
+    hour: gameHour,
+    isNight
+  });
+}
+
+/* ─────────────────────────
+   SIMPLE CONFIRM MODAL
+───────────────────────── */
+
+function createConfirmModal() {
+  const el = document.createElement("div");
+  el.className = "confirm-modal";
+  el.style.display = "none";
+
+  el.innerHTML = `
+    <div class="confirm-box">
+      <p class="confirm-text"></p>
+      <div class="confirm-actions">
+        <button class="btn-yes">Да</button>
+        <button class="btn-no">Нет</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(el);
+
+  const text = el.querySelector(".confirm-text");
+  const yes = el.querySelector(".btn-yes");
+  const no = el.querySelector(".btn-no");
+
+  let onConfirm = null;
+
+  yes.onclick = () => {
+    el.style.display = "none";
+    onConfirm?.();
+  };
+
+  no.onclick = () => {
+    el.style.display = "none";
+  };
+
+  return {
+    show(message, callback) {
+      text.textContent = message;
+      onConfirm = callback;
+      el.style.display = "flex";
+    }
+  };
+}
