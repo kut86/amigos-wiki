@@ -249,7 +249,7 @@
   }
 
   .menu-panel.open {
-    left: 1%;
+    left: 10%;
     right: 1%;
     top: 7%;
     max-width: 700px;
