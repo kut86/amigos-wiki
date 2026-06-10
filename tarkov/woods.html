@@ -13,10 +13,12 @@
 <!-- ───────── TOP BAR ───────── -->
 <header class="topbar">
 
-  <!-- LEFT -->
   <div class="left-panel">
+    <button id="leftToggle">☰</button>
+
     <button id="loginBtn">Войти</button>
     <button id="logoutBtn" style="display:none;">Выйти</button>
+
     <span id="adminBadge" style="display:none;">ADMIN</span>
 
     <div class="external-links">
@@ -25,39 +27,33 @@
     </div>
   </div>
 
-  <!-- CENTER -->
   <div class="center-panel">
-    <select id="mapSelect"></select>
+    <select id="mapSelect">
+      <option value="woods">Woods</option>
+    </select>
   </div>
 
-  <!-- RIGHT -->
   <div class="right-panel">
-
-    <button id="filterToggleBtn">Фильтр</button>
-    <button id="mapToggleBtn">Карта</button>
+    <button id="rightToggle">☰</button>
 
     <button id="addModeBtn" style="display:none;">+ Маркер</button>
-
   </div>
+
 </header>
 
-<!-- ───────── LEFT SIDE MENU ───────── -->
-<aside id="leftMenu" class="side-menu left hidden">
+<!-- ───────── LEFT MENU ───────── -->
+<aside id="leftMenu" class="side-menu left hidden-left">
 
   <h3>Меню</h3>
 
-  <button id="loginBtn2">Войти</button>
-  <button id="logoutBtn2">Выйти</button>
-
-  <hr/>
-
   <button>Настройки</button>
   <button>Справка</button>
+  <button>Discord</button>
 
 </aside>
 
-<!-- ───────── RIGHT SIDE MENU ───────── -->
-<aside id="rightMenu" class="side-menu right hidden">
+<!-- ───────── RIGHT MENU ───────── -->
+<aside id="rightMenu" class="side-menu right hidden-right">
 
   <h3>Фильтр</h3>
 
@@ -67,13 +63,14 @@
     <option value="boss">Боссы</option>
     <option value="quest">Квесты</option>
     <option value="exit">Выходы</option>
-    <option value="structure">Точки</option>
   </select>
 
   <hr/>
 
-  <h3>Карты</h3>
-  <select id="mapSelectSide"></select>
+  <h3>Карта</h3>
+  <select id="mapSelectSide">
+    <option value="woods">Woods</option>
+  </select>
 
 </aside>
 
@@ -86,42 +83,80 @@
 
 </div>
 
-<!-- ───────── ADD / EDIT MODAL ───────── -->
-<div id="markerModal" class="modal hidden">
+<!-- ───────── ADD FORM ───────── -->
+<div id="addForm" class="modal-form" style="display:none;">
+
+  <h3>Добавить маркер</h3>
+
+  <input id="addTitle" placeholder="Название"/>
+
+  <select id="addType">
+    <option value="loot">Лут</option>
+    <option value="boss">Босс</option>
+    <option value="quest">Квест</option>
+    <option value="exit">Выход</option>
+    <option value="structure">Точка интереса</option>
+  </select>
+
+  <input id="addIcon" placeholder="URL иконки (необязательно)"/>
+  <textarea id="addDescription" placeholder="Описание"></textarea>
+
+  <div class="row">
+    <button id="addConfirm">Добавить</button>
+    <button id="addCancel">Отмена</button>
+  </div>
+
+</div>
+
+<!-- ───────── MODAL ───────── -->
+<div id="modal" class="modal">
 
   <div class="modal-content">
 
-    <h2 id="modalTitle">Маркер</h2>
+    <button id="modalClose">✕</button>
 
-    <input id="markerTitle" placeholder="Название маркера"/>
+    <h2 id="modalTitle"></h2>
+    <div id="modalType"></div>
 
-    <select id="markerType">
-      <option value="loot">Лут</option>
-      <option value="boss">Босс</option>
-      <option value="quest">Квест</option>
-      <option value="exit">Выход</option>
-      <option value="structure">Точка интереса</option>
-    </select>
+    <img id="modalImage" style="display:none;" />
 
-    <input id="markerIcon" placeholder="URL иконки (необязательно)"/>
+    <p id="modalText"></p>
 
-    <textarea id="markerDescription" placeholder="Описание"></textarea>
+    <!-- ADMIN -->
+    <div id="modalAdminPanel">
 
-    <textarea id="markerExtra" placeholder="Доп. описание (детали)"></textarea>
+      <button id="editBtn">Редактировать</button>
+      <button id="deleteBtn">Удалить</button>
 
-    <div class="modal-actions">
+      <div id="editForm" style="display:none;">
 
-      <button id="saveMarkerBtn">Сохранить</button>
-      <button id="deleteMarkerBtn" class="danger">Удалить</button>
-      <button id="closeMarkerBtn">Закрыть</button>
+        <input id="editTitle" placeholder="Название"/>
+        <select id="editType">
+          <option value="loot">Лут</option>
+          <option value="boss">Босс</option>
+          <option value="quest">Квест</option>
+          <option value="exit">Выход</option>
+        </select>
+
+        <input id="editIconUrl" placeholder="Иконка"/>
+        <textarea id="editDescription"></textarea>
+
+        <button id="saveBtn">Сохранить</button>
+        <button id="cancelEdit">Отмена</button>
+
+      </div>
 
     </div>
 
   </div>
+
 </div>
 
 <!-- ───────── TOAST ───────── -->
 <div id="toastContainer"></div>
 
+<!-- ───────── SCRIPTS ───────── -->
+<script type="module" src="app.js"></script>
+
 </body>
-      </html>
+</html>
