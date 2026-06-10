@@ -1,87 +1,66 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woods Map</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Woods Map</title>
 
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 
-<body>
+<body data-map="woods">
 
-<!-- ───────────────── LEFT PANEL ───────────────── -->
-<div id="leftPanel" class="panel left hidden">
-
-  <div class="panel-block">
-    <button id="loginBtn">Войти</button>
-    <button id="logoutBtn" style="display:none">Выйти</button>
-    <span id="adminBadge" style="display:none">ADMIN</span>
-  </div>
-
-  <!-- сюда позже добавишь ссылки -->
-  <div id="customLinks" class="panel-block"></div>
-
-</div>
-
-<button id="toggleLeft" class="panel-toggle left-toggle">☰</button>
-
-<!-- ───────────────── RIGHT PANEL ───────────────── -->
-<div id="rightPanel" class="panel right hidden">
-
-  <div class="panel-block">
-    <label>Карта</label>
-    <select id="mapSelect"></select>
-  </div>
-
-  <div class="panel-block">
-    <label>Фильтр</label>
-    <select id="filter">
-      <option value="all">Все</option>
-      <option value="loot">Лут</option>
-      <option value="boss">Босс</option>
-      <option value="quest">Квест</option>
-      <option value="exit">Выход</option>
-      <option value="structure">Интерес</option>
-    </select>
-  </div>
-
-</div>
-
-<button id="toggleRight" class="panel-toggle right-toggle">⚙</button>
-
-<!-- ───────────────── MAP ───────────────── -->
-<div id="mapWrapper">
-  <div id="map">
-    <img id="mapImage" draggable="false" />
-    <div id="markerLayer"></div>
-  </div>
-</div>
-
-<!-- ───────────────── MODAL ───────────────── -->
-<div id="modal" class="modal hidden">
-  <div class="modal-box">
-
-    <div class="modal-header">
-      <h3 id="modalTitle"></h3>
-      <button id="modalClose">✕</button>
+  <!-- ─────────────────────
+       LEFT MENU
+  ───────────────────── -->
+  <div id="leftPanel" class="panel left-panel">
+    
+    <div class="panel-block">
+      <button id="loginBtn" class="btn">Войти</button>
+      <button id="logoutBtn" class="btn" style="display:none">Выйти</button>
     </div>
 
-    <div class="modal-body">
-      <img id="modalImg" style="display:none;">
-      <p id="modalText"></p>
-    </div>
-
-    <div class="modal-footer">
-      <button id="editBtn" style="display:none">Редактировать</button>
-      <button id="delBtn" style="display:none">Удалить</button>
+    <div class="panel-block">
+      <button id="addBtn" class="btn btn-primary" style="display:none">
+        + Маркер
+      </button>
     </div>
 
   </div>
-</div>
 
-<!-- ───────────────── SCRIPTS ───────────────── -->
-<script type="module" src="app.js"></script>
+  <!-- ─────────────────────
+       RIGHT MENU
+  ───────────────────── -->
+  <div id="rightPanel" class="panel right-panel">
+
+    <div class="panel-block">
+      <label>Фильтр</label>
+      <select id="filter">
+        <option value="all">Все</option>
+        <option value="loot">Лут</option>
+        <option value="boss">Босс</option>
+        <option value="quest">Квест</option>
+        <option value="exit">Выход</option>
+        <option value="bot">Снайпер</option>
+        <option value="structure">Точки</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────────
+       MAP
+  ───────────────────── -->
+  <div id="mapViewport">
+    <div id="mapStage">
+      <img id="mapImage" src="images/woods.png" alt="woods map" />
+    </div>
+  </div>
+
+  <!-- ─────────────────────
+       JS
+  ───────────────────── -->
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>
