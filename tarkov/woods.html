@@ -1,137 +1,58 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Woods Map</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Map</title>
 
-  <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-<!-- ─────────────────────────
-     HUD / MENU
-───────────────────────── -->
-<div class="hud">
+<!-- LEFT MENU -->
+<div id="leftPanel" class="panel left hidden">
+  <button id="authBtn">Login</button>
+  <button id="logoutBtn" style="display:none">Logout</button>
 
-  <button id="loginBtn">Войти</button>
-  <button id="logoutBtn" style="display:none">Выйти</button>
+  <div id="customLinks"></div>
+</div>
 
-  <span id="adminBadge" style="display:none">ADMIN</span>
+<button id="toggleLeft">☰</button>
+
+<!-- RIGHT MENU -->
+<div id="rightPanel" class="panel right hidden">
+
+  <select id="mapSelect"></select>
 
   <select id="filter">
-    <option value="all">Все</option>
-    <option value="loot">Лут</option>
-    <option value="bot">Боты</option>
-    <option value="boss">Боссы</option>
-    <option value="quest">Квесты</option>
-    <option value="exit">Выходы</option>
-    <option value="structure">Точки</option>
-  </select>
-
-  <button id="addModeBtn" style="display:none">+ Маркер</button>
-
-</div>
-
-<!-- ─────────────────────────
-     MAP
-───────────────────────── -->
-<div id="mapWrapper">
-  <div id="map">
-    <img
-      id="mapImage"
-      src="images/woods.png"
-      alt="Woods Map"
-      draggable="false"
-    />
-  </div>
-</div>
-
-<!-- ─────────────────────────
-     MARKER ADD FORM
-───────────────────────── -->
-<div id="addForm" style="display:none">
-  <textarea id="addText" placeholder="Описание"></textarea>
-
-  <select id="addType">
+    <option value="all">All</option>
     <option value="loot">Loot</option>
-    <option value="bot">Bot</option>
     <option value="boss">Boss</option>
     <option value="quest">Quest</option>
-    <option value="exit">Exit</option>
-    <option value="structure">Structure</option>
   </select>
 
-  <input id="addImgUrl" placeholder="Image URL (optional)" />
-  <input id="addIcon" placeholder="Icon URL (optional)" />
-
-  <button id="addConfirm">Добавить</button>
-  <button id="addCancel">Отмена</button>
 </div>
 
-<!-- ─────────────────────────
-     MODAL
-───────────────────────── -->
-<div id="modal">
-  <div class="modal-box">
+<button id="toggleRight">⚙</button>
 
-    <div class="modal-header">
-      <span id="modalTitle">Marker</span>
-      <span id="modalBadge"></span>
-      <button id="modalClose">✕</button>
-    </div>
+<!-- MAP -->
+<div id="mapWrapper">
+  <img id="mapImage" draggable="false" />
+  <div id="map"></div>
+</div>
 
-    <div class="modal-body">
-      <img id="modalPhoto" style="display:none" />
-      <p id="modalDesc"></p>
-
-      <div id="editForm" style="display:none">
-        <textarea id="editText"></textarea>
-
-        <select id="editType">
-          <option value="loot">Loot</option>
-          <option value="bot">Bot</option>
-          <option value="boss">Boss</option>
-          <option value="quest">Quest</option>
-          <option value="exit">Exit</option>
-          <option value="structure">Structure</option>
-        </select>
-
-        <input id="editImgUrl" placeholder="Image URL" />
-        <input id="editIcon" placeholder="Icon URL" />
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button id="editBtn">Edit</button>
-      <button id="saveBtn" style="display:none">Save</button>
-      <button id="cancelEdit" style="display:none">Cancel</button>
-      <button id="delBtn">Delete</button>
-    </div>
-
+<!-- MODAL -->
+<div id="modal" class="hidden">
+  <div id="modalBox">
+    <h3 id="modalTitle"></h3>
+    <p id="modalText"></p>
+    <img id="modalImg" />
+    <button id="modalClose">X</button>
   </div>
 </div>
 
-<!-- ─────────────────────────
-     ZOOM
-───────────────────────── -->
-<div id="zoomControls">
-  <button id="zoomIn">+</button>
-  <button id="zoomReset">⟲</button>
-  <button id="zoomOut">-</button>
-</div>
-
-<!-- ─────────────────────────
-     TOAST
-───────────────────────── -->
-<div id="toastContainer"></div>
-
-<!-- ─────────────────────────
-     SCRIPTS
-───────────────────────── -->
-<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 <script type="module" src="app.js"></script>
 
 </body>
-    </html>
+</html>
