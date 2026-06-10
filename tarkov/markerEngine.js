@@ -1,9 +1,13 @@
-import { ref, push, onValue, update, remove } from "firebase/database";
-import { bus } from "./eventBus.js";
-import { state } from "./stateManager.js";
+import {
+  ref,
+  push,
+  onValue,
+  update,
+  remove
+} from "firebase/database";
 
 /* ─────────────────────────
-   MARKER ENGINE (CLEAN VERSION)
+   MARKER ENGINE (POLISHED)
 ───────────────────────── */
 
 export class MarkerEngine {
@@ -14,10 +18,9 @@ export class MarkerEngine {
     this.currentRef = ref(db, `maps/${mapId}/markers`);
 
     this.markers = {};
-    this.listeners = new Set();
+    this.unsub = null;
 
-    this.lastHash = null;
-    this.initialized = false;
+    this.listeners = new Set();
   }
 
   /* ─────────────────────────
@@ -25,40 +28,28 @@ export class MarkerEngine {
   ───────────────────────── */
 
   subscribe(callback) {
-    if (this.initialized) return;
+    // защита от двойной подписки
+    if (this.unsub) {
+      this.unsub();
+      this.unsub = null;
+    }
 
-    this.initialized = true;
+    this.unsub = onValue(this.currentRef, (snap) => {
+      const data = {};
 
-    onValue(this.currentRef, (snap) => {
-      const newMarkers = {};
-
-      snap.forEach((i) => {
-        newMarkers[i.key] = {
-          id: i.key,
-          ...i.val()
+      snap.forEach((child) => {
+        data[child.key] = {
+          id: child.key,
+          ...child.val()
         };
       });
 
-      const hash = this._hash(newMarkers);
+      this.markers = data;
 
-      // защита от лишних обновлений
-      if (hash === this.lastHash) return;
-
-      this.lastHash = hash;
-      this.markers = newMarkers;
-
-      /* ───────── STATE SYNC ───────── */
-
-      state.setMarkers(newMarkers);
-
-      /* ───────── GLOBAL EVENT ───────── */
-
-      bus.emit("markers:sync", newMarkers);
-
-      /* ───────── LOCAL CALLBACK ───────── */
-
-      callback?.(newMarkers);
+      callback?.(data);
     });
+
+    return this.unsub;
   }
 
   /* ─────────────────────────
@@ -76,6 +67,8 @@ export class MarkerEngine {
   ───────────────────────── */
 
   update(id, data) {
+    if (!id) return;
+
     return update(
       ref(this.db, `maps/${this.mapId}/markers/${id}`),
       this.normalize(data, true)
@@ -87,13 +80,15 @@ export class MarkerEngine {
   ───────────────────────── */
 
   delete(id) {
+    if (!id) return;
+
     return remove(
       ref(this.db, `maps/${this.mapId}/markers/${id}`)
     );
   }
 
   /* ─────────────────────────
-     NORMALIZER
+     NORMALIZE (единая структура)
   ───────────────────────── */
 
   normalize(marker, isUpdate = false) {
@@ -114,14 +109,12 @@ export class MarkerEngine {
       actions: marker.actions || []
     };
 
-    if (isUpdate) {
-      return {
-        ...marker,
-        ...base
-      };
-    }
+    if (!isUpdate) return base;
 
-    return base;
+    return {
+      ...base,
+      ...marker
+    };
   }
 
   /* ─────────────────────────
@@ -129,22 +122,20 @@ export class MarkerEngine {
   ───────────────────────── */
 
   addField(id, key, value) {
-    const marker = this.markers[id];
-    if (!marker) return;
+    const m = this.markers[id];
+    if (!m) return;
 
-    const fields = {
-      ...(marker.fields || {}),
-      [key]: value
-    };
+    const fields = { ...(m.fields || {}) };
+    fields[key] = value;
 
     return this.update(id, { fields });
   }
 
   addLink(id, targetId, type = "generic") {
-    const marker = this.markers[id];
-    if (!marker) return;
+    const m = this.markers[id];
+    if (!m) return;
 
-    const links = [...(marker.links || [])];
+    const links = [...(m.links || [])];
 
     links.push({ targetId, type });
 
@@ -152,34 +143,30 @@ export class MarkerEngine {
   }
 
   setCondition(id, condition) {
-    const marker = this.markers[id];
-    if (!marker) return;
+    const m = this.markers[id];
+    if (!m) return;
 
-    return this.update(id, {
-      conditions: [
-        ...(marker.conditions || []),
-        condition
-      ]
-    });
+    const conditions = [...(m.conditions || []), condition];
+
+    return this.update(id, { conditions });
   }
 
   setAction(id, action) {
-    const marker = this.markers[id];
-    if (!marker) return;
+    const m = this.markers[id];
+    if (!m) return;
 
-    return this.update(id, {
-      actions: [
-        ...(marker.actions || []),
-        action
-      ]
-    });
+    const actions = [...(m.actions || []), action];
+
+    return this.update(id, { actions });
   }
 
   /* ─────────────────────────
-     SWITCH MAP
+     SWITCH MAP (ВАЖНО)
   ───────────────────────── */
 
   switchMap(mapId) {
+    if (this.mapId === mapId) return;
+
     this.mapId = mapId;
 
     this.currentRef = ref(
@@ -187,20 +174,31 @@ export class MarkerEngine {
       `maps/${mapId}/markers`
     );
 
-    this.markers = {};
-    this.lastHash = null;
-    this.initialized = false;
+    // перезапуск подписки при смене карты
+    if (this.unsub) {
+      this.unsub();
+      this.unsub = null;
+    }
   }
 
   /* ─────────────────────────
-     HASH UTILITY
+     CLEANUP
   ───────────────────────── */
 
-  _hash(obj) {
-    try {
-      return JSON.stringify(obj);
-    } catch {
-      return null;
+  destroy() {
+    if (this.unsub) {
+      this.unsub();
+      this.unsub = null;
     }
+
+    this.markers = {};
   }
-   }
+}
+
+/* ─────────────────────────
+   USAGE
+───────────────────────── */
+
+export function createMarkerEngine(db, mapId) {
+  return new MarkerEngine(db, mapId);
+}
