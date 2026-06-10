@@ -2,8 +2,7 @@ import { bus } from "./eventBus.js";
 import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   INTERACTION LAYER
-   (drag & connect system)
+   INTERACTION LAYER (CLEAN VERSION)
 ───────────────────────── */
 
 export function initInteractionLayer({
@@ -13,50 +12,77 @@ export function initInteractionLayer({
   let isActive = false;
 
   let startMarker = null;
-  let tempLine = null;
+  let isDragging = false;
 
   /* ─────────────────────────
-     INIT
+     ENABLE / DISABLE
   ───────────────────────── */
 
   function enable() {
     isActive = true;
-    state.set("connectMode", true);
+
+    state.setConnectMode(true);
 
     mapContainer.classList.add("connect-mode");
+
+    bindEvents();
   }
 
   function disable() {
     isActive = false;
-    state.set("connectMode", false);
+
+    state.setConnectMode(false);
 
     startMarker = null;
+    isDragging = false;
+
+    unbindEvents();
+
     clearTempLine();
 
     mapContainer.classList.remove("connect-mode");
   }
 
   /* ─────────────────────────
-     START CONNECTION
+     EVENTS BINDING
+  ───────────────────────── */
+
+  function bindEvents() {
+    mapContainer.addEventListener("mousemove", onMouseMove);
+    mapContainer.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseup", onMouseUp);
+  }
+
+  function unbindEvents() {
+    mapContainer.removeEventListener("mousemove", onMouseMove);
+    mapContainer.removeEventListener("mouseup", onMouseUp);
+    window.removeEventListener("mouseup", onMouseUp);
+  }
+
+  /* ─────────────────────────
+     START DRAG
   ───────────────────────── */
 
   function onMarkerMouseDown(markerId, e) {
     if (!state.get("connectMode")) return;
 
+    isDragging = true;
     startMarker = markerId;
 
     bus.emit("connect:start", {
       id: markerId,
       event: e
     });
+
+    e.preventDefault();
   }
 
   /* ─────────────────────────
-     DRAG MOVE (PREVIEW LINE)
+     MOVE (TEMP LINE)
   ───────────────────────── */
 
   function onMouseMove(e) {
-    if (!startMarker || !state.get("connectMode")) return;
+    if (!isActive || !isDragging || !startMarker) return;
 
     const rect = mapContainer.getBoundingClientRect();
 
@@ -67,39 +93,48 @@ export function initInteractionLayer({
       from: startMarker,
       to: { x, y }
     });
-
-    drawTempLine(startMarker, { x, y });
   }
 
   /* ─────────────────────────
      DROP → CREATE LINK
   ───────────────────────── */
 
-  function onMouseUp(targetMarkerId) {
-    if (!startMarker || !state.get("connectMode")) return;
+  function onMouseUp(e) {
+    if (!isActive || !isDragging) return;
 
-    if (targetMarkerId && targetMarkerId !== startMarker) {
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+
+    const targetId = target?.dataset?.id || null;
+
+    if (
+      targetId &&
+      startMarker &&
+      targetId !== startMarker
+    ) {
       bus.emit("marker:linkRequest", {
         from: startMarker,
-        to: targetMarkerId,
+        to: targetId,
         type: "generic"
       });
     }
 
-    clearTempLine();
-    startMarker = null;
+    reset();
   }
 
   /* ─────────────────────────
-     TEMP LINE (VISUAL)
+     RESET STATE
   ───────────────────────── */
 
-  function drawTempLine(fromId, toCoords) {
-    bus.emit("graph:tempLine", {
-      from: fromId,
-      to: toCoords
-    });
+  function reset() {
+    isDragging = false;
+    startMarker = null;
+
+    clearTempLine();
   }
+
+  /* ─────────────────────────
+     TEMP VISUALS
+  ───────────────────────── */
 
   function clearTempLine() {
     bus.emit("graph:clearTemp");
@@ -116,4 +151,4 @@ export function initInteractionLayer({
     onMouseMove,
     onMouseUp
   };
-      }
+       }
