@@ -1,193 +1,190 @@
-import { state } from "./stateManager.js";
-import { bus } from "./eventBus.js";
+import { ref, push, onValue, update, remove } from "firebase/database";
 
 /* ─────────────────────────
-   MAP ENGINE (STABLE)
+   MARKER ENGINE (STABLE)
 ───────────────────────── */
 
-export class MapEngine {
-  constructor({ mapImg, mapContainer }) {
-    this.mapImg = mapImg;
-    this.mapContainer = mapContainer;
+export class MarkerEngine {
+  constructor(db, mapId) {
+    this.db = db;
+    this.mapId = mapId;
 
-    this.pz = null;
+    this.currentRef = ref(db, `maps/${mapId}/markers`);
 
-    this.mapId = state.get("mapId");
-    this.initialized = false;
+    this.markers = {};
 
-    this.currentImgUrl = null;
-    this.loadingToken = 0;
+    this.unsubscribe = null;
+
+    this.listeners = new Set();
+
+    this.isSubscribed = false;
   }
 
   /* ─────────────────────────
-     INIT
-  ───────────────────────── */
-
-  init() {
-    if (this.initialized) return;
-
-    this.initialized = true;
-
-    this._initPanzoom();
-
-    bus.on("map:change", (mapId) => {
-      this.switchMap(mapId, { source: "ui" });
-    });
-
-    bus.on("map:sync", (mapId) => {
-      this.switchMap(mapId, { source: "remote" });
-    });
-
-    console.log("[MAP ENGINE] initialized");
-  }
-
-  /* ─────────────────────────
-     PANZOOM
+     SUBSCRIBE (SAFE)
 ───────────────────────── */
 
-  _initPanzoom() {
-    if (!window.Panzoom) {
-      console.warn("[MAP ENGINE] Panzoom not found");
-      return;
+  subscribe(callback) {
+    // защита от дублей
+    if (this.isSubscribed) {
+      console.warn("[MarkerEngine] already subscribed");
+      return this.unsubscribe;
     }
 
-    this._destroyPanzoom();
+    this.isSubscribed = true;
 
-    this.pz = Panzoom(this.mapContainer, {
-      maxScale: 8,
-      minScale: 0.5,
-      contain: "outside"
+    this.unsubscribe = onValue(this.currentRef, (snap) => {
+      const next = {};
+
+      snap.forEach((i) => {
+        next[i.key] = {
+          id: i.key,
+          ...i.val()
+        };
+      });
+
+      this.markers = next;
+
+      callback(next);
     });
 
-    this.mapContainer.parentElement.addEventListener(
-      "wheel",
-      (e) => {
-        e.preventDefault();
-        this.pz?.zoomWithWheel(e);
-      },
-      { passive: false }
+    return this.unsubscribe;
+  }
+
+  /* ─────────────────────────
+     ADD
+───────────────────────── */
+
+  add(marker) {
+    const normalized = this.normalize(marker);
+    return push(this.currentRef, normalized);
+  }
+
+  /* ─────────────────────────
+     UPDATE (SAFE MERGE)
+───────────────────────── */
+
+  update(id, data) {
+    return update(
+      ref(this.db, `maps/${this.mapId}/markers/${id}`),
+      this.normalize(data, true)
     );
   }
 
-  _destroyPanzoom() {
-    this.pz?.destroy();
-    this.pz = null;
+  /* ─────────────────────────
+     DELETE
+───────────────────────── */
+
+  delete(id) {
+    return remove(
+      ref(this.db, `maps/${this.mapId}/markers/${id}`)
+    );
   }
 
   /* ─────────────────────────
-     SWITCH MAP (SAFE)
+     NORMALIZE (SAFE MERGE)
 ───────────────────────── */
 
-  switchMap(mapId, options = {}) {
+  normalize(marker, isUpdate = false) {
+    const base = {
+      text: "",
+      type: "loot",
+
+      x: 0,
+      y: 0,
+
+      imgUrl: null,
+      iconUrl: null,
+
+      fields: {},
+      links: [],
+      meta: {},
+      conditions: [],
+      actions: []
+    };
+
+    if (!isUpdate) {
+      return {
+        ...base,
+        ...marker
+      };
+    }
+
+    // update → аккуратный merge
+    return {
+      ...marker
+    };
+  }
+
+  /* ─────────────────────────
+     HELPERS
+───────────────────────── */
+
+  addField(id, key, value) {
+    const m = this.markers[id];
+    if (!m) return;
+
+    const fields = { ...(m.fields || {}) };
+    fields[key] = value;
+
+    return this.update(id, { fields });
+  }
+
+  addLink(id, targetId, type = "generic") {
+    const m = this.markers[id];
+    if (!m) return;
+
+    const links = [...(m.links || [])];
+
+    links.push({ targetId, type });
+
+    return this.update(id, { links });
+  }
+
+  setCondition(id, condition) {
+    const m = this.markers[id];
+    if (!m) return;
+
+    const conditions = [...(m.conditions || [])];
+    conditions.push(condition);
+
+    return this.update(id, { conditions });
+  }
+
+  setAction(id, action) {
+    const m = this.markers[id];
+    if (!m) return;
+
+    const actions = [...(m.actions || [])];
+    actions.push(action);
+
+    return this.update(id, { actions });
+  }
+
+  /* ─────────────────────────
+     SWITCH MAP (FIXED)
+───────────────────────── */
+
+  switchMap(mapId) {
     if (!mapId || this.mapId === mapId) return;
 
-    const { imgUrl, fallbackUrl, source = "internal" } = options;
+    // отписка от старого listener
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
+    }
+
+    this.isSubscribed = false;
 
     this.mapId = mapId;
 
-    // state only ONCE source-safe
-    state.setMap(mapId);
-
-    this._destroyPanzoom();
-
-    const token = ++this.loadingToken;
-
-    this.mapImg.onload = () => {
-      if (token !== this.loadingToken) return;
-
-      this._initPanzoom();
-      this.resetView();
-    };
-
-    this.mapImg.onerror = () => {
-      if (fallbackUrl) {
-        this.mapImg.src = fallbackUrl;
-      }
-    };
-
-    if (imgUrl && imgUrl !== this.currentImgUrl) {
-      this.currentImgUrl = imgUrl;
-      this.mapImg.src = imgUrl;
-    }
-
-    // emit ONLY from UI source (prevent loops)
-    if (source === "ui") {
-      bus.emit("map:change", mapId);
-    }
-  }
-
-  /* ─────────────────────────
-     ZOOM
-───────────────────────── */
-
-  zoomIn() {
-    if (!this.pz) return;
-    this.pz.zoom(this.pz.getScale() * 1.25);
-  }
-
-  zoomOut() {
-    if (!this.pz) return;
-    this.pz.zoom(this.pz.getScale() / 1.25);
-  }
-
-  resetView() {
-    if (!this.pz || !this.mapImg) return;
-
-    const iw = this.mapImg.naturalWidth;
-    const ih = this.mapImg.naturalHeight;
-
-    const vw = this.mapContainer.clientWidth;
-    const vh = this.mapContainer.clientHeight;
-
-    if (!iw || !ih || !vw || !vh) return;
-
-    const scale = Math.min(vw / iw, vh / ih);
-
-    const x = (vw - iw * scale) / 2;
-    const y = (vh - ih * scale) / 2;
-
-    this.pz.zoom(scale, { animate: false });
-    this.pz.pan(x, y, { animate: false });
-  }
-
-  /* ─────────────────────────
-     DESTROY
-───────────────────────── */
-
-  destroy() {
-    this._destroyPanzoom();
-    this.initialized = false;
+    this.currentRef = ref(
+      this.db,
+      `maps/${mapId}/markers`
+    );
   }
 }
 
-/* ─────────────────────────
-   FACTORY
-───────────────────────── */
-
-export function initMapEngine(config) {
-  const engine = new MapEngine(config);
-  engine.init();
-  return engine;
-}
-
-/* ─────────────────────────
-   GLOBAL API
-───────────────────────── */
-
-let instance = null;
-
-export function setMapEngine(i) {
-  instance = i;
-}
-
-export function zoomIn() {
-  instance?.zoomIn();
-}
-
-export function zoomOut() {
-  instance?.zoomOut();
-}
-
-export function resetView() {
-  instance?.resetView();
-}
+/* singleton export */
+export const createMarkerEngine = (db, mapId) =>
+  new MarkerEngine(db, mapId);
