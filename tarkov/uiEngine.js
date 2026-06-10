@@ -1,6 +1,10 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
+/* ─────────────────────────
+   UI ENGINE (FEATURE-LEVEL)
+───────────────────────── */
+
 export function initUIEngine() {
   /* ─────────────────────────
      DOM
@@ -28,17 +32,26 @@ export function initUIEngine() {
   let currentMarker = null;
 
   /* ─────────────────────────
+     SAFETY
+  ───────────────────────── */
+
+  if (!modal) {
+    console.warn("[UI] modal not found");
+    return {};
+  }
+
+  /* ─────────────────────────
      OPEN MODAL
   ───────────────────────── */
 
   function openModal(marker) {
-    currentMarker = marker;
+    if (!marker) return;
 
+    currentMarker = marker;
     state.setCurrentMarker(marker);
 
     modalTitle.textContent = marker.text || "Маркер";
     modalBadge.textContent = marker.type || "unknown";
-
     modalDesc.textContent = marker.text || "";
 
     if (marker.imgUrl) {
@@ -48,14 +61,11 @@ export function initUIEngine() {
       modalPhoto.style.display = "none";
     }
 
-    editForm.style.display = "none";
-    editBtn.style.display = "";
-    saveBtn.style.display = "none";
-    cancelEdit.style.display = "none";
+    exitEditMode(false);
 
     modal.classList.add("open");
 
-    bus.emit("ui:modalOpen", marker);
+    bus.emit("ui:modal:open", marker);
   }
 
   /* ─────────────────────────
@@ -64,10 +74,13 @@ export function initUIEngine() {
 
   function closeModal() {
     modal.classList.remove("open");
+
     currentMarker = null;
     state.setCurrentMarker(null);
 
-    bus.emit("ui:modalClose");
+    exitEditMode(false);
+
+    bus.emit("ui:modal:close");
   }
 
   /* ─────────────────────────
@@ -87,20 +100,26 @@ export function initUIEngine() {
     saveBtn.style.display = "";
     cancelEdit.style.display = "";
 
-    bus.emit("ui:editMode", currentMarker);
+    state.set("editMode", true);
+
+    bus.emit("ui:edit:start", currentMarker);
   }
 
-  function exitEditMode() {
+  function exitEditMode(emit = true) {
     editForm.style.display = "none";
     editBtn.style.display = "";
     saveBtn.style.display = "none";
     cancelEdit.style.display = "none";
 
-    bus.emit("ui:editCancel");
+    state.set("editMode", false);
+
+    if (emit) {
+      bus.emit("ui:edit:cancel");
+    }
   }
 
   /* ─────────────────────────
-     SAVE EDIT (только UI отдаёт данные наружу)
+     SAVE EDIT
   ───────────────────────── */
 
   function saveEdit() {
@@ -137,15 +156,17 @@ export function initUIEngine() {
   }
 
   /* ─────────────────────────
-     ADD MODE UI (будущий конструктор)
+     ADD MODE
   ───────────────────────── */
 
   function openAddForm(position) {
-    bus.emit("ui:addOpen", position);
+    state.set("addMode", true);
+    bus.emit("ui:add:open", position);
   }
 
   function closeAddForm() {
-    bus.emit("ui:addClose");
+    state.set("addMode", false);
+    bus.emit("ui:add:close");
   }
 
   /* ─────────────────────────
@@ -153,7 +174,7 @@ export function initUIEngine() {
   ───────────────────────── */
 
   editBtn.onclick = enterEditMode;
-  cancelEdit.onclick = exitEditMode;
+  cancelEdit.onclick = () => exitEditMode();
   saveBtn.onclick = saveEdit;
   delBtn.onclick = deleteMarker;
   modalClose.onclick = closeModal;
@@ -169,14 +190,11 @@ export function initUIEngine() {
   return {
     openModal,
     closeModal,
-
     enterEditMode,
     exitEditMode,
-
     saveEdit,
     deleteMarker,
-
     openAddForm,
     closeAddForm
   };
-}
+      }
