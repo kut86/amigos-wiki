@@ -1,23 +1,29 @@
-/* app.js*/
 import { onAuthChange, getUserRole, ensureUser } from "./firebase.js";
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 import { syncEngine } from "./syncEngine.js";
 
 /* ─────────────────────────
-   DETECT PAGE
+   PAGE DETECTION
 ───────────────────────── */
 
 const isMapPage = !!document.getElementById("map");
 const isWikiPage = !!document.getElementById("wiki");
 
 /* ─────────────────────────
-   INIT STATE (если нужно)
+   BOOT FLAGS (ANTI DOUBLE INIT)
+───────────────────────── */
+
+let appStarted = false;
+
+/* ─────────────────────────
+   INIT STATE DEFAULTS
 ───────────────────────── */
 
 state.patch({
   addMode: false,
   editMode: false,
+  connectMode: false,
   currentMarker: null
 });
 
@@ -31,12 +37,17 @@ onAuthChange(async (user) => {
     return;
   }
 
+  if (appStarted) return;
+  appStarted = true;
+
   console.log("[APP] user:", user.uid);
 
-  /* ensure user exists in DB */
+  /* ─────────────────────────
+     USER INIT
+  ───────────────────────── */
+
   await ensureUser(user);
 
-  /* get role */
   const role = await getUserRole(user.uid);
 
   localStorage.setItem("uid", user.uid);
@@ -45,7 +56,7 @@ onAuthChange(async (user) => {
   state.setUser(user, role === "admin");
 
   /* ─────────────────────────
-     START WORLD SYNC
+     START SYNC ENGINE
   ───────────────────────── */
 
   const mapId = state.get("mapId") || "woods";
@@ -53,7 +64,27 @@ onAuthChange(async (user) => {
   syncEngine.init(mapId);
 
   /* ─────────────────────────
-     PAGE ROUTING LOGIC
+     GLOBAL EVENT HOOKS
+  ───────────────────────── */
+
+  bus.on("map:change", (mapId) => {
+    state.setMap(mapId);
+  });
+
+  bus.on("filter:change", (filter) => {
+    state.setFilter(filter);
+  });
+
+  bus.on("mode:change", (mode) => {
+    state.setMode(mode);
+  });
+
+  bus.on("markers:update", (markers) => {
+    state.setMarkers(markers);
+  });
+
+  /* ─────────────────────────
+     PAGE ROUTING
   ───────────────────────── */
 
   if (isMapPage) {
@@ -63,6 +94,8 @@ onAuthChange(async (user) => {
   if (isWikiPage) {
     startWikiApp();
   }
+
+  console.log("[APP] bootstrap complete");
 });
 
 /* ─────────────────────────
@@ -73,9 +106,7 @@ function startMapApp() {
   console.log("[APP] MAP MODE");
 
   import("./map.js").then((mod) => {
-    if (mod.initMapPage) {
-      mod.initMapPage();
-    }
+    mod?.initMapPage?.();
   });
 }
 
@@ -87,20 +118,6 @@ function startWikiApp() {
   console.log("[APP] WIKI MODE");
 
   import("./wiki.js").then((mod) => {
-    if (mod.initWikiPage) {
-      mod.initWikiPage();
-    }
+    mod?.initWikiPage?.();
   });
 }
-
-/* ─────────────────────────
-   GLOBAL EVENTS
-───────────────────────── */
-
-/* синхронизация карты */
-bus.on("map:change", (mapId) => {
-  state.setMap(mapId);
-});
-
-/* UI debug */
-console.log("[APP] bootstrap loaded");
