@@ -25,7 +25,7 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── PAGE ID (изоляция карт) ── */
+/* ── PAGE ISOLATION (woods.html, customs.html и т.д.) ── */
 const PAGE_ID = location.pathname.split("/").pop().replace(".html", "");
 
 /* ── STATE ── */
@@ -35,7 +35,7 @@ let isAdmin = false;
 let currentMap = "woods";
 
 let currentRef = null;
-let offFn = null;
+let unsubscribe = null;
 
 let allMarkers = {};
 let addMode = false;
@@ -49,15 +49,17 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const addModeBtn = document.getElementById("addModeBtn");
-const addForm = document.getElementById("addForm");
 
+const addForm = document.getElementById("addForm");
 const addTitle = document.getElementById("addTitle");
 const addType = document.getElementById("addType");
-const addIconUrl = document.getElementById("addIconUrl");
+const addIcon = document.getElementById("addIcon");
 const addDescription = document.getElementById("addDescription");
 
 const addConfirm = document.getElementById("addConfirm");
 const addCancel = document.getElementById("addCancel");
+
+const mapSelect = document.getElementById("mapSelect");
 
 /* ── AUTH ── */
 loginBtn.onclick = () => signInWithPopup(auth, provider);
@@ -76,17 +78,20 @@ onAuthStateChanged(auth, user => {
   if (!isAdmin) exitAddMode();
 });
 
-/* ── MAP ── */
+/* ── MAP SWITCH ── */
+mapSelect?.addEventListener("change", e => {
+  switchMap(e.target.value);
+});
+
 function switchMap(id) {
   currentMap = id;
 
-  if (offFn) offFn();
+  if (unsubscribe) unsubscribe();
 
   allMarkers = {};
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
-  mapImg.onload = () => subscribe();
-  mapImg.src = mapImg.src;
+  subscribe();
 }
 
 /* ── FIREBASE ── */
@@ -95,11 +100,13 @@ function subscribe() {
 
   currentRef = ref(db, path);
 
-  offFn = onValue(currentRef, snap => {
+  unsubscribe = onValue(currentRef, snap => {
     allMarkers = {};
+
     snap.forEach(i => {
       allMarkers[i.key] = i.val();
     });
+
     render();
   });
 }
@@ -138,7 +145,7 @@ mapEl.addEventListener("click", e => {
   addForm.style.display = "block";
 });
 
-/* ── ADD MARKER ── */
+/* ── CREATE MARKER ── */
 addConfirm.onclick = () => {
   if (!pendingPos) return;
 
@@ -147,7 +154,7 @@ addConfirm.onclick = () => {
     y: pendingPos.y,
     title: addTitle.value.trim(),
     type: addType.value,
-    iconUrl: addIconUrl.value.trim() || null,
+    iconUrl: addIcon.value.trim() || null,
     description: addDescription.value.trim() || ""
   });
 
@@ -175,12 +182,13 @@ function createMarker(id, m) {
   div.onclick = (e) => {
     e.stopPropagation();
 
-    openModal(
-      { id, ...m },
-      updateMarker,
-      deleteMarker,
-      saveMarker
-    );
+    openModal({
+      id,
+      ...m
+    }, {
+      update: (data) => updateMarker(id, data),
+      delete: () => deleteMarker(id)
+    });
   };
 
   mapEl.appendChild(div);
@@ -189,10 +197,6 @@ function createMarker(id, m) {
 /* ── CRUD ── */
 function updateMarker(id, data) {
   update(ref(db, `maps/${PAGE_ID}/${currentMap}/markers/${id}`), data);
-}
-
-function saveMarker(id, data) {
-  updateMarker(id, data);
 }
 
 function deleteMarker(id) {
