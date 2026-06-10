@@ -1,6 +1,10 @@
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
+/* ─────────────────────────
+   MAP ENGINE (FINAL STABLE)
+───────────────────────── */
+
 export class MapEngine {
   constructor({ mapImg, mapContainer }) {
     this.mapImg = mapImg;
@@ -9,123 +13,120 @@ export class MapEngine {
     this.pz = null;
 
     this.mapId = state.get("mapId");
+    this.initialized = false;
 
-    this.loading = false;
-    this.pendingMap = null;
+    this.currentImgUrl = null;
+    this.loadingToken = 0;
   }
 
-  /* ─────────────────────────
-     INIT
-  ───────────────────────── */
-
+  /* ───────────────────────── */
   init() {
+    if (this.initialized) return;
+
+    this.initialized = true;
+
     this._initPanzoom();
 
-    bus.on("map:change", (mapId) => {
-      this.switchMap(mapId);
+    bus.on("map:request", (mapId) => {
+      this.switchMap(mapId, { source: "ui" });
     });
+
+    bus.on("map:sync", (mapId) => {
+      this.switchMap(mapId, { source: "remote" });
+    });
+
+    console.log("[MAP ENGINE] initialized");
   }
 
-  /* ─────────────────────────
-     PANZOOM
-  ───────────────────────── */
-
+  /* ───────────────────────── */
   _initPanzoom() {
+    if (!window.Panzoom) {
+      console.warn("[MAP ENGINE] Panzoom not found");
+      return;
+    }
+
+    this._destroyPanzoom();
+
     this.pz = Panzoom(this.mapContainer, {
       maxScale: 8,
       minScale: 0.5,
-      contain: "outside",
+      contain: "outside"
     });
 
     this.mapContainer.parentElement.addEventListener(
       "wheel",
       (e) => {
         e.preventDefault();
-        this.pz.zoomWithWheel(e);
+        this.pz?.zoomWithWheel(e);
       },
       { passive: false }
     );
   }
 
-  /* ─────────────────────────
-     SWITCH MAP (УЛУЧШЕНО)
-  ───────────────────────── */
+  _destroyPanzoom() {
+    this.pz?.destroy();
+    this.pz = null;
+  }
 
+  /* ───────────────────────── */
   switchMap(mapId, options = {}) {
-    if (!mapId) return;
+    if (!mapId || this.mapId === mapId) return;
 
-    // защита от повторного вызова
-    if (this.loading && this.pendingMap === mapId) {
-      return;
-    }
-
-    if (this.mapId === mapId && !options.force) {
-      return;
-    }
-
-    this.loading = true;
-    this.pendingMap = mapId;
+    const {
+      imgUrl,
+      fallbackUrl,
+      source = "internal"
+    } = options;
 
     this.mapId = mapId;
 
-    // ❗ UI слой НЕ должен писать напрямую в state
-    // state.setMap(mapId) ← УБРАЛИ
+    /* state safe */
+    if (state.get("mapId") !== mapId) {
+      state.setMap(mapId);
+    }
 
-    const { imgUrl, fallbackUrl } = options;
+    this._destroyPanzoom();
 
-    this._clearPanzoom();
+    const token = ++this.loadingToken;
 
     this.mapImg.onload = () => {
+      if (token !== this.loadingToken) return;
+
       this._initPanzoom();
       this.resetView();
-
-      this.loading = false;
-      this.pendingMap = null;
     };
 
     this.mapImg.onerror = () => {
       if (fallbackUrl) {
         this.mapImg.src = fallbackUrl;
       }
-
-      this.loading = false;
-      this.pendingMap = null;
     };
 
-    this.mapImg.src = imgUrl;
-  }
+    /* image update */
+    if (imgUrl && imgUrl !== this.currentImgUrl) {
+      this.currentImgUrl = imgUrl;
+      this.mapImg.src = imgUrl;
+    }
 
-  /* ─────────────────────────
-     PANZOOM CLEANUP
-  ───────────────────────── */
-
-  _clearPanzoom() {
-    if (this.pz) {
-      this.pz.destroy();
-      this.pz = null;
+    /* emit only UI-driven changes */
+    if (source === "ui") {
+      bus.emit("map:request", mapId);
     }
   }
 
-  /* ─────────────────────────
-     VIEW CONTROL
-  ───────────────────────── */
-
+  /* ───────────────────────── */
   zoomIn() {
     if (!this.pz) return;
-
-    const scale = this.pz.getScale() * 1.3;
-    this.pz.zoom(scale);
+    this.pz.zoom(this.pz.getScale() * 1.25);
   }
 
   zoomOut() {
     if (!this.pz) return;
-
-    const scale = this.pz.getScale() / 1.3;
-    this.pz.zoom(scale);
+    this.pz.zoom(this.pz.getScale() / 1.25);
   }
 
   resetView() {
-    if (!this.pz) return;
+    if (!this.pz || !this.mapImg) return;
 
     const iw = this.mapImg.naturalWidth;
     const ih = this.mapImg.naturalHeight;
@@ -133,7 +134,7 @@ export class MapEngine {
     const vw = this.mapContainer.clientWidth;
     const vh = this.mapContainer.clientHeight;
 
-    if (!iw || !ih) return;
+    if (!iw || !ih || !vw || !vh) return;
 
     const scale = Math.min(vw / iw, vh / ih);
 
@@ -143,36 +144,16 @@ export class MapEngine {
     this.pz.zoom(scale, { animate: false });
     this.pz.pan(x, y, { animate: false });
   }
+
+  destroy() {
+    this._destroyPanzoom();
+    this.initialized = false;
+  }
 }
 
-/* ─────────────────────────
-   HELPER EXPORT
-───────────────────────── */
-
+/* ───────────────────────── */
 export function initMapEngine(config) {
   const engine = new MapEngine(config);
   engine.init();
   return engine;
-}
-
-/* ─────────────────────────
-   GLOBAL CONTROL WRAPPERS
-───────────────────────── */
-
-let instance = null;
-
-export function setMapEngine(i) {
-  instance = i;
-}
-
-export function zoomIn() {
-  instance?.zoomIn();
-}
-
-export function zoomOut() {
-  instance?.zoomOut();
-}
-
-export function resetView() {
-  instance?.resetView();
-    }
+      }
