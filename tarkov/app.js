@@ -1,4 +1,4 @@
-import { onAuthChange, getUserRole, ensureUser } from "./firebase.js";
+import { onAuthChange, ensureUser, getUserRole } from "./firebase.js";
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 import { syncEngine } from "./syncEngine.js";
@@ -11,24 +11,17 @@ const isMapPage = !!document.getElementById("map");
 const isWikiPage = !!document.getElementById("wiki");
 
 /* ─────────────────────────
-   BOOT FLAGS (ANTI DOUBLE INIT)
-───────────────────────── */
-
-let appStarted = false;
-
-/* ─────────────────────────
-   INIT STATE DEFAULTS
+   BASE STATE INIT
 ───────────────────────── */
 
 state.patch({
   addMode: false,
   editMode: false,
-  connectMode: false,
   currentMarker: null
 });
 
 /* ─────────────────────────
-   AUTH BOOTSTRAP
+   AUTH BOOTSTRAP (MAIN ENTRY)
 ───────────────────────── */
 
 onAuthChange(async (user) => {
@@ -37,87 +30,84 @@ onAuthChange(async (user) => {
     return;
   }
 
-  if (appStarted) return;
-  appStarted = true;
+  try {
+    console.log("[APP] user:", user.uid);
 
-  console.log("[APP] user:", user.uid);
+    await ensureUser(user);
 
-  /* ─────────────────────────
-     USER INIT
-  ───────────────────────── */
+    const role = await getUserRole(user.uid);
 
-  await ensureUser(user);
+    localStorage.setItem("uid", user.uid);
+    localStorage.setItem("role", role);
 
-  const role = await getUserRole(user.uid);
+    state.setUser(user, role === "admin");
 
-  localStorage.setItem("uid", user.uid);
-  localStorage.setItem("role", role);
+    /* ─────────────────────────
+       START SYNC ENGINE (ONLY ONCE)
+    ───────────────────────── */
 
-  state.setUser(user, role === "admin");
+    const initialMap = state.get("mapId") || "woods";
 
-  /* ─────────────────────────
-     START SYNC ENGINE
-  ───────────────────────── */
+    syncEngine.init(initialMap);
 
-  const mapId = state.get("mapId") || "woods";
+    /* ─────────────────────────
+       ROUTING
+    ───────────────────────── */
 
-  syncEngine.init(mapId);
+    if (isMapPage) {
+      startMapApp();
+    }
 
-  /* ─────────────────────────
-     GLOBAL EVENT HOOKS
-  ───────────────────────── */
+    if (isWikiPage) {
+      startWikiApp();
+    }
 
-  bus.on("map:change", (mapId) => {
-    state.setMap(mapId);
-  });
-
-  bus.on("filter:change", (filter) => {
-    state.setFilter(filter);
-  });
-
-  bus.on("mode:change", (mode) => {
-    state.setMode(mode);
-  });
-
-  bus.on("markers:update", (markers) => {
-    state.setMarkers(markers);
-  });
-
-  /* ─────────────────────────
-     PAGE ROUTING
-  ───────────────────────── */
-
-  if (isMapPage) {
-    startMapApp();
+    console.log("[APP] bootstrap ready");
+  } catch (err) {
+    console.error("[APP] bootstrap error:", err);
   }
-
-  if (isWikiPage) {
-    startWikiApp();
-  }
-
-  console.log("[APP] bootstrap complete");
 });
 
 /* ─────────────────────────
-   MAP BOOT
+   MAP APP BOOT
 ───────────────────────── */
 
 function startMapApp() {
   console.log("[APP] MAP MODE");
 
   import("./map.js").then((mod) => {
-    mod?.initMapPage?.();
+    mod.initMapPage?.();
   });
 }
 
 /* ─────────────────────────
-   WIKI BOOT
+   WIKI APP BOOT
 ───────────────────────── */
 
 function startWikiApp() {
   console.log("[APP] WIKI MODE");
 
   import("./wiki.js").then((mod) => {
-    mod?.initWikiPage?.();
+    mod.initWikiPage?.();
   });
 }
+
+/* ─────────────────────────
+   GLOBAL SAFE SYNC (ONLY STATE MIRROR)
+───────────────────────── */
+
+/*
+  ВАЖНО:
+  app.js больше НЕ управляет логикой карты.
+  Он только отражает state -> debug.
+*/
+
+bus.on("map:change", (mapId) => {
+  console.log("[APP] map changed:", mapId);
+});
+
+/* ─────────────────────────
+   DEBUG
+───────────────────────── */
+
+console.log("[APP] bootstrap loaded");
