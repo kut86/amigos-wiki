@@ -1,114 +1,181 @@
-import { onAuthChange, ensureUser, getUserRole } from "./firebase.js";
-import { state } from "./stateManager.js";
-import { bus } from "./eventBus.js";
-import { syncEngine } from "./syncEngine.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  update,
+  remove
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* ─────────────────────────
-   FIXED PAGE MAP ID
-   (эта страница = woods.html)
+   FIREBASE
 ───────────────────────── */
 
-const PAGE_MAP_ID = "woods";
+const firebaseConfig = {
+  apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
+  authDomain: "tarkovmap-376d0.firebaseapp.com",
+  projectId: "tarkovmap-376d0",
+  storageBucket: "tarkovmap-376d0.firebasestorage.app",
+  messagingSenderId: "693794844907",
+  appId: "1:693794844907:web:bb020ca896ae7b07acceae",
+  databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 /* ─────────────────────────
-   PAGE DETECTION
+   FIXED MAP (woods.html)
 ───────────────────────── */
 
-const isMapPage = !!document.getElementById("map");
-const isWikiPage = !!document.getElementById("wiki");
+const MAP_ID = "woods";
 
 /* ─────────────────────────
-   BASE STATE INIT
+   STATE
 ───────────────────────── */
 
-state.patch({
-  addMode: false,
-  editMode: false,
-  currentMarker: null,
-  mapId: PAGE_MAP_ID // 🔥 фиксируем карту на уровне страницы
+let isAdmin = false;
+let user = null;
+
+let currentRef = null;
+let allMarkers = {};
+
+let addMode = false;
+let pendingPos = null;
+
+/* ─────────────────────────
+   ADMIN ID (твоя логика)
+───────────────────────── */
+
+const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
+
+/* ─────────────────────────
+   AUTH
+───────────────────────── */
+
+document.getElementById("loginBtn").onclick = () =>
+  signInWithPopup(auth, provider);
+
+document.getElementById("logoutBtn").onclick = () =>
+  signOut(auth);
+
+onAuthStateChanged(auth, (u) => {
+  user = u;
+  isAdmin = !!(u && u.uid === ADMIN_UID);
+
+  document.getElementById("loginBtn").style.display = u ? "none" : "";
+  document.getElementById("logoutBtn").style.display = u ? "" : "none";
+  document.getElementById("adminBadge").style.display = isAdmin ? "" : "none";
+  document.getElementById("addModeBtn").style.display = isAdmin ? "" : "none";
+
+  subscribe();
 });
 
 /* ─────────────────────────
-   AUTH BOOTSTRAP
+   FIREBASE PATH (ВАЖНО)
 ───────────────────────── */
 
-onAuthChange(async (user) => {
-  if (!user) {
-    console.log("[APP] not logged in");
-    return;
-  }
+function subscribe() {
+  currentRef = ref(db, `maps/${MAP_ID}/markers`);
 
-  try {
-    console.log("[APP] user:", user.uid);
+  onValue(currentRef, (snap) => {
+    allMarkers = {};
 
-    await ensureUser(user);
+    snap.forEach((i) => {
+      allMarkers[i.key] = i.val();
+    });
 
-    const role = await getUserRole(user.uid);
-
-    localStorage.setItem("uid", user.uid);
-    localStorage.setItem("role", role);
-
-    state.setUser(user, role === "admin");
-
-    /* ─────────────────────────
-       START SYNC ENGINE
-       (ВСЕГДА woods для этой страницы)
-    ───────────────────────── */
-
-    syncEngine.init(PAGE_MAP_ID);
-
-    /* ─────────────────────────
-       ROUTING
-    ───────────────────────── */
-
-    if (isMapPage) {
-      startMapApp();
-    }
-
-    if (isWikiPage) {
-      startWikiApp();
-    }
-
-    console.log("[APP] bootstrap ready (woods.html)");
-  } catch (err) {
-    console.error("[APP] bootstrap error:", err);
-  }
-});
-
-/* ─────────────────────────
-   MAP APP BOOT
-───────────────────────── */
-
-function startMapApp() {
-  console.log("[APP] MAP MODE: woods");
-
-  import("./map.js").then((mod) => {
-    mod.initMapPage?.();
+    render();
   });
 }
 
 /* ─────────────────────────
-   WIKI APP BOOT
+   ADD MODE
 ───────────────────────── */
 
-function startWikiApp() {
-  console.log("[APP] WIKI MODE");
-
-  import("./wiki.js").then((mod) => {
-    mod.initWikiPage?.();
-  });
-}
+document.getElementById("addModeBtn").onclick = () => {
+  addMode = !addMode;
+};
 
 /* ─────────────────────────
-   DEBUG BUS
+   CLICK MAP → CREATE MARKER
 ───────────────────────── */
 
-bus.on("map:change", (mapId) => {
-  console.log("[APP] map change ignored (fixed page):", mapId);
+const mapEl = document.getElementById("map");
+
+mapEl.addEventListener("click", (e) => {
+  if (!addMode || !isAdmin) return;
+
+  const rect = mapEl.getBoundingClientRect();
+
+  pendingPos = {
+    x: ((e.clientX - rect.left) / rect.width) * 100,
+    y: ((e.clientY - rect.top) / rect.height) * 100
+  };
+
+  const text = prompt("Название маркера:");
+
+  if (!text) return;
+
+  push(currentRef, {
+    x: pendingPos.x,
+    y: pendingPos.y,
+    text,
+    type: "loot",
+    imgUrl: null,
+    iconUrl: null
+  });
 });
 
 /* ─────────────────────────
-   DEBUG
+   RENDER
 ───────────────────────── */
 
-console.log("[APP] woods app loaded");
+function render() {
+  document.querySelectorAll(".marker").forEach((m) => m.remove());
+
+  for (const [id, m] of Object.entries(allMarkers)) {
+    createMarker(id, m);
+  }
+}
+
+function createMarker(id, m) {
+  const div = document.createElement("div");
+  div.className = "marker";
+
+  div.dataset.id = id;
+
+  div.style.left = m.x + "%";
+  div.style.top = m.y + "%";
+
+  div.innerHTML = `
+    <div class="marker-icon">📍</div>
+    <div class="marker-tooltip">${escapeHtml(m.text || "")}</div>
+  `;
+
+  mapEl.appendChild(div);
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* ─────────────────────────
+   INIT
+───────────────────────── */
+
+console.log("[APP] woods.html loaded");
