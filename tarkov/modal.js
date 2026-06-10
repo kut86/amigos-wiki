@@ -3,14 +3,15 @@ let isAdmin = false;
 
 /* ── DOM ── */
 const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modalTitle");
-const modalType = document.getElementById("modalType");
-const modalImage = document.getElementById("modalImage");
-const modalText = document.getElementById("modalText");
 
-const modalClose = document.getElementById("modalClose");
+const titleEl = document.getElementById("modalTitle");
+const typeEl = document.getElementById("modalType");
+const imageEl = document.getElementById("modalImage");
+const textEl = document.getElementById("modalText");
 
-const modalAdminPanel = document.getElementById("modalAdminPanel");
+const closeBtn = document.getElementById("modalClose");
+
+const adminPanel = document.getElementById("modalAdminPanel");
 
 const editBtn = document.getElementById("editBtn");
 const deleteBtn = document.getElementById("deleteBtn");
@@ -19,85 +20,111 @@ const editForm = document.getElementById("editForm");
 
 const editTitle = document.getElementById("editTitle");
 const editType = document.getElementById("editType");
-const editIconUrl = document.getElementById("editIconUrl");
-const editDescription = document.getElementById("editDescription");
+const editIcon = document.getElementById("editIconUrl");
+const editDesc = document.getElementById("editDescription");
 
 const saveBtn = document.getElementById("saveBtn");
-const cancelEdit = document.getElementById("cancelEdit");
+const cancelBtn = document.getElementById("cancelEdit");
 
-/* ── INIT ADMIN ── */
+/* ── ADMIN STATE ── */
 export function setAdmin(state) {
   isAdmin = state;
 }
 
-/* ── OPEN MODAL (VIEW) ── */
-export function openModal(marker, onEdit, onDelete, onSave) {
+/* ── OPEN MODAL (VIEW MODE) ── */
+export function openModal(marker, actions = {}) {
   currentMarker = marker;
 
-  modalTitle.textContent = marker.title || "Без названия";
-  modalType.textContent = marker.type || "";
-  modalText.textContent = marker.description || "";
-
-  if (marker.imgUrl) {
-    modalImage.style.display = "block";
-    modalImage.src = marker.imgUrl;
-  } else {
-    modalImage.style.display = "none";
-  }
+  renderView(marker);
 
   modal.classList.add("open");
 
-  /* ── ADMIN UI ── */
-  if (isAdmin) {
-    modalAdminPanel.style.display = "block";
+  adminPanel.style.display = isAdmin ? "block" : "none";
+
+  bindActions(actions);
+}
+
+/* ── VIEW RENDER ── */
+function renderView(marker) {
+  titleEl.textContent = marker.title || "Без названия";
+  typeEl.textContent = marker.type || "";
+  textEl.textContent = marker.description || "";
+
+  if (marker.imgUrl) {
+    imageEl.style.display = "block";
+    imageEl.src = marker.imgUrl;
   } else {
-    modalAdminPanel.style.display = "none";
+    imageEl.style.display = "none";
   }
 
-  /* ── EDIT ── */
+  editForm.style.display = "none";
+}
+
+/* ── ACTIONS BIND ── */
+function bindActions(actions) {
+  const { update, delete: del } = actions;
+
+  /* ── EDIT MODE ── */
   editBtn.onclick = () => {
+    if (!isAdmin || !currentMarker) return;
+
     editForm.style.display = "block";
 
-    editTitle.value = marker.title || "";
-    editType.value = marker.type || "loot";
-    editIconUrl.value = marker.iconUrl || "";
-    editDescription.value = marker.description || "";
+    editTitle.value = currentMarker.title || "";
+    editType.value = currentMarker.type || "loot";
+    editIcon.value = currentMarker.iconUrl || "";
+    editDesc.value = currentMarker.description || "";
   };
 
-  cancelEdit.onclick = () => {
-    editForm.style.display = "none";
-  };
-
+  /* ── SAVE ── */
   saveBtn.onclick = () => {
+    if (!isAdmin || !currentMarker) return;
+
     const updated = {
-      ...marker,
       title: editTitle.value.trim(),
       type: editType.value,
-      iconUrl: editIconUrl.value.trim() || null,
-      description: editDescription.value.trim()
+      iconUrl: editIcon.value.trim() || null,
+      description: editDesc.value.trim()
     };
 
-    onSave(marker.id, updated);
-    editForm.style.display = "none";
-    modal.classList.remove("open");
+    if (typeof update === "function") {
+      update(updated);
+    }
+
+    closeModal();
   };
 
+  /* ── DELETE ── */
   deleteBtn.onclick = () => {
+    if (!isAdmin || !currentMarker) return;
+
     if (!confirm("Удалить маркер?")) return;
-    onDelete(marker.id);
-    modal.classList.remove("open");
+
+    if (typeof del === "function") {
+      del();
+    }
+
+    closeModal();
   };
 }
 
-/* ── CLOSE ── */
-modalClose.onclick = () => {
+/* ── CLOSE MODAL ── */
+export function closeModal() {
   modal.classList.remove("open");
   editForm.style.display = "none";
-};
+  currentMarker = null;
+}
+
+/* ── UI CLOSE EVENTS ── */
+closeBtn.onclick = closeModal;
 
 modal.addEventListener("click", (e) => {
   if (e.target === modal) {
-    modal.classList.remove("open");
-    editForm.style.display = "none";
+    closeModal();
   }
 });
+
+/* ── CANCEL EDIT ── */
+cancelBtn.onclick = () => {
+  editForm.style.display = "none";
+};
