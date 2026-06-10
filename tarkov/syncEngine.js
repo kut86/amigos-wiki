@@ -16,13 +16,13 @@ export class SyncEngine {
     this.lastMode = null;
 
     /* ─────────────────────────
-       ANTI LOOP FLAG
+       LOOP GUARD (SAFE VERSION)
     ───────────────────────── */
-    this.isRemoteUpdate = false;
+    this.remoteLock = false;
   }
 
   /* ─────────────────────────
-     INIT WORLD
+     INIT
   ───────────────────────── */
 
   init(mapId) {
@@ -46,8 +46,7 @@ export class SyncEngine {
   ───────────────────────── */
 
   bindFirebase() {
-    if (this.firebaseBound) return;
-    if (!this.worldRef) return;
+    if (this.firebaseBound || !this.worldRef) return;
 
     this.firebaseBound = true;
 
@@ -55,14 +54,10 @@ export class SyncEngine {
       const data = snap.val();
       if (!data) return;
 
-      this.isRemoteUpdate = true;
+      this.remoteLock = true;
 
       /* MAP */
-      if (
-        data.mapId &&
-        data.mapId !== this.lastMapId &&
-        data.mapId !== state.get("mapId")
-      ) {
+      if (data.mapId && data.mapId !== this.lastMapId) {
         this.lastMapId = data.mapId;
         state.setMap(data.mapId);
         bus.emit("map:sync", data.mapId);
@@ -85,7 +80,7 @@ export class SyncEngine {
         bus.emit("markers:sync", data.markers);
       }
 
-      this.isRemoteUpdate = false;
+      this.remoteLock = false;
     });
   }
 
@@ -99,7 +94,7 @@ export class SyncEngine {
     this.eventsBound = true;
 
     bus.on("map:change", (mapId) => {
-      if (this.isRemoteUpdate) return;
+      if (this.remoteLock) return;
       if (mapId === this.lastMapId) return;
 
       this.lastMapId = mapId;
@@ -107,7 +102,7 @@ export class SyncEngine {
     });
 
     bus.on("filter:change", (filter) => {
-      if (this.isRemoteUpdate) return;
+      if (this.remoteLock) return;
       if (filter === this.lastFilter) return;
 
       this.lastFilter = filter;
@@ -115,7 +110,7 @@ export class SyncEngine {
     });
 
     bus.on("mode:change", (mode) => {
-      if (this.isRemoteUpdate) return;
+      if (this.remoteLock) return;
       if (mode === this.lastMode) return;
 
       this.lastMode = mode;
@@ -123,23 +118,19 @@ export class SyncEngine {
     });
 
     bus.on("markers:update", (markers) => {
-      if (this.isRemoteUpdate) return;
+      if (this.remoteLock) return;
       this.update({ markers });
     });
   }
 
   /* ─────────────────────────
-     UPDATE FIREBASE
+     UPDATE
   ───────────────────────── */
 
   update(data) {
     if (!this.worldRef) return;
     update(this.worldRef, data);
   }
-
-  /* ─────────────────────────
-     SET FULL STATE
-  ───────────────────────── */
 
   setFullState(stateData) {
     if (!this.worldRef) return;
