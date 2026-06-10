@@ -22,7 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* ─────────────────────────────
-   Firebase config
+   FIREBASE CONFIG
 ───────────────────────────── */
 
 const firebaseConfig = {
@@ -37,7 +37,7 @@ const firebaseConfig = {
 };
 
 /* ─────────────────────────────
-   Init
+   INIT
 ───────────────────────────── */
 
 const app = initializeApp(firebaseConfig);
@@ -47,7 +47,7 @@ export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
 /* ─────────────────────────────
-   DB helpers
+   DB EXPORTS
 ───────────────────────────── */
 
 export {
@@ -64,11 +64,11 @@ export {
    AUTH
 ───────────────────────────── */
 
-export function loginWithGoogle() {
+export async function loginWithGoogle() {
   return signInWithPopup(auth, provider);
 }
 
-export function logout() {
+export async function logout() {
   return signOut(auth);
 }
 
@@ -77,54 +77,161 @@ export function onAuthChange(callback) {
 }
 
 /* ─────────────────────────────
-   USER SYSTEM (РОЛИ)
+   USER SYSTEM
 ───────────────────────────── */
 
 /**
- * создаёт пользователя если его нет
+ * Создать пользователя если отсутствует
  */
 export async function ensureUser(user) {
-  if (!user) return;
+  if (!user) return null;
 
-  const userRef = ref(db, `users/${user.uid}`);
+  try {
+    const userRef = ref(db, `users/${user.uid}`);
 
-  const snap = await new Promise((resolve) => {
-    onValue(userRef, resolve, { onlyOnce: true });
-  });
+    const snap = await get(userRef);
 
-  if (!snap.exists()) {
-    await set(userRef, {
+    if (snap.exists()) {
+      await update(userRef, {
+        lastLogin: Date.now()
+      });
+
+      return snap.val();
+    }
+
+    const userData = {
       uid: user.uid,
+
+      email: user.email || null,
+
       name: user.displayName || "unknown",
+
       photoURL: user.photoURL || null,
+
       role: "user",
-      createdAt: Date.now()
-    });
+
+      createdAt: Date.now(),
+      lastLogin: Date.now()
+    };
+
+    await set(userRef, userData);
+
+    return userData;
+  } catch (err) {
+    console.error(
+      "[FIREBASE] ensureUser error",
+      err
+    );
+
+    throw err;
   }
 }
 
 /**
- * получить роль пользователя
+ * Получить профиль пользователя
+ */
+export async function getUser(uid) {
+  if (!uid) return null;
+
+  try {
+    const snap = await get(
+      ref(db, `users/${uid}`)
+    );
+
+    if (!snap.exists()) {
+      return null;
+    }
+
+    return snap.val();
+  } catch (err) {
+    console.error(
+      "[FIREBASE] getUser error",
+      err
+    );
+
+    return null;
+  }
+}
+
+/**
+ * Получить роль пользователя
  */
 export async function getUserRole(uid) {
   if (!uid) return "user";
 
-  const roleRef = ref(db, `users/${uid}/role`);
+  try {
+    const snap = await get(
+      ref(db, `users/${uid}/role`)
+    );
 
-  const snap = await new Promise((resolve) => {
-    onValue(roleRef, resolve, { onlyOnce: true });
-  });
+    if (!snap.exists()) {
+      return "user";
+    }
 
-  return snap.exists() ? snap.val() : "user";
+    return snap.val();
+  } catch (err) {
+    console.error(
+      "[FIREBASE] getUserRole error",
+      err
+    );
+
+    return "user";
+  }
 }
 
 /**
- * обновить роль (ТОЛЬКО ДЛЯ ADMIN LOGIC)
+ * Проверка администратора
+ */
+export async function isAdmin(uid) {
+  const role = await getUserRole(uid);
+
+  return role === "admin";
+}
+
+/**
+ * Изменить роль пользователя
  */
 export async function setUserRole(uid, role) {
   if (!uid) return;
 
-  await update(ref(db, `users/${uid}`), {
-    role
-  });
-    }
+  try {
+    await update(
+      ref(db, `users/${uid}`),
+      {
+        role
+      }
+    );
+
+    console.log(
+      `[FIREBASE] role updated: ${uid} -> ${role}`
+    );
+  } catch (err) {
+    console.error(
+      "[FIREBASE] setUserRole error",
+      err
+    );
+
+    throw err;
+  }
+}
+
+/**
+ * Обновить дату входа
+ */
+export async function updateLastLogin(uid) {
+  if (!uid) return;
+
+  try {
+    await update(
+      ref(db, `users/${uid}`),
+      {
+        lastLogin: Date.now()
+      }
+    );
+  } catch (err) {
+    console.error(
+      "[FIREBASE] updateLastLogin error",
+      err
+    );
+  }
+        }
