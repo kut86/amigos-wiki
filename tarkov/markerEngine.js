@@ -1,7 +1,9 @@
 import { ref, push, onValue, update, remove } from "firebase/database";
+import { bus } from "./eventBus.js";
+import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   MARKER ENGINE (STABLE)
+   MARKER ENGINE (STABLE CORE)
 ───────────────────────── */
 
 export class MarkerEngine {
@@ -12,48 +14,56 @@ export class MarkerEngine {
     this.currentRef = ref(db, `maps/${mapId}/markers`);
 
     this.markers = {};
+    this.initialized = false;
 
+    this.lastSnapshot = null;
     this.unsubscribe = null;
 
-    this.listeners = new Set();
+    this.isRemoteUpdate = false;
+  }
 
-    this.isSubscribed = false;
+  /* ───────────────────────── */
+  init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    this.subscribe();
+
+    console.log("[MARKER ENGINE] initialized");
   }
 
   /* ─────────────────────────
-     SUBSCRIBE (SAFE)
-───────────────────────── */
+     FIREBASE SUBSCRIBE
+  ───────────────────────── */
 
-  subscribe(callback) {
-    // защита от дублей
-    if (this.isSubscribed) {
-      console.warn("[MarkerEngine] already subscribed");
-      return this.unsubscribe;
-    }
-
-    this.isSubscribed = true;
+  subscribe() {
+    if (this.unsubscribe) this.unsubscribe();
 
     this.unsubscribe = onValue(this.currentRef, (snap) => {
-      const next = {};
+      const data = snap.val();
 
-      snap.forEach((i) => {
-        next[i.key] = {
-          id: i.key,
-          ...i.val()
-        };
-      });
+      if (!data) {
+        this.markers = {};
+        bus.emit("markers:update", this.markers);
+        return;
+      }
 
-      this.markers = next;
+      this.isRemoteUpdate = true;
 
-      callback(next);
+      this.markers = data;
+
+      state.setMarkers(this.markers);
+
+      bus.emit("markers:update", this.markers);
+      bus.emit("graph:render");
+
+      this.isRemoteUpdate = false;
     });
-
-    return this.unsubscribe;
   }
 
   /* ─────────────────────────
-     ADD
-───────────────────────── */
+     ADD MARKER
+  ───────────────────────── */
 
   add(marker) {
     const normalized = this.normalize(marker);
@@ -61,64 +71,62 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     UPDATE (SAFE MERGE)
-───────────────────────── */
+     UPDATE MARKER
+  ───────────────────────── */
 
   update(id, data) {
-    return update(
-      ref(this.db, `maps/${this.mapId}/markers/${id}`),
-      this.normalize(data, true)
+    if (!id) return;
+
+    const refPath = ref(
+      this.db,
+      `maps/${this.mapId}/markers/${id}`
     );
+
+    return update(refPath, this.normalize(data, true));
   }
 
   /* ─────────────────────────
-     DELETE
-───────────────────────── */
+     DELETE MARKER
+  ───────────────────────── */
 
   delete(id) {
+    if (!id) return;
+
     return remove(
       ref(this.db, `maps/${this.mapId}/markers/${id}`)
     );
   }
 
   /* ─────────────────────────
-     NORMALIZE (SAFE MERGE)
-───────────────────────── */
+     NORMALIZER (SAFE CORE)
+  ───────────────────────── */
 
   normalize(marker, isUpdate = false) {
     const base = {
-      text: "",
-      type: "loot",
+      text: marker.text || "",
+      type: marker.type || "loot",
 
-      x: 0,
-      y: 0,
+      x: marker.x ?? 0,
+      y: marker.y ?? 0,
 
-      imgUrl: null,
-      iconUrl: null,
+      imgUrl: marker.imgUrl || null,
+      iconUrl: marker.iconUrl || null,
 
-      fields: {},
-      links: [],
-      meta: {},
-      conditions: [],
-      actions: []
+      fields: marker.fields || {},
+      links: marker.links || [],
+      meta: marker.meta || {},
+      conditions: marker.conditions || [],
+      actions: marker.actions || []
     };
 
-    if (!isUpdate) {
-      return {
-        ...base,
-        ...marker
-      };
-    }
-
-    // update → аккуратный merge
-    return {
-      ...marker
-    };
+    return isUpdate
+      ? { ...base, ...marker }
+      : base;
   }
 
   /* ─────────────────────────
-     HELPERS
-───────────────────────── */
+     BUSINESS HELPERS
+  ───────────────────────── */
 
   addField(id, key, value) {
     const m = this.markers[id];
@@ -146,6 +154,7 @@ export class MarkerEngine {
     if (!m) return;
 
     const conditions = [...(m.conditions || [])];
+
     conditions.push(condition);
 
     return this.update(id, { conditions });
@@ -156,25 +165,18 @@ export class MarkerEngine {
     if (!m) return;
 
     const actions = [...(m.actions || [])];
+
     actions.push(action);
 
     return this.update(id, { actions });
   }
 
   /* ─────────────────────────
-     SWITCH MAP (FIXED)
-───────────────────────── */
+     SWITCH MAP
+  ───────────────────────── */
 
   switchMap(mapId) {
     if (!mapId || this.mapId === mapId) return;
-
-    // отписка от старого listener
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
-
-    this.isSubscribed = false;
 
     this.mapId = mapId;
 
@@ -182,9 +184,21 @@ export class MarkerEngine {
       this.db,
       `maps/${mapId}/markers`
     );
+
+    this.subscribe();
+  }
+
+  /* ───────────────────────── */
+  destroy() {
+    if (this.unsubscribe) this.unsubscribe();
+    this.initialized = false;
+    this.markers = {};
   }
 }
 
-/* singleton export */
-export const createMarkerEngine = (db, mapId) =>
-  new MarkerEngine(db, mapId);
+/* singleton usage */
+export function createMarkerEngine(db, mapId) {
+  const engine = new MarkerEngine(db, mapId);
+  engine.init();
+  return engine;
+       }
