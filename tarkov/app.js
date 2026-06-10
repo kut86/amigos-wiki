@@ -1,23 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getDatabase,
-  ref,
-  push,
-  onValue
+  getDatabase, ref, push, onValue, update, remove
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
 import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged,
-  signOut
+  getAuth, GoogleAuthProvider,
+  signInWithPopup, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ─────────────────────
-   FIREBASE
-───────────────────── */
-
+/* ── Firebase ── */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -28,153 +18,196 @@ const firebaseConfig = {
   databaseURL: "https://tarkovmap-376d0-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getDatabase(app);
-const auth = getAuth(app);
+const app      = initializeApp(firebaseConfig);
+const db       = getDatabase(app);
+const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ─────────────────────
-   MAP ID (ВАЖНО)
-───────────────────── */
+/* ── 🧠 ВАЖНО: ID страницы (изоляция карт) ── */
+const PAGE_ID = location.pathname
+  .split("/")
+  .pop()
+  .replace(".html", ""); // woods.html → woods
 
-const MAP_ID = document.body.dataset.map || "woods";
-const markersRef = ref(db, `maps/${MAP_ID}/markers`);
+/* ── Карты (локально в каждой странице) ── */
+const MAPS = {
+  woods: {
+    label: "Лес",
+    imgUrl: "images/woods.png",
+    fallback: "https://gspics.org/images/2026/06/03/IDigvX.jpg"
+  },
+  customs: {
+    label: "Таможня",
+    imgUrl: "images/customs.jpg",
+    fallback: "https://i.imgur.com/FKY4S2W.jpg"
+  },
+  interchange: {
+    label: "Развязка",
+    imgUrl: "images/interchange.jpg",
+    fallback: "https://i.imgur.com/FKY4S2W.jpg"
+  }
+};
 
-/* ─────────────────────
-   STATE
-───────────────────── */
+/* ── DOM ── */
+const mapEl      = document.getElementById("map");
+const mapImg     = document.getElementById("mapImage");
+const loginBtn   = document.getElementById("loginBtn");
+const logoutBtn  = document.getElementById("logoutBtn");
+const adminBadge = document.getElementById("adminBadge");
+const addModeBtn = document.getElementById("addModeBtn");
+const filterSel  = document.getElementById("filter");
+const mapSelect  = document.getElementById("mapSelect");
+const mapWrapper = document.getElementById("mapWrapper");
 
+const addForm    = document.getElementById("addForm");
+const addText    = document.getElementById("addText");
+const addType    = document.getElementById("addType");
+const addImgUrl  = document.getElementById("addImgUrl");
+const addIcon    = document.getElementById("addIcon");
+const addConfirm = document.getElementById("addConfirm");
+const addCancel  = document.getElementById("addCancel");
+
+/* ── State ── */
+const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 let isAdmin = false;
-let markers = {};
 
-/* ─────────────────────
-   DOM
-───────────────────── */
+let currentMap = "woods";
+let currentRef  = null;
+let offFn       = null;
 
-const mapStage  = document.getElementById("mapStage");
-const mapImage  = document.getElementById("mapImage");
+let addMode = false;
+let pendingPos = null;
+let allMarkers = {};
 
-const loginBtn  = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+/* ── AUTH (как у тебя было) ── */
+loginBtn.onclick  = () => signInWithPopup(auth, provider);
+logoutBtn.onclick = () => signOut(auth);
 
-const addBtn    = document.getElementById("addBtn") || null;
+onAuthStateChanged(auth, user => {
+  isAdmin = !!(user && user.uid === ADMIN_UID);
 
-/* ─────────────────────
-   AUTH
-───────────────────── */
+  loginBtn.style.display   = user ? "none" : "";
+  logoutBtn.style.display  = user ? "" : "none";
+  adminBadge.style.display = isAdmin ? "" : "none";
+  addModeBtn.style.display = isAdmin ? "" : "none";
 
-loginBtn?.addEventListener("click", () => {
-  signInWithPopup(auth, provider);
+  if (!isAdmin) exitAddMode();
 });
 
-logoutBtn?.addEventListener("click", () => {
-  signOut(auth);
+/* ── MAP SWITCH ── */
+mapSelect.addEventListener("change", e => switchMap(e.target.value));
+
+function switchMap(id) {
+  currentMap = id;
+
+  if (offFn) offFn();
+
+  allMarkers = {};
+  document.querySelectorAll(".marker").forEach(m => m.remove());
+
+  mapImg.onload = () => {
+    subscribe();
+  };
+
+  mapImg.onerror = () => {
+    mapImg.src = MAPS[id].fallback;
+  };
+
+  mapImg.src = MAPS[id].imgUrl;
+}
+
+/* ── FIREBASE PATH (ГЛАВНОЕ ИЗМЕНЕНИЕ) ── */
+function subscribe() {
+  const path = `maps/${PAGE_ID}/${currentMap}/markers`;
+
+  currentRef = ref(db, path);
+
+  offFn = onValue(currentRef, snap => {
+    allMarkers = {};
+    snap.forEach(i => {
+      allMarkers[i.key] = i.val();
+    });
+    render();
+  });
+}
+
+/* ── ADD MODE ── */
+addModeBtn.onclick = () => addMode ? exitAddMode() : enterAddMode();
+
+function enterAddMode() {
+  if (!isAdmin) return;
+
+  addMode = true;
+  addModeBtn.textContent = "✕ Отмена";
+  mapWrapper.style.cursor = "crosshair";
+}
+
+function exitAddMode() {
+  addMode = false;
+  pendingPos = null;
+  addForm.style.display = "none";
+  addModeBtn.textContent = "+ Маркер";
+  mapWrapper.style.cursor = "default";
+}
+
+/* ── CLICK MAP ── */
+mapEl.addEventListener("click", e => {
+  if (!addMode || !isAdmin) return;
+  if (e.target.closest(".marker")) return;
+
+  const r = mapEl.getBoundingClientRect();
+
+  pendingPos = {
+    x: ((e.clientX - r.left) / r.width) * 100,
+    y: ((e.clientY - r.top) / r.height) * 100
+  };
+
+  addForm.style.display = "flex";
 });
 
-onAuthStateChanged(auth, (user) => {
-  isAdmin = !!user;
+/* ── SAVE MARKER ── */
+addConfirm.onclick = () => {
+  if (!pendingPos) return;
 
-  if (loginBtn) loginBtn.style.display = user ? "none" : "";
-  if (logoutBtn) logoutBtn.style.display = user ? "" : "none";
-});
+  const text = addText.value.trim();
+  if (!text) return;
 
-/* ─────────────────────
-   LOAD MARKERS
-───────────────────── */
-
-onValue(markersRef, (snap) => {
-  markers = {};
-
-  snap.forEach((item) => {
-    markers[item.key] = item.val();
+  push(currentRef, {
+    x: pendingPos.x,
+    y: pendingPos.y,
+    text,
+    type: addType.value,
+    imgUrl: addImgUrl.value.trim() || null,
+    iconUrl: addIcon.value.trim() || null
   });
 
-  render();
-});
+  exitAddMode();
+};
 
-/* ─────────────────────
-   RENDER
-───────────────────── */
+addCancel.onclick = exitAddMode;
 
+/* ── RENDER ── */
 function render() {
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
-  for (const [id, m] of Object.entries(markers)) {
+  Object.entries(allMarkers).forEach(([id, m]) => {
     createMarker(id, m);
-  }
+  });
 }
 
 function createMarker(id, m) {
   const div = document.createElement("div");
-  div.className = "marker";
 
+  div.className = "marker";
   div.style.left = m.x + "%";
   div.style.top  = m.y + "%";
 
   div.innerHTML = `
-    <div class="marker-dot">${getEmoji(m.type)}</div>
-    <div class="marker-label">${escapeHtml(m.text || "")}</div>
+    <div class="marker-tooltip">${m.text}</div>
   `;
 
-  div.addEventListener("click", () => {
-    openMarker(m);
-  });
-
-  mapStage.appendChild(div);
+  mapEl.appendChild(div);
 }
 
-/* ─────────────────────
-   ADD MARKER (admin)
-───────────────────── */
-
-mapStage.addEventListener("click", (e) => {
-  if (!isAdmin) return;
-  if (e.target.closest(".marker")) return;
-
-  const rect = mapStage.getBoundingClientRect();
-
-  const x = ((e.clientX - rect.left) / rect.width) * 100;
-  const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-  const text = prompt("Название маркера:");
-  if (!text) return;
-
-  const type = prompt("Тип (loot/boss/quest/exit/bot/structure):", "loot");
-
-  push(markersRef, {
-    x, y,
-    text,
-    type: type || "loot"
-  });
-});
-
-/* ─────────────────────
-   OPEN MARKER
-───────────────────── */
-
-function openMarker(m) {
-  alert(`${m.text}\nТип: ${m.type}`);
-}
-
-/* ─────────────────────
-   UTILS
-───────────────────── */
-
-function getEmoji(type) {
-  const map = {
-    loot: "📦",
-    boss: "💀",
-    quest: "📋",
-    exit: "🚪",
-    bot: "🎯",
-    structure: "🧩"
-  };
-  return map[type] || "📍";
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
+/* ── INIT ── */
+switchMap("woods");
