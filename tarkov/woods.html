@@ -13,40 +13,36 @@
 <!-- ───────── TOP BAR ───────── -->
 <header class="topbar">
 
+  <!-- LEFT -->
   <div class="left-panel">
     <button id="loginBtn">Войти</button>
     <button id="logoutBtn" style="display:none;">Выйти</button>
     <span id="adminBadge" style="display:none;">ADMIN</span>
 
-    <!-- будущие внешние ссылки -->
     <div class="external-links">
       <a href="#">Wiki</a>
       <a href="#">Discord</a>
     </div>
   </div>
 
+  <!-- CENTER -->
   <div class="center-panel">
-    <select id="mapSelect">
-      <!-- app.js заполняет -->
-    </select>
+    <select id="mapSelect"></select>
   </div>
 
+  <!-- RIGHT -->
   <div class="right-panel">
 
-    <!-- фильтр -->
-    <button id="filterBtn">Фильтр</button>
+    <button id="filterToggleBtn">Фильтр</button>
+    <button id="mapToggleBtn">Карта</button>
 
-    <!-- кнопка переключения режима добавления -->
     <button id="addModeBtn" style="display:none;">+ Маркер</button>
-
-    <!-- открытие панели карты -->
-    <button id="mapPanelBtn">Карта</button>
 
   </div>
 </header>
 
-<!-- ───────── LEFT MENU (скрываемое в будущем) ───────── -->
-<aside id="leftMenu" class="side-menu left">
+<!-- ───────── LEFT SIDE MENU ───────── -->
+<aside id="leftMenu" class="side-menu left hidden">
 
   <h3>Меню</h3>
 
@@ -60,8 +56,8 @@
 
 </aside>
 
-<!-- ───────── RIGHT MENU (фильтры / карты) ───────── -->
-<aside id="rightMenu" class="side-menu right">
+<!-- ───────── RIGHT SIDE MENU ───────── -->
+<aside id="rightMenu" class="side-menu right hidden">
 
   <h3>Фильтр</h3>
 
@@ -71,11 +67,12 @@
     <option value="boss">Боссы</option>
     <option value="quest">Квесты</option>
     <option value="exit">Выходы</option>
+    <option value="structure">Точки</option>
   </select>
 
   <hr/>
 
-  <h3>Карта</h3>
+  <h3>Карты</h3>
   <select id="mapSelectSide"></select>
 
 </aside>
@@ -89,65 +86,34 @@
 
 </div>
 
-<!-- ───────── ADD FORM (АДМИН) ───────── -->
-<div id="addForm" class="modal-form" style="display:none;">
-
-  <h3>Добавить маркер</h3>
-
-  <input id="addTitle" placeholder="Название маркера"/>
-  
-  <select id="addType">
-    <option value="loot">Лут</option>
-    <option value="boss">Босс</option>
-    <option value="quest">Квест</option>
-    <option value="exit">Выход</option>
-    <option value="structure">Точка интереса</option>
-  </select>
-
-  <input id="addIconUrl" placeholder="Ссылка на иконку (необязательно)"/>
-
-  <textarea id="addDescription" placeholder="Описание"></textarea>
-
-  <button id="addConfirm">Добавить</button>
-  <button id="addCancel">Отмена</button>
-
-</div>
-
-<!-- ───────── MODAL (VIEW + EDIT) ───────── -->
-<div id="modal" class="modal">
+<!-- ───────── ADD / EDIT MODAL ───────── -->
+<div id="markerModal" class="modal hidden">
 
   <div class="modal-content">
 
-    <button id="modalClose">✕</button>
+    <h2 id="modalTitle">Маркер</h2>
 
-    <h2 id="modalTitle"></h2>
+    <input id="markerTitle" placeholder="Название маркера"/>
 
-    <span id="modalType"></span>
+    <select id="markerType">
+      <option value="loot">Лут</option>
+      <option value="boss">Босс</option>
+      <option value="quest">Квест</option>
+      <option value="exit">Выход</option>
+      <option value="structure">Точка интереса</option>
+    </select>
 
-    <img id="modalImage" />
+    <input id="markerIcon" placeholder="URL иконки (необязательно)"/>
 
-    <p id="modalText"></p>
+    <textarea id="markerDescription" placeholder="Описание"></textarea>
 
-    <div id="modalExtra"></div>
+    <textarea id="markerExtra" placeholder="Доп. описание (детали)"></textarea>
 
-    <!-- админ блок -->
-    <div id="modalAdminPanel" style="display:none;">
+    <div class="modal-actions">
 
-      <button id="editBtn">Редактировать</button>
-      <button id="deleteBtn">Удалить</button>
-
-    </div>
-
-    <!-- EDIT FORM -->
-    <div id="editForm" style="display:none;">
-
-      <input id="editTitle" />
-      <select id="editType"></select>
-      <input id="editIconUrl" />
-      <textarea id="editDescription"></textarea>
-
-      <button id="saveBtn">Сохранить</button>
-      <button id="cancelEdit">Отмена</button>
+      <button id="saveMarkerBtn">Сохранить</button>
+      <button id="deleteMarkerBtn" class="danger">Удалить</button>
+      <button id="closeMarkerBtn">Закрыть</button>
 
     </div>
 
@@ -157,11 +123,5 @@
 <!-- ───────── TOAST ───────── -->
 <div id="toastContainer"></div>
 
-<!-- ───────── SCRIPTS ───────── -->
-<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
-
-<script type="module" src="app.js"></script>
-<script type="module" src="modal.js"></script>
-
 </body>
-  </html>
+      </html>
