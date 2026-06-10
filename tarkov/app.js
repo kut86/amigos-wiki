@@ -4,9 +4,11 @@ import { bus } from "./eventBus.js";
 import { syncEngine } from "./syncEngine.js";
 
 /* ─────────────────────────
-   PROJECT ISOLATION (ВАЖНО)
+   FIXED PAGE MAP ID
+   (эта страница = woods.html)
 ───────────────────────── */
-const PROJECT_ID = "site1"; // ← меняешь если копируешь сайт
+
+const PAGE_MAP_ID = "woods";
 
 /* ─────────────────────────
    PAGE DETECTION
@@ -22,7 +24,8 @@ const isWikiPage = !!document.getElementById("wiki");
 state.patch({
   addMode: false,
   editMode: false,
-  currentMarker: null
+  currentMarker: null,
+  mapId: PAGE_MAP_ID // 🔥 фиксируем карту на уровне страницы
 });
 
 /* ─────────────────────────
@@ -49,11 +52,10 @@ onAuthChange(async (user) => {
 
     /* ─────────────────────────
        START SYNC ENGINE
+       (ВСЕГДА woods для этой страницы)
     ───────────────────────── */
 
-    const initialMap = state.get("mapId") || "woods";
-
-    syncEngine.init(initialMap);
+    syncEngine.init(PAGE_MAP_ID);
 
     /* ─────────────────────────
        ROUTING
@@ -67,7 +69,7 @@ onAuthChange(async (user) => {
       startWikiApp();
     }
 
-    console.log("[APP] bootstrap ready");
+    console.log("[APP] bootstrap ready (woods.html)");
   } catch (err) {
     console.error("[APP] bootstrap error:", err);
   }
@@ -78,7 +80,7 @@ onAuthChange(async (user) => {
 ───────────────────────── */
 
 function startMapApp() {
-  console.log("[APP] MAP MODE");
+  console.log("[APP] MAP MODE: woods");
 
   import("./map.js").then((mod) => {
     mod.initMapPage?.();
@@ -98,16 +100,15 @@ function startWikiApp() {
 }
 
 /* ─────────────────────────
-   GLOBAL BUS DEBUG
+   DEBUG BUS
 ───────────────────────── */
 
 bus.on("map:change", (mapId) => {
-  console.log("[APP] map changed:", mapId);
+  console.log("[APP] map change ignored (fixed page):", mapId);
 });
 
 /* ─────────────────────────
    DEBUG
 ───────────────────────── */
 
-console.log("[APP] bootstrap loaded");
-console.log("[APP] PROJECT_ID =", PROJECT_ID);
+console.log("[APP] woods app loaded");
