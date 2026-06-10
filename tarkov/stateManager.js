@@ -18,11 +18,14 @@ export class StateManager {
       editMode: false,
       connectMode: false,
 
+      mode: null,
+
       /* ─────────────────────
          MARKERS
       ───────────────────── */
 
       currentMarker: null,
+      markers: {},
 
       /* ─────────────────────
          TIME SYSTEM
@@ -30,6 +33,12 @@ export class StateManager {
 
       time: 12,
       isNight: false,
+
+      /* ─────────────────────
+         FILTERS
+      ───────────────────── */
+
+      filter: "all",
 
       /* ─────────────────────
          UI STATE
@@ -50,7 +59,7 @@ export class StateManager {
   }
 
   getState() {
-    return this.state;
+    return { ...this.state };
   }
 
   /* ─────────────────────────
@@ -58,19 +67,34 @@ export class StateManager {
   ───────────────────────── */
 
   set(key, value) {
+    if (this.state[key] === value) {
+      return;
+    }
+
     this.state[key] = value;
+
     this.emit(key, value);
-    this.emit("stateChange", this.state);
+    this.emit("stateChange", this.getState());
   }
 
   patch(obj) {
-    Object.assign(this.state, obj);
+    let changed = false;
 
     for (const key in obj) {
+      if (this.state[key] === obj[key]) {
+        continue;
+      }
+
+      this.state[key] = obj[key];
+
       this.emit(key, obj[key]);
+
+      changed = true;
     }
 
-    this.emit("stateChange", this.state);
+    if (changed) {
+      this.emit("stateChange", this.getState());
+    }
   }
 
   /* ─────────────────────────
@@ -92,7 +116,13 @@ export class StateManager {
   }
 
   emit(event, data) {
-    this.listeners.get(event)?.forEach(cb => cb(data));
+    this.listeners.get(event)?.forEach((cb) => {
+      try {
+        cb(data);
+      } catch (err) {
+        console.error(`[STATE ERROR] ${event}`, err);
+      }
+    });
   }
 
   /* ─────────────────────────
@@ -104,7 +134,10 @@ export class StateManager {
   }
 
   setUser(user, isAdmin = false) {
-    this.patch({ user, isAdmin });
+    this.patch({
+      user,
+      isAdmin
+    });
   }
 
   setAddMode(value) {
@@ -123,15 +156,42 @@ export class StateManager {
     this.set("currentMarker", marker);
   }
 
+  setMarkers(markers) {
+    this.set("markers", markers);
+  }
+
+  setFilter(filter) {
+    this.set("filter", filter);
+  }
+
+  setMode(mode) {
+    this.set("mode", mode);
+  }
+
   setTime(time) {
-    this.set("time", time);
-    this.set("isNight", time >= 20 || time < 6);
+    this.patch({
+      time,
+      isNight: time >= 20 || time < 6
+    });
   }
 
   setNight(isNight) {
     this.set("isNight", isNight);
   }
+
+  setTool(tool) {
+    this.set("selectedTool", tool);
+  }
+
+  resetModes() {
+    this.patch({
+      addMode: false,
+      editMode: false,
+      connectMode: false
+    });
+  }
 }
 
 /* singleton */
+
 export const state = new StateManager();
