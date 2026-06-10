@@ -31,11 +31,17 @@ export class EventBus {
   }
 
   /* ─────────────────────────
-     EMIT
+     EMIT (УЛУЧШЕНО)
   ───────────────────────── */
 
   emit(event, data) {
-    this.events.get(event)?.forEach(cb => cb(data));
+    this.events.get(event)?.forEach((cb) => {
+      try {
+        cb(data);
+      } catch (err) {
+        console.error(`[EventBus error] ${event}`, err);
+      }
+    });
   }
 
   /* ─────────────────────────
@@ -51,7 +57,7 @@ export class EventBus {
   }
 
   /* ─────────────────────────
-     HELPERS (для архитектуры)
+     HELPERS (once)
   ───────────────────────── */
 
   once(event, callback) {
