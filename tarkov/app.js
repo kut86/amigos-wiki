@@ -11,17 +11,28 @@ const isMapPage = !!document.getElementById("map");
 const isWikiPage = !!document.getElementById("wiki");
 
 /* ─────────────────────────
+   GUARD (ANTI DOUBLE INIT)
+───────────────────────── */
+
+let bootstrapped = false;
+let syncStarted = false;
+
+/* ─────────────────────────
    BASE STATE INIT
 ───────────────────────── */
 
-state.patch({
-  addMode: false,
-  editMode: false,
-  currentMarker: null
-});
+if (!bootstrapped) {
+  state.patch({
+    addMode: false,
+    editMode: false,
+    currentMarker: null
+  });
+
+  bootstrapped = true;
+}
 
 /* ─────────────────────────
-   AUTH BOOTSTRAP (MAIN ENTRY)
+   AUTH BOOTSTRAP
 ───────────────────────── */
 
 onAuthChange(async (user) => {
@@ -43,24 +54,21 @@ onAuthChange(async (user) => {
     state.setUser(user, role === "admin");
 
     /* ─────────────────────────
-       START SYNC ENGINE (ONLY ONCE)
+       SYNC ENGINE (ONLY ONCE)
     ───────────────────────── */
 
-    const initialMap = state.get("mapId") || "woods";
-
-    syncEngine.init(initialMap);
+    if (!syncStarted) {
+      const initialMap = state.get("mapId") || "woods";
+      syncEngine.init(initialMap);
+      syncStarted = true;
+    }
 
     /* ─────────────────────────
        ROUTING
     ───────────────────────── */
 
-    if (isMapPage) {
-      startMapApp();
-    }
-
-    if (isWikiPage) {
-      startWikiApp();
-    }
+    if (isMapPage) startMapApp();
+    if (isWikiPage) startWikiApp();
 
     console.log("[APP] bootstrap ready");
   } catch (err) {
@@ -69,7 +77,7 @@ onAuthChange(async (user) => {
 });
 
 /* ─────────────────────────
-   MAP APP BOOT
+   MAP APP
 ───────────────────────── */
 
 function startMapApp() {
@@ -81,7 +89,7 @@ function startMapApp() {
 }
 
 /* ─────────────────────────
-   WIKI APP BOOT
+   WIKI APP
 ───────────────────────── */
 
 function startWikiApp() {
@@ -93,21 +101,16 @@ function startWikiApp() {
 }
 
 /* ─────────────────────────
-   GLOBAL SAFE SYNC (ONLY STATE MIRROR)
+   DEBUG EVENTS
 ───────────────────────── */
 
-/*
-  ВАЖНО:
-  app.js больше НЕ управляет логикой карты.
-  Он только отражает state -> debug.
-*/
-
-bus.on("map:change", (mapId) => {
+const offMapChange = bus.on("map:change", (mapId) => {
   console.log("[APP] map changed:", mapId);
 });
 
-/* ─────────────────────────
-   DEBUG
-───────────────────────── */
+/* optional cleanup hook (future-proof) */
+window.__APP_OFF__ = () => {
+  offMapChange?.();
+};
 
 console.log("[APP] bootstrap loaded");
