@@ -1,9 +1,7 @@
 import { bus } from "./eventBus.js";
-import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   GRAPH RENDERER (CLEAN)
-   lines between markers
+   GRAPH RENDERER (FINAL STABLE)
 ───────────────────────── */
 
 export function initGraphRenderer({ mapContainer, getMarkers }) {
@@ -17,9 +15,10 @@ export function initGraphRenderer({ mapContainer, getMarkers }) {
   const ctx = canvas.getContext("2d");
 
   let markers = {};
+  let rafId = null;
 
   /* ─────────────────────────
-     RESIZE
+     RESIZE (stable ref)
   ───────────────────────── */
 
   function resize() {
@@ -32,14 +31,26 @@ export function initGraphRenderer({ mapContainer, getMarkers }) {
 
     canvas.style.width = rect.width + "px";
     canvas.style.height = rect.height + "px";
+
+    requestRender();
   }
 
-  window.addEventListener("resize", () => {
-    resize();
-    render();
-  });
+  window.addEventListener("resize", resize);
 
   resize();
+
+  /* ─────────────────────────
+     RENDER QUEUE (ANTI-SPAM)
+  ───────────────────────── */
+
+  function requestRender() {
+    if (rafId) return;
+
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      render();
+    });
+  }
 
   /* ─────────────────────────
      RENDER CORE
@@ -53,10 +64,9 @@ export function initGraphRenderer({ mapContainer, getMarkers }) {
     markers = getMarkers?.() || {};
 
     for (const m of Object.values(markers)) {
-      const links = m.links;
-      if (!links || !links.length) continue;
+      if (!m.links?.length) continue;
 
-      for (const link of links) {
+      for (const link of m.links) {
         const target = markers[link.targetId];
         if (!target) continue;
 
@@ -107,42 +117,38 @@ export function initGraphRenderer({ mapContainer, getMarkers }) {
   }
 
   /* ─────────────────────────
+     EVENTS
+  ───────────────────────── */
+
+  const offMarkers = bus.on("markers:update", (m) => {
+    markers = m || {};
+    requestRender();
+  });
+
+  const offRender = bus.on("graph:render", () => {
+    requestRender();
+  });
+
+  /* ─────────────────────────
      PUBLIC API
   ───────────────────────── */
 
-  function update(newMarkers) {
-    markers = newMarkers || {};
-    render();
-  }
-
-  function forceRender() {
-    render();
-  }
-
-  /* ─────────────────────────
-     EVENTS (ONLY TRIGGERS)
-  ───────────────────────── */
-
-  bus.on("markers:update", (m) => {
-    update(m);
-  });
-
-  bus.on("graph:render", () => {
-    render();
-  });
-
-  /* ❌ УДАЛЕНО:
-     setInterval(render, 1000)
-     — это ломало производительность
-  */
-
-  /* ───────────────────────── */
   return {
-    update,
-    render,
-    forceRender,
+    update: (m) => {
+      markers = m || {};
+      requestRender();
+    },
+
+    render: requestRender,
+
+    forceRender: render,
+
     destroy: () => {
       window.removeEventListener("resize", resize);
+      offMarkers?.();
+      offRender?.();
+
+      if (rafId) cancelAnimationFrame(rafId);
     }
   };
 }
