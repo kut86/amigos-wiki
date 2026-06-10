@@ -11,9 +11,16 @@ export class SyncEngine {
     this.firebaseBound = false;
     this.eventsBound = false;
 
+    /* ─────────────────────────
+       ANTI LOOP STATE
+    ───────────────────────── */
+
     this.lastMapId = null;
     this.lastFilter = null;
     this.lastMode = null;
+    this.lastMarkersHash = null;
+
+    this.localUpdateLock = false;
   }
 
   /* ─────────────────────────
@@ -21,10 +28,7 @@ export class SyncEngine {
   ───────────────────────── */
 
   init(mapId) {
-    // защита от повторного запуска
-    if (this.initialized && this.mapId === mapId) {
-      return;
-    }
+    if (this.initialized && this.mapId === mapId) return;
 
     this.initialized = true;
     this.mapId = mapId;
@@ -44,17 +48,17 @@ export class SyncEngine {
   ───────────────────────── */
 
   bindFirebase() {
-    if (this.firebaseBound) return;
-    if (!this.worldRef) return;
+    if (this.firebaseBound || !this.worldRef) return;
 
     this.firebaseBound = true;
 
     onValue(this.worldRef, (snap) => {
       const data = snap.val();
-
       if (!data) return;
 
-      /* MAP */
+      this.localUpdateLock = true;
+
+      /* ───────── MAP ───────── */
 
       if (
         data.mapId &&
@@ -64,11 +68,10 @@ export class SyncEngine {
         this.lastMapId = data.mapId;
 
         state.setMap(data.mapId);
-
         bus.emit("map:sync", data.mapId);
       }
 
-      /* FILTER */
+      /* ───────── FILTER ───────── */
 
       if (
         data.filter &&
@@ -76,10 +79,12 @@ export class SyncEngine {
       ) {
         this.lastFilter = data.filter;
 
+        state.setFilter?.(data.filter);
+
         bus.emit("filter:sync", data.filter);
       }
 
-      /* MODE */
+      /* ───────── MODE ───────── */
 
       if (
         data.mode &&
@@ -87,16 +92,24 @@ export class SyncEngine {
       ) {
         this.lastMode = data.mode;
 
-        state.patch({
-          mode: data.mode
-        });
+        state.setMode?.(data.mode);
       }
 
-      /* MARKERS */
+      /* ───────── MARKERS ───────── */
 
       if (data.markers) {
-        bus.emit("markers:sync", data.markers);
+        const hash = this._hash(data.markers);
+
+        if (hash !== this.lastMarkersHash) {
+          this.lastMarkersHash = hash;
+
+          state.setMarkers?.(data.markers);
+
+          bus.emit("markers:sync", data.markers);
+        }
       }
+
+      this.localUpdateLock = false;
     });
   }
 
@@ -110,60 +123,89 @@ export class SyncEngine {
     this.eventsBound = true;
 
     bus.on("map:change", (mapId) => {
+      if (this.localUpdateLock) return;
       if (mapId === this.lastMapId) return;
 
       this.lastMapId = mapId;
 
-      this.update({
-        mapId
-      });
+      this._update({ mapId });
     });
 
     bus.on("filter:change", (filter) => {
+      if (this.localUpdateLock) return;
       if (filter === this.lastFilter) return;
 
       this.lastFilter = filter;
 
-      this.update({
-        filter
-      });
+      this._update({ filter });
     });
 
     bus.on("mode:change", (mode) => {
+      if (this.localUpdateLock) return;
       if (mode === this.lastMode) return;
 
       this.lastMode = mode;
 
-      this.update({
-        mode
-      });
+      this._update({ mode });
     });
 
     bus.on("markers:update", (markers) => {
-      this.update({
-        markers
-      });
+      if (this.localUpdateLock) return;
+
+      const hash = this._hash(markers);
+      if (hash === this.lastMarkersHash) return;
+
+      this.lastMarkersHash = hash;
+
+      this._update({ markers });
     });
   }
 
   /* ─────────────────────────
-     UPDATE FIREBASE
+     FIREBASE UPDATE
   ───────────────────────── */
 
-  update(data) {
+  _update(data) {
     if (!this.worldRef) return;
 
-    update(this.worldRef, data);
+    const clean = this._normalize(data);
+
+    update(this.worldRef, clean);
   }
 
   /* ─────────────────────────
-     SET FULL STATE
+     FULL STATE SET
   ───────────────────────── */
 
   setFullState(stateData) {
     if (!this.worldRef) return;
 
-    set(this.worldRef, stateData);
+    set(this.worldRef, this._normalize(stateData));
+  }
+
+  /* ─────────────────────────
+     NORMALIZATION
+  ───────────────────────── */
+
+  _normalize(data) {
+    return {
+      mapId: data.mapId,
+      filter: data.filter,
+      mode: data.mode,
+      markers: data.markers
+    };
+  }
+
+  /* ─────────────────────────
+     SIMPLE HASH (anti spam update)
+  ───────────────────────── */
+
+  _hash(obj) {
+    try {
+      return JSON.stringify(obj);
+    } catch {
+      return null;
+    }
   }
 }
 
