@@ -241,10 +241,10 @@
 
 @media (max-width: 1024px) {
  .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
+    width: 7dvh;;
+    height: 7dvh;
     font-size: 100%;
-    top: 1%;
+    top: 2%;
     left: 1%;
   }
 
@@ -252,7 +252,7 @@
     left: 1%;
     right: 1%;
     top: 7%;
-    max-width: 80dvh;
+    max-width: 700px;
   }
 
   .hud-label {
