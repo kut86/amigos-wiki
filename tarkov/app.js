@@ -1,3 +1,4 @@
+/* app.js*/
 import { onAuthChange, getUserRole, ensureUser } from "./firebase.js";
 import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
