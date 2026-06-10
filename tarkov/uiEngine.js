@@ -2,14 +2,10 @@ import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
 /* ─────────────────────────
-   UI ENGINE (POLISHED)
+   UI ENGINE (STABLE)
 ───────────────────────── */
 
 export function initUIEngine() {
-  /* ─────────────────────────
-     SAFE DOM
-  ───────────────────────── */
-
   const modal = document.getElementById("modal");
   const modalTitle = document.getElementById("modalTitle");
   const modalBadge = document.getElementById("modalBadge");
@@ -29,7 +25,6 @@ export function initUIEngine() {
   const delBtn = document.getElementById("delBtn");
   const modalClose = document.getElementById("modalClose");
 
-  /* защита */
   if (!modal) {
     console.warn("[UI] modal not found");
     return {};
@@ -37,14 +32,13 @@ export function initUIEngine() {
 
   let currentMarker = null;
   let isEditMode = false;
+  let ignoreStateSync = false;
 
   /* ─────────────────────────
-     RENDER MARKER
+     RENDER
 ───────────────────────── */
 
   function render(marker) {
-    if (!marker) return;
-
     modalTitle.textContent = marker.text || "Маркер";
     modalBadge.textContent = marker.type || "unknown";
     modalDesc.textContent = marker.text || "";
@@ -63,12 +57,14 @@ export function initUIEngine() {
 
   function openModal(marker) {
     if (!marker) return;
-
     if (currentMarker?.id === marker.id) return;
 
     currentMarker = marker;
 
+    ignoreStateSync = true;
     state.setCurrentMarker(marker);
+    ignoreStateSync = false;
+
     render(marker);
 
     isEditMode = false;
@@ -89,7 +85,10 @@ export function initUIEngine() {
     modal.classList.remove("open");
 
     currentMarker = null;
+
+    ignoreStateSync = true;
     state.setCurrentMarker(null);
+    ignoreStateSync = false;
 
     exitEditMode();
 
@@ -97,7 +96,7 @@ export function initUIEngine() {
   }
 
   /* ─────────────────────────
-     EDIT MODE
+     EDIT
 ───────────────────────── */
 
   function enterEditMode() {
@@ -125,11 +124,11 @@ export function initUIEngine() {
     bus.emit("ui:editCancel");
   }
 
-  function toggleEdit(state) {
-    editForm.style.display = state ? "flex" : "none";
-    editBtn.style.display = state ? "none" : "";
-    saveBtn.style.display = state ? "" : "none";
-    cancelEdit.style.display = state ? "" : "none";
+  function toggleEdit(on) {
+    editForm.style.display = on ? "flex" : "none";
+    editBtn.style.display = on ? "none" : "";
+    saveBtn.style.display = on ? "" : "none";
+    cancelEdit.style.display = on ? "" : "none";
   }
 
   /* ─────────────────────────
@@ -139,16 +138,14 @@ export function initUIEngine() {
   function saveEdit() {
     if (!currentMarker) return;
 
-    const updated = {
-      text: editText.value.trim(),
-      type: editType.value,
-      imgUrl: editImgUrl.value.trim() || null,
-      iconUrl: editIcon.value.trim() || null
-    };
-
     bus.emit("marker:updateRequest", {
       id: currentMarker.id,
-      data: updated
+      data: {
+        text: editText.value.trim(),
+        type: editType.value,
+        imgUrl: editImgUrl.value.trim() || null,
+        iconUrl: editIcon.value.trim() || null
+      }
     });
 
     exitEditMode();
@@ -161,7 +158,6 @@ export function initUIEngine() {
 
   function deleteMarker() {
     if (!currentMarker) return;
-
     if (!confirm("Удалить маркер?")) return;
 
     bus.emit("marker:deleteRequest", currentMarker.id);
@@ -173,8 +169,8 @@ export function initUIEngine() {
      ADD MODE
 ───────────────────────── */
 
-  function openAddForm(position) {
-    bus.emit("ui:addOpen", position);
+  function openAddForm(pos) {
+    bus.emit("ui:addOpen", pos);
   }
 
   function closeAddForm() {
@@ -196,13 +192,16 @@ export function initUIEngine() {
   });
 
   /* ─────────────────────────
-     SYNC WITH STATE
+     STATE SYNC SAFE
 ───────────────────────── */
 
   state.on("currentMarker", (m) => {
-    if (m && !currentMarker) {
-      openModal(m);
-    }
+    if (ignoreStateSync) return;
+    if (!m) return;
+
+    if (currentMarker?.id === m.id) return;
+
+    openModal(m);
   });
 
   console.log("[UI] engine initialized");
