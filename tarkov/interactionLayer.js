@@ -2,13 +2,10 @@ import { bus } from "./eventBus.js";
 import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   INTERACTION LAYER (CLEAN VERSION)
+   INTERACTION LAYER (FINAL STABLE)
 ───────────────────────── */
 
-export function initInteractionLayer({
-  mapContainer,
-  getMarkerElementById
-}) {
+export function initInteractionLayer({ mapContainer }) {
   let isActive = false;
 
   let startMarker = null;
@@ -19,23 +16,24 @@ export function initInteractionLayer({
   ───────────────────────── */
 
   function enable() {
+    if (isActive) return;
+
     isActive = true;
 
     state.setConnectMode(true);
-
     mapContainer.classList.add("connect-mode");
 
     bindEvents();
   }
 
   function disable() {
+    if (!isActive) return;
+
     isActive = false;
 
     state.setConnectMode(false);
 
-    startMarker = null;
-    isDragging = false;
-
+    reset();
     unbindEvents();
 
     clearTempLine();
@@ -64,7 +62,7 @@ export function initInteractionLayer({
   ───────────────────────── */
 
   function onMarkerMouseDown(markerId, e) {
-    if (!state.get("connectMode")) return;
+    if (!isActive || !state.get("connectMode")) return;
 
     isDragging = true;
     startMarker = markerId;
@@ -78,7 +76,7 @@ export function initInteractionLayer({
   }
 
   /* ─────────────────────────
-     MOVE (TEMP LINE)
+     MOVE
   ───────────────────────── */
 
   function onMouseMove(e) {
@@ -102,15 +100,11 @@ export function initInteractionLayer({
   function onMouseUp(e) {
     if (!isActive || !isDragging) return;
 
-    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const targetEl = document.elementFromPoint(e.clientX, e.clientY);
 
-    const targetId = target?.dataset?.id || null;
+    const targetId = findMarkerId(targetEl);
 
-    if (
-      targetId &&
-      startMarker &&
-      targetId !== startMarker
-    ) {
+    if (targetId && startMarker && targetId !== startMarker) {
       bus.emit("marker:linkRequest", {
         from: startMarker,
         to: targetId,
@@ -122,14 +116,29 @@ export function initInteractionLayer({
   }
 
   /* ─────────────────────────
-     RESET STATE
+     SAFE MARKER DETECTION
+  ───────────────────────── */
+
+  function findMarkerId(el) {
+    let node = el;
+
+    while (node) {
+      if (node.dataset?.id) {
+        return node.dataset.id;
+      }
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  /* ─────────────────────────
+     RESET
   ───────────────────────── */
 
   function reset() {
     isDragging = false;
     startMarker = null;
-
-    clearTempLine();
   }
 
   /* ─────────────────────────
@@ -147,8 +156,6 @@ export function initInteractionLayer({
   return {
     enable,
     disable,
-    onMarkerMouseDown,
-    onMouseMove,
-    onMouseUp
+    onMarkerMouseDown
   };
-       }
+}
