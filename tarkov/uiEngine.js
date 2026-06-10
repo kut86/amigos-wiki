@@ -2,12 +2,12 @@ import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
 /* ─────────────────────────
-   UI ENGINE (FEATURE-LEVEL)
+   UI ENGINE (POLISHED)
 ───────────────────────── */
 
 export function initUIEngine() {
   /* ─────────────────────────
-     DOM
+     SAFE DOM
   ───────────────────────── */
 
   const modal = document.getElementById("modal");
@@ -29,26 +29,21 @@ export function initUIEngine() {
   const delBtn = document.getElementById("delBtn");
   const modalClose = document.getElementById("modalClose");
 
-  let currentMarker = null;
-
-  /* ─────────────────────────
-     SAFETY
-  ───────────────────────── */
-
+  /* защита */
   if (!modal) {
     console.warn("[UI] modal not found");
     return {};
   }
 
+  let currentMarker = null;
+  let isEditMode = false;
+
   /* ─────────────────────────
-     OPEN MODAL
-  ───────────────────────── */
+     RENDER MARKER
+───────────────────────── */
 
-  function openModal(marker) {
+  function render(marker) {
     if (!marker) return;
-
-    currentMarker = marker;
-    state.setCurrentMarker(marker);
 
     modalTitle.textContent = marker.text || "Маркер";
     modalBadge.textContent = marker.type || "unknown";
@@ -60,67 +55,86 @@ export function initUIEngine() {
     } else {
       modalPhoto.style.display = "none";
     }
-
-    exitEditMode(false);
-
-    modal.classList.add("open");
-
-    bus.emit("ui:modal:open", marker);
   }
 
   /* ─────────────────────────
-     CLOSE MODAL
-  ───────────────────────── */
+     OPEN
+───────────────────────── */
+
+  function openModal(marker) {
+    if (!marker) return;
+
+    if (currentMarker?.id === marker.id) return;
+
+    currentMarker = marker;
+
+    state.setCurrentMarker(marker);
+    render(marker);
+
+    isEditMode = false;
+    toggleEdit(false);
+
+    modal.classList.add("open");
+
+    bus.emit("ui:modalOpen", marker);
+  }
+
+  /* ─────────────────────────
+     CLOSE
+───────────────────────── */
 
   function closeModal() {
+    if (!modal.classList.contains("open")) return;
+
     modal.classList.remove("open");
 
     currentMarker = null;
     state.setCurrentMarker(null);
 
-    exitEditMode(false);
+    exitEditMode();
 
-    bus.emit("ui:modal:close");
+    bus.emit("ui:modalClose");
   }
 
   /* ─────────────────────────
      EDIT MODE
-  ───────────────────────── */
+───────────────────────── */
 
   function enterEditMode() {
-    if (!currentMarker) return;
+    if (!currentMarker || isEditMode) return;
+
+    isEditMode = true;
 
     editText.value = currentMarker.text || "";
     editType.value = currentMarker.type || "loot";
     editImgUrl.value = currentMarker.imgUrl || "";
     editIcon.value = currentMarker.iconUrl || "";
 
-    editForm.style.display = "flex";
-    editBtn.style.display = "none";
-    saveBtn.style.display = "";
-    cancelEdit.style.display = "";
+    toggleEdit(true);
 
-    state.set("editMode", true);
-
-    bus.emit("ui:edit:start", currentMarker);
+    bus.emit("ui:editMode", currentMarker);
   }
 
-  function exitEditMode(emit = true) {
-    editForm.style.display = "none";
-    editBtn.style.display = "";
-    saveBtn.style.display = "none";
-    cancelEdit.style.display = "none";
+  function exitEditMode() {
+    if (!isEditMode) return;
 
-    state.set("editMode", false);
+    isEditMode = false;
 
-    if (emit) {
-      bus.emit("ui:edit:cancel");
-    }
+    toggleEdit(false);
+
+    bus.emit("ui:editCancel");
+  }
+
+  function toggleEdit(state) {
+    editForm.style.display = state ? "flex" : "none";
+    editBtn.style.display = state ? "none" : "";
+    saveBtn.style.display = state ? "" : "none";
+    cancelEdit.style.display = state ? "" : "none";
   }
 
   /* ─────────────────────────
-     SAVE EDIT
-  ───────────────────────── */
+     SAVE
+───────────────────────── */
 
   function saveEdit() {
     if (!currentMarker) return;
@@ -143,7 +157,7 @@ export function initUIEngine() {
 
   /* ─────────────────────────
      DELETE
-  ───────────────────────── */
+───────────────────────── */
 
   function deleteMarker() {
     if (!currentMarker) return;
@@ -157,35 +171,41 @@ export function initUIEngine() {
 
   /* ─────────────────────────
      ADD MODE
-  ───────────────────────── */
+───────────────────────── */
 
   function openAddForm(position) {
-    state.set("addMode", true);
-    bus.emit("ui:add:open", position);
+    bus.emit("ui:addOpen", position);
   }
 
   function closeAddForm() {
-    state.set("addMode", false);
-    bus.emit("ui:add:close");
+    bus.emit("ui:addClose");
   }
 
   /* ─────────────────────────
      EVENTS
-  ───────────────────────── */
+───────────────────────── */
 
-  editBtn.onclick = enterEditMode;
-  cancelEdit.onclick = () => exitEditMode();
-  saveBtn.onclick = saveEdit;
-  delBtn.onclick = deleteMarker;
-  modalClose.onclick = closeModal;
+  editBtn?.addEventListener("click", enterEditMode);
+  cancelEdit?.addEventListener("click", exitEditMode);
+  saveBtn?.addEventListener("click", saveEdit);
+  delBtn?.addEventListener("click", deleteMarker);
+  modalClose?.addEventListener("click", closeModal);
 
-  modal.addEventListener("click", (e) => {
+  modal?.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
   });
 
   /* ─────────────────────────
-     PUBLIC API
-  ───────────────────────── */
+     SYNC WITH STATE
+───────────────────────── */
+
+  state.on("currentMarker", (m) => {
+    if (m && !currentMarker) {
+      openModal(m);
+    }
+  });
+
+  console.log("[UI] engine initialized");
 
   return {
     openModal,
@@ -197,4 +217,4 @@ export function initUIEngine() {
     openAddForm,
     closeAddForm
   };
-      }
+}
