@@ -1,57 +1,86 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Map</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woods Map</title>
 
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- LEFT MENU -->
+<!-- ───────────────── LEFT PANEL ───────────────── -->
 <div id="leftPanel" class="panel left hidden">
-  <button id="authBtn">Login</button>
-  <button id="logoutBtn" style="display:none">Logout</button>
 
-  <div id="customLinks"></div>
+  <div class="panel-block">
+    <button id="loginBtn">Войти</button>
+    <button id="logoutBtn" style="display:none">Выйти</button>
+    <span id="adminBadge" style="display:none">ADMIN</span>
+  </div>
+
+  <!-- сюда позже добавишь ссылки -->
+  <div id="customLinks" class="panel-block"></div>
+
 </div>
 
-<button id="toggleLeft">☰</button>
+<button id="toggleLeft" class="panel-toggle left-toggle">☰</button>
 
-<!-- RIGHT MENU -->
+<!-- ───────────────── RIGHT PANEL ───────────────── -->
 <div id="rightPanel" class="panel right hidden">
 
-  <select id="mapSelect"></select>
+  <div class="panel-block">
+    <label>Карта</label>
+    <select id="mapSelect"></select>
+  </div>
 
-  <select id="filter">
-    <option value="all">All</option>
-    <option value="loot">Loot</option>
-    <option value="boss">Boss</option>
-    <option value="quest">Quest</option>
-  </select>
+  <div class="panel-block">
+    <label>Фильтр</label>
+    <select id="filter">
+      <option value="all">Все</option>
+      <option value="loot">Лут</option>
+      <option value="boss">Босс</option>
+      <option value="quest">Квест</option>
+      <option value="exit">Выход</option>
+      <option value="structure">Интерес</option>
+    </select>
+  </div>
 
 </div>
 
-<button id="toggleRight">⚙</button>
+<button id="toggleRight" class="panel-toggle right-toggle">⚙</button>
 
-<!-- MAP -->
+<!-- ───────────────── MAP ───────────────── -->
 <div id="mapWrapper">
-  <img id="mapImage" draggable="false" />
-  <div id="map"></div>
-</div>
-
-<!-- MODAL -->
-<div id="modal" class="hidden">
-  <div id="modalBox">
-    <h3 id="modalTitle"></h3>
-    <p id="modalText"></p>
-    <img id="modalImg" />
-    <button id="modalClose">X</button>
+  <div id="map">
+    <img id="mapImage" draggable="false" />
+    <div id="markerLayer"></div>
   </div>
 </div>
 
+<!-- ───────────────── MODAL ───────────────── -->
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button id="modalClose">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <img id="modalImg" style="display:none;">
+      <p id="modalText"></p>
+    </div>
+
+    <div class="modal-footer">
+      <button id="editBtn" style="display:none">Редактировать</button>
+      <button id="delBtn" style="display:none">Удалить</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ───────────────── SCRIPTS ───────────────── -->
 <script type="module" src="app.js"></script>
 
 </body>
