@@ -2,7 +2,7 @@ import { state } from "./stateManager.js";
 import { bus } from "./eventBus.js";
 
 /* ─────────────────────────
-   MAP ENGINE (POLISHED)
+   MAP ENGINE (STABLE)
 ───────────────────────── */
 
 export class MapEngine {
@@ -13,9 +13,10 @@ export class MapEngine {
     this.pz = null;
 
     this.mapId = state.get("mapId");
-
     this.initialized = false;
+
     this.currentImgUrl = null;
+    this.loadingToken = 0;
   }
 
   /* ─────────────────────────
@@ -29,22 +30,20 @@ export class MapEngine {
 
     this._initPanzoom();
 
-    /* реагируем на глобальную смену карты */
     bus.on("map:change", (mapId) => {
-      this.switchMap(mapId);
+      this.switchMap(mapId, { source: "ui" });
     });
 
-    /* реакция на syncEngine */
     bus.on("map:sync", (mapId) => {
-      this.switchMap(mapId, { silent: true });
+      this.switchMap(mapId, { source: "remote" });
     });
 
     console.log("[MAP ENGINE] initialized");
   }
 
   /* ─────────────────────────
-     PANZOOM INIT
-  ───────────────────────── */
+     PANZOOM
+───────────────────────── */
 
   _initPanzoom() {
     if (!window.Panzoom) {
@@ -64,36 +63,38 @@ export class MapEngine {
       "wheel",
       (e) => {
         e.preventDefault();
-        this.pz.zoomWithWheel(e);
+        this.pz?.zoomWithWheel(e);
       },
       { passive: false }
     );
   }
 
   _destroyPanzoom() {
-    if (this.pz) {
-      this.pz.destroy();
-      this.pz = null;
-    }
+    this.pz?.destroy();
+    this.pz = null;
   }
 
   /* ─────────────────────────
-     SWITCH MAP
+     SWITCH MAP (SAFE)
 ───────────────────────── */
 
   switchMap(mapId, options = {}) {
     if (!mapId || this.mapId === mapId) return;
 
+    const { imgUrl, fallbackUrl, source = "internal" } = options;
+
     this.mapId = mapId;
 
-    const { imgUrl, fallbackUrl, silent = false } = options;
-
+    // state only ONCE source-safe
     state.setMap(mapId);
 
     this._destroyPanzoom();
 
-    /* загрузка картинки */
+    const token = ++this.loadingToken;
+
     this.mapImg.onload = () => {
+      if (token !== this.loadingToken) return;
+
       this._initPanzoom();
       this.resetView();
     };
@@ -104,29 +105,28 @@ export class MapEngine {
       }
     };
 
-    if (imgUrl) {
+    if (imgUrl && imgUrl !== this.currentImgUrl) {
       this.currentImgUrl = imgUrl;
       this.mapImg.src = imgUrl;
     }
 
-    if (!silent) {
+    // emit ONLY from UI source (prevent loops)
+    if (source === "ui") {
       bus.emit("map:change", mapId);
     }
   }
 
   /* ─────────────────────────
-     ZOOM API
+     ZOOM
 ───────────────────────── */
 
   zoomIn() {
     if (!this.pz) return;
-
     this.pz.zoom(this.pz.getScale() * 1.25);
   }
 
   zoomOut() {
     if (!this.pz) return;
-
     this.pz.zoom(this.pz.getScale() / 1.25);
   }
 
@@ -151,7 +151,7 @@ export class MapEngine {
   }
 
   /* ─────────────────────────
-     CLEANUP
+     DESTROY
 ───────────────────────── */
 
   destroy() {
@@ -171,7 +171,7 @@ export function initMapEngine(config) {
 }
 
 /* ─────────────────────────
-   GLOBAL INSTANCE (если нужно)
+   GLOBAL API
 ───────────────────────── */
 
 let instance = null;
@@ -190,4 +190,4 @@ export function zoomOut() {
 
 export function resetView() {
   instance?.resetView();
-           }
+}
