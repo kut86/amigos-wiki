@@ -330,66 +330,7 @@
     font-size: 70%;
   }
 }
-@media (max-width: 375px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
 
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
-@media (max-width: 320px) {
- .menu-toggle {
-    width: 5dvh;;
-    height: 5dvh;
-    font-size: 100%;
-    top: 1%;
-    left: 1%;
-  }
-
-  .menu-panel.open {
-    left: 1%;
-    right: 1%;
-    top: 7%;
-    max-width: 100dvh;
-  }
-
-  .hud-label {
-    font-size: 100%;
-  }
-
-  select {
-    padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-
-  .btn {
-   padding: inherit 9% 9%;
-    font-size: 70%;
-  }
-}
 /* ══════════════════════════════════════════════════════════════ */
 /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
 /* ══════════════════════════════════════════════════════════════ */
