@@ -2,25 +2,29 @@ import { bus } from "./eventBus.js";
 import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   GRAPH RENDERER (CLEAN VERSION)
+   GRAPH RENDERER (CLEAN)
+   lines between markers
 ───────────────────────── */
 
-export function initGraphRenderer({
-  mapContainer,
-  getMarkers
-}) {
+export function initGraphRenderer({ mapContainer, getMarkers }) {
   const canvas = document.getElementById("graphLayer");
+
+  if (!canvas) {
+    console.warn("[GRAPH] canvas not found");
+    return null;
+  }
+
   const ctx = canvas.getContext("2d");
 
   let markers = {};
-  let dirty = true;
-  let raf = null;
 
   /* ─────────────────────────
      RESIZE
   ───────────────────────── */
 
   function resize() {
+    if (!mapContainer) return;
+
     const rect = mapContainer.getBoundingClientRect();
 
     canvas.width = rect.width;
@@ -28,48 +32,35 @@ export function initGraphRenderer({
 
     canvas.style.width = rect.width + "px";
     canvas.style.height = rect.height + "px";
-
-    requestRender();
   }
 
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => {
+    resize();
+    render();
+  });
+
+  resize();
 
   /* ─────────────────────────
-     REQUEST RENDER (optimized)
-  ───────────────────────── */
-
-  function requestRender() {
-    if (dirty) return;
-
-    dirty = true;
-
-    raf = requestAnimationFrame(render);
-  }
-
-  /* ─────────────────────────
-     MAIN RENDER
+     RENDER CORE
   ───────────────────────── */
 
   function render() {
-    dirty = false;
+    if (!ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     markers = getMarkers?.() || {};
 
-    const rect = mapContainer.getBoundingClientRect();
-
-    const scaleX = rect.width / 100;
-    const scaleY = rect.height / 100;
-
     for (const m of Object.values(markers)) {
-      if (!m.links?.length) continue;
+      const links = m.links;
+      if (!links || !links.length) continue;
 
-      for (const link of m.links) {
+      for (const link of links) {
         const target = markers[link.targetId];
         if (!target) continue;
 
-        drawLine(m, target, link.type, scaleX, scaleY);
+        drawLine(m, target, link.type);
       }
     }
   }
@@ -78,12 +69,14 @@ export function initGraphRenderer({
      DRAW LINE
   ───────────────────────── */
 
-  function drawLine(from, to, type, scaleX, scaleY) {
-    const x1 = from.x * scaleX;
-    const y1 = from.y * scaleY;
+  function drawLine(from, to, type = "default") {
+    const rect = mapContainer.getBoundingClientRect();
 
-    const x2 = to.x * scaleX;
-    const y2 = to.y * scaleY;
+    const x1 = (from.x / 100) * rect.width;
+    const y1 = (from.y / 100) * rect.height;
+
+    const x2 = (to.x / 100) * rect.width;
+    const y2 = (to.y / 100) * rect.height;
 
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -114,33 +107,12 @@ export function initGraphRenderer({
   }
 
   /* ─────────────────────────
-     SYNC EVENTS
-  ───────────────────────── */
-
-  bus.on("markers:sync", (m) => {
-    markers = m;
-    requestRender();
-  });
-
-  bus.on("graph:render", () => {
-    requestRender();
-  });
-
-  bus.on("map:change", () => {
-    requestRender();
-  });
-
-  bus.on("filter:change", () => {
-    requestRender();
-  });
-
-  /* ─────────────────────────
      PUBLIC API
   ───────────────────────── */
 
   function update(newMarkers) {
-    markers = newMarkers;
-    requestRender();
+    markers = newMarkers || {};
+    render();
   }
 
   function forceRender() {
@@ -148,18 +120,29 @@ export function initGraphRenderer({
   }
 
   /* ─────────────────────────
-     INIT
+     EVENTS (ONLY TRIGGERS)
   ───────────────────────── */
 
-  resize();
-  requestRender();
+  bus.on("markers:update", (m) => {
+    update(m);
+  });
 
+  bus.on("graph:render", () => {
+    render();
+  });
+
+  /* ❌ УДАЛЕНО:
+     setInterval(render, 1000)
+     — это ломало производительность
+  */
+
+  /* ───────────────────────── */
   return {
     update,
-    render: requestRender,
+    render,
     forceRender,
     destroy: () => {
-      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
     }
   };
 }
