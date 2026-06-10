@@ -5,8 +5,15 @@ import { bus } from "./eventBus.js";
 export class SyncEngine {
   constructor() {
     this.mapId = null;
-    this.listeners = [];
     this.worldRef = null;
+
+    this.initialized = false;
+    this.firebaseBound = false;
+    this.eventsBound = false;
+
+    this.lastMapId = null;
+    this.lastFilter = null;
+    this.lastMode = null;
   }
 
   /* ─────────────────────────
@@ -14,6 +21,12 @@ export class SyncEngine {
   ───────────────────────── */
 
   init(mapId) {
+    // защита от повторного запуска
+    if (this.initialized && this.mapId === mapId) {
+      return;
+    }
+
+    this.initialized = true;
     this.mapId = mapId;
 
     state.setMap(mapId);
@@ -21,8 +34,9 @@ export class SyncEngine {
     this.worldRef = ref(db, `world/${mapId}`);
 
     this.bindFirebase();
-
     this.bindLocalEvents();
+
+    console.log("[SYNC] initialized:", mapId);
   }
 
   /* ─────────────────────────
@@ -30,30 +44,56 @@ export class SyncEngine {
   ───────────────────────── */
 
   bindFirebase() {
+    if (this.firebaseBound) return;
     if (!this.worldRef) return;
+
+    this.firebaseBound = true;
 
     onValue(this.worldRef, (snap) => {
       const data = snap.val();
 
       if (!data) return;
 
-      // синхронизация карты
-      if (data.mapId && data.mapId !== state.get("mapId")) {
+      /* MAP */
+
+      if (
+        data.mapId &&
+        data.mapId !== this.lastMapId &&
+        data.mapId !== state.get("mapId")
+      ) {
+        this.lastMapId = data.mapId;
+
         state.setMap(data.mapId);
+
         bus.emit("map:sync", data.mapId);
       }
 
-      // синхронизация фильтра
-      if (data.filter) {
+      /* FILTER */
+
+      if (
+        data.filter &&
+        data.filter !== this.lastFilter
+      ) {
+        this.lastFilter = data.filter;
+
         bus.emit("filter:sync", data.filter);
       }
 
-      // синхронизация режима
-      if (data.mode) {
-        state.patch({ mode: data.mode });
+      /* MODE */
+
+      if (
+        data.mode &&
+        data.mode !== this.lastMode
+      ) {
+        this.lastMode = data.mode;
+
+        state.patch({
+          mode: data.mode
+        });
       }
 
-      // маркеры (если используешь глобально)
+      /* MARKERS */
+
       if (data.markers) {
         bus.emit("markers:sync", data.markers);
       }
@@ -65,20 +105,44 @@ export class SyncEngine {
   ───────────────────────── */
 
   bindLocalEvents() {
+    if (this.eventsBound) return;
+
+    this.eventsBound = true;
+
     bus.on("map:change", (mapId) => {
-      this.update({ mapId });
+      if (mapId === this.lastMapId) return;
+
+      this.lastMapId = mapId;
+
+      this.update({
+        mapId
+      });
     });
 
     bus.on("filter:change", (filter) => {
-      this.update({ filter });
+      if (filter === this.lastFilter) return;
+
+      this.lastFilter = filter;
+
+      this.update({
+        filter
+      });
     });
 
     bus.on("mode:change", (mode) => {
-      this.update({ mode });
+      if (mode === this.lastMode) return;
+
+      this.lastMode = mode;
+
+      this.update({
+        mode
+      });
     });
 
     bus.on("markers:update", (markers) => {
-      this.update({ markers });
+      this.update({
+        markers
+      });
     });
   }
 
@@ -104,4 +168,5 @@ export class SyncEngine {
 }
 
 /* singleton */
+
 export const syncEngine = new SyncEngine();
