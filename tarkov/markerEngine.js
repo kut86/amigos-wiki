@@ -1,7 +1,9 @@
 import { ref, push, onValue, update, remove } from "firebase/database";
+import { bus } from "./eventBus.js";
+import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   MARKER ENGINE (CONSTRUCTOR VERSION)
+   MARKER ENGINE (CLEAN VERSION)
 ───────────────────────── */
 
 export class MarkerEngine {
@@ -10,33 +12,57 @@ export class MarkerEngine {
     this.mapId = mapId;
 
     this.currentRef = ref(db, `maps/${mapId}/markers`);
+
     this.markers = {};
     this.listeners = new Set();
+
+    this.lastHash = null;
+    this.initialized = false;
   }
 
   /* ─────────────────────────
-     SUBSCRIBE
+     SUBSCRIBE (REALTIME)
   ───────────────────────── */
 
   subscribe(callback) {
-    const unsub = onValue(this.currentRef, (snap) => {
-      this.markers = {};
+    if (this.initialized) return;
+
+    this.initialized = true;
+
+    onValue(this.currentRef, (snap) => {
+      const newMarkers = {};
 
       snap.forEach((i) => {
-        this.markers[i.key] = {
+        newMarkers[i.key] = {
           id: i.key,
           ...i.val()
         };
       });
 
-      callback(this.markers);
-    });
+      const hash = this._hash(newMarkers);
 
-    return unsub;
+      // защита от лишних обновлений
+      if (hash === this.lastHash) return;
+
+      this.lastHash = hash;
+      this.markers = newMarkers;
+
+      /* ───────── STATE SYNC ───────── */
+
+      state.setMarkers(newMarkers);
+
+      /* ───────── GLOBAL EVENT ───────── */
+
+      bus.emit("markers:sync", newMarkers);
+
+      /* ───────── LOCAL CALLBACK ───────── */
+
+      callback?.(newMarkers);
+    });
   }
 
   /* ─────────────────────────
-     CREATE (CONSTRUCTOR MODE)
+     CREATE
   ───────────────────────── */
 
   add(marker) {
@@ -67,7 +93,7 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     NORMALIZER (СЕРДЦЕ КОНСТРУКТОРА)
+     NORMALIZER
   ───────────────────────── */
 
   normalize(marker, isUpdate = false) {
@@ -81,30 +107,17 @@ export class MarkerEngine {
       imgUrl: marker.imgUrl || null,
       iconUrl: marker.iconUrl || null,
 
-      /* ── NEW: CONSTRUCTOR FIELDS ── */
-
-      fields: marker.fields || {}, 
-      // гибкие кастом поля:
-      // { key: value }
-
+      fields: marker.fields || {},
       links: marker.links || [],
-      // цепочки: дверь → ключ → карта
-
       meta: marker.meta || {},
-      // технические данные
-
       conditions: marker.conditions || [],
-      // условия отображения
-
       actions: marker.actions || []
-      // действия (например: перейти, открыть, подсветить)
     };
 
-    /* при update не ломаем старые данные */
     if (isUpdate) {
       return {
-        ...base,
-        ...marker
+        ...marker,
+        ...base
       };
     }
 
@@ -112,15 +125,17 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     HELPERS (БУДУЩИЕ ФИЧИ)
+     HELPERS
   ───────────────────────── */
 
   addField(id, key, value) {
     const marker = this.markers[id];
     if (!marker) return;
 
-    const fields = marker.fields || {};
-    fields[key] = value;
+    const fields = {
+      ...(marker.fields || {}),
+      [key]: value
+    };
 
     return this.update(id, { fields });
   }
@@ -129,12 +144,9 @@ export class MarkerEngine {
     const marker = this.markers[id];
     if (!marker) return;
 
-    const links = marker.links || [];
+    const links = [...(marker.links || [])];
 
-    links.push({
-      targetId,
-      type
-    });
+    links.push({ targetId, type });
 
     return this.update(id, { links });
   }
@@ -143,20 +155,24 @@ export class MarkerEngine {
     const marker = this.markers[id];
     if (!marker) return;
 
-    const conditions = marker.conditions || [];
-    conditions.push(condition);
-
-    return this.update(id, { conditions });
+    return this.update(id, {
+      conditions: [
+        ...(marker.conditions || []),
+        condition
+      ]
+    });
   }
 
   setAction(id, action) {
     const marker = this.markers[id];
     if (!marker) return;
 
-    const actions = marker.actions || [];
-    actions.push(action);
-
-    return this.update(id, { actions });
+    return this.update(id, {
+      actions: [
+        ...(marker.actions || []),
+        action
+      ]
+    });
   }
 
   /* ─────────────────────────
@@ -170,5 +186,21 @@ export class MarkerEngine {
       this.db,
       `maps/${mapId}/markers`
     );
+
+    this.markers = {};
+    this.lastHash = null;
+    this.initialized = false;
   }
-      }
+
+  /* ─────────────────────────
+     HASH UTILITY
+  ───────────────────────── */
+
+  _hash(obj) {
+    try {
+      return JSON.stringify(obj);
+    } catch {
+      return null;
+    }
+  }
+   }
