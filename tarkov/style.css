@@ -1,0 +1,219 @@
+:root {
+  --bg: #0b0d10;
+  --panel: rgba(20, 22, 26, 0.92);
+  --border: rgba(255,255,255,0.08);
+  --text: #e6e6e6;
+  --accent: #4aa3ff;
+}
+
+/* ───────────────── BASE ───────────────── */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, Arial;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ───────────────── MAP ───────────────── */
+
+#mapWrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+#map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#mapImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ───────────────── MARKERS ───────────────── */
+
+#markerLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.marker-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
+
+.marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ───────────────── PANELS ───────────────── */
+
+.panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--border);
+  transition: transform 0.25s ease;
+  z-index: 1000;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel.right {
+  right: 0;
+  left: auto;
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.panel.hidden {
+  transform: translateX(-105%);
+}
+
+.panel.right.hidden {
+  transform: translateX(105%);
+}
+
+/* ───────────────── PANEL BUTTONS ───────────────── */
+
+.panel-toggle {
+  position: absolute;
+  top: 12px;
+  z-index: 1100;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.left-toggle {
+  left: 12px;
+}
+
+.right-toggle {
+  right: 12px;
+}
+
+/* ───────────────── PANEL BLOCKS ───────────────── */
+
+.panel-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-block label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ───────────────── SELECT ───────────────── */
+
+select {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* ───────────────── BUTTONS ───────────────── */
+
+button {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ───────────────── MODAL ───────────────── */
+
+.modal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-box {
+  width: 360px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+/* ───────────────── UTIL ───────────────── */
+
+.hidden {
+  display: none;
+  }
