@@ -6,7 +6,6 @@ export class EventBus {
   /* ─────────────────────────
      SUBSCRIBE
   ───────────────────────── */
-
   on(event, callback) {
     if (!this.events.has(event)) {
       this.events.set(event, new Set());
@@ -14,40 +13,42 @@ export class EventBus {
 
     this.events.get(event).add(callback);
 
-    // вернуть функцию отписки
     return () => this.off(event, callback);
   }
 
   /* ─────────────────────────
      UNSUBSCRIBE
   ───────────────────────── */
-
   off(event, callback) {
-    this.events.get(event)?.delete(callback);
+    const set = this.events.get(event);
+    if (!set) return;
 
-    if (this.events.get(event)?.size === 0) {
+    set.delete(callback);
+
+    if (set.size === 0) {
       this.events.delete(event);
     }
   }
 
   /* ─────────────────────────
-     EMIT (УЛУЧШЕНО)
+     EMIT (STABLE)
   ───────────────────────── */
-
   emit(event, data) {
-    this.events.get(event)?.forEach((cb) => {
+    const set = this.events.get(event);
+    if (!set) return;
+
+    for (const cb of set) {
       try {
         cb(data);
       } catch (err) {
         console.error(`[EventBus error] ${event}`, err);
       }
-    });
+    }
   }
 
   /* ─────────────────────────
-     CLEAR (редко нужно)
+     CLEAR
   ───────────────────────── */
-
   clear(event) {
     if (event) {
       this.events.delete(event);
@@ -57,18 +58,17 @@ export class EventBus {
   }
 
   /* ─────────────────────────
-     HELPERS (once)
+     ONCE
   ───────────────────────── */
-
   once(event, callback) {
     const wrapper = (data) => {
-      callback(data);
       this.off(event, wrapper);
+      callback(data);
     };
 
     this.on(event, wrapper);
   }
 }
 
-/* singleton (ОДИН на всё приложение) */
+/* singleton */
 export const eventBus = new EventBus();
