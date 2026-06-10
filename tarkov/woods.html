@@ -8,59 +8,160 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body data-map="woods">
+<body>
 
-  <!-- ─────────────────────
-       LEFT MENU
-  ───────────────────── -->
-  <div id="leftPanel" class="panel left-panel">
-    
-    <div class="panel-block">
-      <button id="loginBtn" class="btn">Войти</button>
-      <button id="logoutBtn" class="btn" style="display:none">Выйти</button>
-    </div>
+<!-- ───────── TOP BAR ───────── -->
+<header class="topbar">
 
-    <div class="panel-block">
-      <button id="addBtn" class="btn btn-primary" style="display:none">
-        + Маркер
-      </button>
-    </div>
+  <div class="left-panel">
+    <button id="loginBtn">Войти</button>
+    <button id="logoutBtn" style="display:none;">Выйти</button>
+    <span id="adminBadge" style="display:none;">ADMIN</span>
 
-  </div>
-
-  <!-- ─────────────────────
-       RIGHT MENU
-  ───────────────────── -->
-  <div id="rightPanel" class="panel right-panel">
-
-    <div class="panel-block">
-      <label>Фильтр</label>
-      <select id="filter">
-        <option value="all">Все</option>
-        <option value="loot">Лут</option>
-        <option value="boss">Босс</option>
-        <option value="quest">Квест</option>
-        <option value="exit">Выход</option>
-        <option value="bot">Снайпер</option>
-        <option value="structure">Точки</option>
-      </select>
-    </div>
-
-  </div>
-
-  <!-- ─────────────────────
-       MAP
-  ───────────────────── -->
-  <div id="mapViewport">
-    <div id="mapStage">
-      <img id="mapImage" src="images/woods.png" alt="woods map" />
+    <!-- будущие внешние ссылки -->
+    <div class="external-links">
+      <a href="#">Wiki</a>
+      <a href="#">Discord</a>
     </div>
   </div>
 
-  <!-- ─────────────────────
-       JS
-  ───────────────────── -->
-  <script type="module" src="app.js"></script>
+  <div class="center-panel">
+    <select id="mapSelect">
+      <!-- app.js заполняет -->
+    </select>
+  </div>
+
+  <div class="right-panel">
+
+    <!-- фильтр -->
+    <button id="filterBtn">Фильтр</button>
+
+    <!-- кнопка переключения режима добавления -->
+    <button id="addModeBtn" style="display:none;">+ Маркер</button>
+
+    <!-- открытие панели карты -->
+    <button id="mapPanelBtn">Карта</button>
+
+  </div>
+</header>
+
+<!-- ───────── LEFT MENU (скрываемое в будущем) ───────── -->
+<aside id="leftMenu" class="side-menu left">
+
+  <h3>Меню</h3>
+
+  <button id="loginBtn2">Войти</button>
+  <button id="logoutBtn2">Выйти</button>
+
+  <hr/>
+
+  <button>Настройки</button>
+  <button>Справка</button>
+
+</aside>
+
+<!-- ───────── RIGHT MENU (фильтры / карты) ───────── -->
+<aside id="rightMenu" class="side-menu right">
+
+  <h3>Фильтр</h3>
+
+  <select id="filter">
+    <option value="all">Все</option>
+    <option value="loot">Лут</option>
+    <option value="boss">Боссы</option>
+    <option value="quest">Квесты</option>
+    <option value="exit">Выходы</option>
+  </select>
+
+  <hr/>
+
+  <h3>Карта</h3>
+  <select id="mapSelectSide"></select>
+
+</aside>
+
+<!-- ───────── MAP ───────── -->
+<div id="mapWrapper" class="map-wrapper">
+
+  <div id="map">
+    <img id="mapImage" src="images/woods.png" />
+  </div>
+
+</div>
+
+<!-- ───────── ADD FORM (АДМИН) ───────── -->
+<div id="addForm" class="modal-form" style="display:none;">
+
+  <h3>Добавить маркер</h3>
+
+  <input id="addTitle" placeholder="Название маркера"/>
+  
+  <select id="addType">
+    <option value="loot">Лут</option>
+    <option value="boss">Босс</option>
+    <option value="quest">Квест</option>
+    <option value="exit">Выход</option>
+    <option value="structure">Точка интереса</option>
+  </select>
+
+  <input id="addIconUrl" placeholder="Ссылка на иконку (необязательно)"/>
+
+  <textarea id="addDescription" placeholder="Описание"></textarea>
+
+  <button id="addConfirm">Добавить</button>
+  <button id="addCancel">Отмена</button>
+
+</div>
+
+<!-- ───────── MODAL (VIEW + EDIT) ───────── -->
+<div id="modal" class="modal">
+
+  <div class="modal-content">
+
+    <button id="modalClose">✕</button>
+
+    <h2 id="modalTitle"></h2>
+
+    <span id="modalType"></span>
+
+    <img id="modalImage" />
+
+    <p id="modalText"></p>
+
+    <div id="modalExtra"></div>
+
+    <!-- админ блок -->
+    <div id="modalAdminPanel" style="display:none;">
+
+      <button id="editBtn">Редактировать</button>
+      <button id="deleteBtn">Удалить</button>
+
+    </div>
+
+    <!-- EDIT FORM -->
+    <div id="editForm" style="display:none;">
+
+      <input id="editTitle" />
+      <select id="editType"></select>
+      <input id="editIconUrl" />
+      <textarea id="editDescription"></textarea>
+
+      <button id="saveBtn">Сохранить</button>
+      <button id="cancelEdit">Отмена</button>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ───────── TOAST ───────── -->
+<div id="toastContainer"></div>
+
+<!-- ───────── SCRIPTS ───────── -->
+<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
+
+<script type="module" src="app.js"></script>
+<script type="module" src="modal.js"></script>
 
 </body>
-</html>
+  </html>
