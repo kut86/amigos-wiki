@@ -1,9 +1,9 @@
 import { ref, push, onValue, update, remove } from "firebase/database";
-import { bus } from "./eventBus.js";
+import { eventBus as bus } from "./eventBus.js";
 import { state } from "./stateManager.js";
 
 /* ─────────────────────────
-   MARKER ENGINE (STABLE CORE)
+   MARKER ENGINE (FINAL STABLE CORE)
 ───────────────────────── */
 
 export class MarkerEngine {
@@ -16,17 +16,17 @@ export class MarkerEngine {
     this.markers = {};
     this.initialized = false;
 
-    this.lastSnapshot = null;
     this.unsubscribe = null;
 
     this.isRemoteUpdate = false;
+    this.lastEmitHash = null;
   }
 
   /* ───────────────────────── */
   init() {
     if (this.initialized) return;
-    this.initialized = true;
 
+    this.initialized = true;
     this.subscribe();
 
     console.log("[MARKER ENGINE] initialized");
@@ -40,29 +40,29 @@ export class MarkerEngine {
     if (this.unsubscribe) this.unsubscribe();
 
     this.unsubscribe = onValue(this.currentRef, (snap) => {
-      const data = snap.val();
-
-      if (!data) {
-        this.markers = {};
-        bus.emit("markers:update", this.markers);
-        return;
-      }
+      const data = snap.val() || {};
 
       this.isRemoteUpdate = true;
 
       this.markers = data;
 
-      state.setMarkers(this.markers);
+      state.setMarkers(data);
 
-      bus.emit("markers:update", this.markers);
-      bus.emit("graph:render");
+      // защита от лишних rerender циклов
+      const hash = JSON.stringify(data);
+      if (hash !== this.lastEmitHash) {
+        this.lastEmitHash = hash;
+
+        bus.emit("markers:update", data);
+        bus.emit("graph:render");
+      }
 
       this.isRemoteUpdate = false;
     });
   }
 
   /* ─────────────────────────
-     ADD MARKER
+     CREATE
   ───────────────────────── */
 
   add(marker) {
@@ -71,22 +71,20 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     UPDATE MARKER
+     UPDATE
   ───────────────────────── */
 
   update(id, data) {
     if (!id) return;
 
-    const refPath = ref(
-      this.db,
-      `maps/${this.mapId}/markers/${id}`
+    return update(
+      ref(this.db, `maps/${this.mapId}/markers/${id}`),
+      this.normalize(data, true)
     );
-
-    return update(refPath, this.normalize(data, true));
   }
 
   /* ─────────────────────────
-     DELETE MARKER
+     DELETE
   ───────────────────────── */
 
   delete(id) {
@@ -98,7 +96,7 @@ export class MarkerEngine {
   }
 
   /* ─────────────────────────
-     NORMALIZER (SAFE CORE)
+     NORMALIZER
   ───────────────────────── */
 
   normalize(marker, isUpdate = false) {
@@ -119,13 +117,11 @@ export class MarkerEngine {
       actions: marker.actions || []
     };
 
-    return isUpdate
-      ? { ...base, ...marker }
-      : base;
+    return isUpdate ? { ...base, ...marker } : base;
   }
 
   /* ─────────────────────────
-     BUSINESS HELPERS
+     HELPERS
   ───────────────────────── */
 
   addField(id, key, value) {
@@ -143,7 +139,6 @@ export class MarkerEngine {
     if (!m) return;
 
     const links = [...(m.links || [])];
-
     links.push({ targetId, type });
 
     return this.update(id, { links });
@@ -154,7 +149,6 @@ export class MarkerEngine {
     if (!m) return;
 
     const conditions = [...(m.conditions || [])];
-
     conditions.push(condition);
 
     return this.update(id, { conditions });
@@ -165,7 +159,6 @@ export class MarkerEngine {
     if (!m) return;
 
     const actions = [...(m.actions || [])];
-
     actions.push(action);
 
     return this.update(id, { actions });
@@ -191,14 +184,18 @@ export class MarkerEngine {
   /* ───────────────────────── */
   destroy() {
     if (this.unsubscribe) this.unsubscribe();
+
     this.initialized = false;
     this.markers = {};
   }
 }
 
-/* singleton usage */
+/* ─────────────────────────
+   FACTORY
+───────────────────────── */
+
 export function createMarkerEngine(db, mapId) {
   const engine = new MarkerEngine(db, mapId);
   engine.init();
   return engine;
-       }
+   }
