@@ -1,15 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getDatabase, ref, push, onValue, update, remove
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  update,
+  remove
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 import {
-  getAuth, GoogleAuthProvider,
-  signInWithPopup, onAuthStateChanged, signOut
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { openModal, setAdmin } from "./modal.js";
+import { initPanzoom } from "./pamzoom.js";
 
-/* ── Firebase ── */
+/* ───────── FIREBASE ───────── */
 const firebaseConfig = {
   apiKey: "AIzaSyA7GnUlFkDcDKAv4ntXC6UZDjAkpaEgPMs",
   authDomain: "tarkovmap-376d0.firebaseapp.com",
@@ -25,10 +35,10 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── PAGE ISOLATION (woods.html, customs.html и т.д.) ── */
+/* ───────── PAGE ISOLATION ───────── */
 const PAGE_ID = location.pathname.split("/").pop().replace(".html", "");
 
-/* ── STATE ── */
+/* ───────── STATE ───────── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 
 let isAdmin = false;
@@ -38,10 +48,11 @@ let currentRef = null;
 let unsubscribe = null;
 
 let allMarkers = {};
+
 let addMode = false;
 let pendingPos = null;
 
-/* ── DOM ── */
+/* ───────── DOM ───────── */
 const mapEl = document.getElementById("map");
 const mapImg = document.getElementById("mapImage");
 
@@ -61,7 +72,7 @@ const addCancel = document.getElementById("addCancel");
 
 const mapSelect = document.getElementById("mapSelect");
 
-/* ── AUTH ── */
+/* ───────── AUTH ───────── */
 loginBtn.onclick = () => signInWithPopup(auth, provider);
 logoutBtn.onclick = () => signOut(auth);
 
@@ -78,10 +89,8 @@ onAuthStateChanged(auth, user => {
   if (!isAdmin) exitAddMode();
 });
 
-/* ── MAP SWITCH ── */
-mapSelect?.addEventListener("change", e => {
-  switchMap(e.target.value);
-});
+/* ───────── MAP SWITCH ───────── */
+mapSelect?.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
   currentMap = id;
@@ -92,9 +101,10 @@ function switchMap(id) {
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
   subscribe();
+  initPanzoom();
 }
 
-/* ── FIREBASE ── */
+/* ───────── FIREBASE ───────── */
 function subscribe() {
   const path = `maps/${PAGE_ID}/${currentMap}/markers`;
 
@@ -111,7 +121,7 @@ function subscribe() {
   });
 }
 
-/* ── ADD MODE ── */
+/* ───────── ADD MODE ───────── */
 addModeBtn.onclick = () => {
   addMode ? exitAddMode() : enterAddMode();
 };
@@ -130,7 +140,7 @@ function exitAddMode() {
   addModeBtn.textContent = "+ Маркер";
 }
 
-/* ── CLICK MAP ── */
+/* ───────── CLICK MAP ───────── */
 mapEl.addEventListener("click", e => {
   if (!addMode || !isAdmin) return;
   if (e.target.closest(".marker")) return;
@@ -145,7 +155,7 @@ mapEl.addEventListener("click", e => {
   addForm.style.display = "block";
 });
 
-/* ── CREATE MARKER ── */
+/* ───────── ADD MARKER ───────── */
 addConfirm.onclick = () => {
   if (!pendingPos) return;
 
@@ -163,7 +173,7 @@ addConfirm.onclick = () => {
 
 addCancel.onclick = exitAddMode;
 
-/* ── RENDER ── */
+/* ───────── RENDER ───────── */
 function render() {
   document.querySelectorAll(".marker").forEach(m => m.remove());
 
@@ -194,7 +204,7 @@ function createMarker(id, m) {
   mapEl.appendChild(div);
 }
 
-/* ── CRUD ── */
+/* ───────── CRUD ───────── */
 function updateMarker(id, data) {
   update(ref(db, `maps/${PAGE_ID}/${currentMap}/markers/${id}`), data);
 }
@@ -203,5 +213,5 @@ function deleteMarker(id) {
   remove(ref(db, `maps/${PAGE_ID}/${currentMap}/markers/${id}`));
 }
 
-/* ── INIT ── */
+/* ───────── INIT ───────── */
 switchMap("woods");
