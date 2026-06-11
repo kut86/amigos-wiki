@@ -1,0 +1,732 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg:        #080a08;
+  --surface:   #0e1210;
+  --surface2:  #161c18;
+  --surface3:  #1e2620;
+  --border:    #2a3428;
+  --border2:   #3a4838;
+
+  --accent:    #ff6600;
+  --accent-dim: rgba(255,102,0,.12);
+  --accent-glow: rgba(255,102,0,.25);
+
+  --green:     #4a9e5c;
+  --green-dim: rgba(74,158,92,.15);
+
+  --danger:    #c0392b;
+  --danger-dim: rgba(192,57,43,.15);
+
+  --info:      #2e86c1;
+  --info-dim:  rgba(46,134,193,.15);
+
+  --purple:    #8e44ad;
+  --orange:    #e67e22;
+
+  --text:      #d0ccc0;
+  --text-dim:  #6a7868;
+  --text-bright: #ede9e0;
+
+  --radius:    6px;
+  --radius-lg: 12px;
+
+  /* marker colors */
+  --loot-color:      #c8a84b;
+  --boss-color:      #c0392b;
+  --quest-color:     #2e86c1;
+  --custom-color:    #9b59b6;
+  --bot-color:       #e67e22;
+  --exit-color:      #27ae60;
+  --structure-color: #8e44ad;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%; height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--text);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCANLINE OVERLAY
+═══════════════════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,.06) 3px,
+    rgba(0,0,0,.06) 4px
+  );
+  pointer-events: none;
+  z-index: 10000;
+}
+
+/* subtle noise grain */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: .5;
+  z-index: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP CONTAINER & WRAPPER
+═══════════════════════════════════════════════════════════════ */
+.map-container {
+  /* не создаём stacking context — убираем position/z-index */
+  display: contents;
+}
+
+#mapWrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: crosshair;
+  z-index: 1;
+  touch-action: none;
+  width: 100vw;
+  height: 100dvh;
+}
+#mapWrapper.dragging { cursor: grabbing; }
+#mapWrapper.adding   { cursor: crosshair; }
+
+#map {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  /* pointer-events: auto — panzoom должен получать события */
+  pointer-events: auto;
+}
+#map img {
+  display: block;
+  width: 100%;
+  /* картинка не перехватывает клики — panzoom слушает #map */
+  pointer-events: none;
+  image-rendering: crisp-edges;
+  -webkit-user-drag: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MARKERS
+═══════════════════════════════════════════════════════════════ */
+.marker {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto; /* маркеры перехватывают клики */
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+
+
+/* pin shape */
+.marker-icon {
+  width: 25px; height: 25px;
+  border-radius: 50% 50% 50% 0;
+  rotate: -45deg;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 2px 9px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08);
+  transition: box-shadow .15s;
+}
+.marker:hover .marker-icon {
+  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 4px 16px rgba(0,0,0,.8);
+}
+.marker-icon span { rotate: 45deg; line-height: 1; }
+
+.marker-icon.loot      { background: var(--loot-color); }
+.marker-icon.boss      { background: var(--boss-color); }
+.marker-icon.quest     { background: var(--quest-color); }
+.marker-icon.custom    { background: var(--custom-color); }
+.marker-icon.bot       { background: var(--bot-color); }
+.marker-icon.exit      { background: var(--exit-color); }
+.marker-icon.structure { background: var(--structure-color); }
+
+/* photo marker */
+.marker-photo {
+  width: 25px; height: 25px;
+  border-radius: 50% 50% 50% 0;
+  border-radius: 50%;
+  rotate: -45deg;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  font-size: 12px;
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 10px rgba(0,0,0,.7);
+  transition: box-shadow .15s;
+}
+.marker-photo img { width: 100%; rotate: 45deg; height:  100%; object-fit: cover; }
+.marker:hover .marker-photo { box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
+
+/* tooltip */
+.marker-tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,10,8,.96);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 5px 11px;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: .04em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s, transform .15s;
+  max-width: 180px;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 300;
+}
+.marker:hover .marker-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(2px);
+}
+
+/* photo preview */
+.marker-preview {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  width: 300px; height: 180px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 24px rgba(0,0,0,.85);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  z-index: 300;
+  background: var(--surface); /* фон под отступами */
+  padding: 3px;
+}
+
+.marker-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* вся картинка целиком */
+  border-radius: calc(var(--radius) - 3px);
+}
+/*.marker:hover .marker-preview {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}*/
+.marker-preview img { width: 100%; height: 100%; object-fit: cover; }
+.marker-photo img { width: 100%; height: 100%; object-fit: cover; }
+.marker:hover .marker-photo { box-shadow: 0 0 0 5px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ADD FORM
+═══════════════════════════════════════════════════════════════ */
+#addForm {
+  position: fixed;
+  bottom: 76px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 9100;
+  background: rgba(8,10,8,.97);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  width: 310px;
+  max-width: calc(100vw - 28px);
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.8), 0 0 0 1px rgba(255,102,0,.08);
+  backdrop-filter: blur(16px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════════ */
+#modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 8000;
+  backdrop-filter: blur(6px);
+}
+#modal.open { display: flex; }
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,.8), 0 0 40px rgba(255,102,0,.05);
+  animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes modalIn {
+  from { transform: translateY(12px) scale(.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1);    opacity: 1; }
+}
+
+.modal-header {
+  padding: 16px 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.modal-title {
+  font-size: 18px; font-weight: 700;
+  letter-spacing: .06em;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-bright);
+}
+
+.modal-type-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: .12em;
+  padding: 2px 8px; border-radius: 20px;
+  font-weight: 400; text-transform: uppercase;
+}
+
+.badge-loot      { background: rgba(200,168,75,.15);  color: var(--loot-color);      border: 1px solid rgba(200,168,75,.3); }
+.badge-boss      { background: rgba(192,57,43,.15);   color: var(--boss-color);      border: 1px solid rgba(192,57,43,.3); }
+.badge-quest     { background: rgba(46,134,193,.15);  color: var(--quest-color);     border: 1px solid rgba(46,134,193,.3); }
+.badge-custom    { background: rgba(155,89,182,.15);  color: var(--custom-color);    border: 1px solid rgba(155,89,182,.3); }
+.badge-bot       { background: rgba(230,126,34,.15);  color: var(--bot-color);       border: 1px solid rgba(230,126,34,.3); }
+.badge-exit      { background: rgba(39,174,96,.15);   color: var(--exit-color);      border: 1px solid rgba(39,174,96,.3); }
+.badge-structure { background: rgba(142,68,173,.15);  color: var(--structure-color); border: 1px solid rgba(142,68,173,.3); }
+
+.modal-close {
+  background: none; border: none;
+  color: var(--text-dim);
+  font-size: 18px; cursor: pointer;
+  padding: 4px 8px; border-radius: var(--radius);
+  transition: color .15s, background .15s;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--text); background: var(--surface3); }
+
+.modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-photo {
+  width: 100%; height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.modal-desc {
+  font-size: 14px; line-height: 1.6;
+  color: var(--text);
+}
+
+.modal-coords {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: .06em;
+}
+
+.modal-footer {
+  padding: 12px 18px;
+  display: flex; gap: 8px; justify-content: flex-end;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM ELEMENTS (shared, non-menu)
+═══════════════════════════════════════════════════════════════ */
+.form-group {
+  display: flex; flex-direction: column; gap: 5px;
+}
+
+.form-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: .12em;
+  color: var(--text-dim); text-transform: uppercase;
+}
+
+/* Inputs/selects inside modal & addForm only */
+.modal-body input[type="text"],
+.modal-body input[type="url"],
+.modal-body textarea,
+.modal-body select,
+#addForm input[type="text"],
+#addForm input[type="url"],
+#addForm textarea,
+#addForm select {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px; font-weight: 500;
+  padding: 7px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--surface3);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus,
+#addForm input:focus,
+#addForm textarea:focus,
+#addForm select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+textarea { resize: vertical; min-height: 72px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS (modal & addForm only — menu buttons stay in menu.css)
+═══════════════════════════════════════════════════════════════ */
+.modal-footer .btn,
+#addForm .btn {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600; font-size: 13px;
+  letter-spacing: .06em;
+  padding: 6px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--surface3);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
+}
+.modal-footer .btn:hover,
+#addForm .btn:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+.modal-footer .btn:active,
+#addForm .btn:active { transform: translateY(0); }
+
+.modal-footer .btn-primary,
+#addForm .btn-primary {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.modal-footer .btn-primary:hover,
+#addForm .btn-primary:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.modal-footer .btn-danger,
+#addForm .btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-dim);
+}
+.modal-footer .btn-danger:hover,
+#addForm .btn-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN BADGE
+═══════════════════════════════════════════════════════════════ */
+#adminBadge {
+  display: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: .12em;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 3px 9px;
+  border-radius: var(--radius);
+  animation: pulseBadge 2.5s ease infinite;
+}
+@keyframes pulseBadge {
+  0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%      { box-shadow: 0 0 0 4px transparent; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ZOOM CONTROLS
+═══════════════════════════════════════════════════════════════ */
+#zoomControls {
+  position: fixed;
+  bottom: 24px; right: 18px;
+  z-index: 9000;
+  display: flex; flex-direction: column; gap: 5px;
+}
+
+.zoom-btn {
+  width: 38px; height: 38px;
+  background: rgba(8,10,8,.9);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 20px; font-weight: 300; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s, color .15s, transform .1s;
+  backdrop-filter: blur(10px);
+}
+.zoom-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.08);
+}
+.zoom-btn:active { transform: scale(.96); }
+
+/* ═══════════════════════════════════════════════════════════════
+   STATUS BAR
+═══════════════════════════════════════════════════════════════ */
+#statusBar {
+  position: fixed;
+  bottom: 14px; left: 14px;
+  z-index: 9000;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--text-dim);
+  letter-spacing: .08em;
+  background: rgba(8,10,8,.8);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════════ */
+#toastContainer {
+  position: fixed; top: 70px; right: 16px;
+  z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  font-size: 13px; font-family: 'Rajdhani', sans-serif; font-weight: 500;
+  letter-spacing: .04em;
+  animation: toastIn .2s ease, toastOut .3s ease 2.7s forwards;
+  pointer-events: none;
+  max-width: 240px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.6);
+}
+.toast.err { border-left-color: var(--danger); }
+
+@keyframes toastIn  { from { opacity:0; transform: translateX(16px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(16px); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  html, body {
+    height: 100dvh;
+    touch-action: none;
+  }
+
+  #mapWrapper {
+    width: 100vw;
+    height: 100dvh;
+  }
+
+   .modal-title {
+  font-size: 20px; font-weight: 5px;
+  letter-spacing: .1em;
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text-bright);
+}
+  /* inputs — блокирует авто-зум iOS */
+  input[type="text"],
+  input[type="url"],
+  textarea, select { font-size: 16px; }
+
+  /* modal — bottom sheet */
+   
+  .modal-box {
+    width: 90%; max-width: 90%;
+    border-radius: 2% 2% 2% 2%;
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: sheetIn .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-photo { height: 100%; }
+
+  /* add form */
+  #addForm {
+    bottom: 68px;
+    width: calc(100vw - 24px);
+  }
+
+  /* markers — крупнее для пальца */
+  .marker-icon  { width: 0.9dvh; height: 0.9dvh; font-size: 0.5dvh; }
+  .marker-photo { width: 0.9dvh; height: 0.9dvh; }
+  .marker-preview { display: none; } /* hover на touch не работает */
+
+  
+  .marker-photo img,
+  .marker-icon {
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 768px) {
+  html, body {
+    height: 100dvh;
+    touch-action: none;
+  }
+
+  #mapWrapper {
+    width: 100vw;
+    height: 100dvh;
+  }
+
+   .modal-title {
+  font-size: 20px; font-weight: 5px;
+  letter-spacing: .1em;
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text-bright);
+}
+  /* inputs — блокирует авто-зум iOS */
+  input[type="text"],
+  input[type="url"],
+  textarea, select { font-size: 16px; }
+
+  /* modal — bottom sheet */
+   
+  .modal-box {
+    width: 90%; max-width: 90%;
+    border-radius: 2% 2% 2% 2%;
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: sheetIn .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-photo { height: 100%; }
+
+  /* add form */
+  #addForm {
+    bottom: 68px;
+    width: calc(100vw - 24px);
+  }
+
+  /* markers — крупнее для пальца */
+  .marker-icon  { width: 0.9dvh; height: 0.9dvh; font-size: 0.5dvh; }
+  .marker-photo { width: 0.9dvh; height: 0.9dvh; }
+  .marker-preview { display: none; } /* hover на touch не работает */
+
+  
+  .marker-photo img,
+  .marker-icon {
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+}
+  
+ @media (max-width: 425px) {
+  html, body {
+    height: 100dvh;
+    touch-action: none;
+  }
+
+  #mapWrapper {
+    width: 100vw;
+    height: 100dvh;
+  }
+
+    .modal-title {
+  font-size: 20px; font-weight: 5px;
+  letter-spacing: .1em;
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text-bright);
+}
+  /* inputs — блокирует авто-зум iOS */
+  input[type="text"],
+  input[type="url"],
+  textarea, select { font-size: 16px; }
+
+  /* modal — bottom sheet */
+   
+  .modal-box {
+    width: 90%; max-width: 90%;
+    border-radius: 2% 2% 2% 2%;
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: sheetIn .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-photo { height: 100%; }
+
+  /* add form */
+  #addForm {
+    bottom: 68px;
+    width: calc(100vw - 24px);
+  }
+
+  /* markers — крупнее для пальца */
+  .marker-icon  { width: 0.9dvh; height: 0.9dvh; font-size: 0.5dvh; }
+  .marker-photo { width: 0.9dvh; height: 0.9dvh; }
+  .marker-preview { display: none; } /* hover на touch не работает */
+  
+   
+  .marker-photo img,
+  .marker-icon {
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 375px) {
+  html, body {
+    height: 100dvh;
+    touch-action: non
