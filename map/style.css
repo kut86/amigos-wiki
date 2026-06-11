@@ -661,7 +661,9 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
 
-  
+  .marker-tooltip {
+    display: none;
+  }
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
@@ -679,7 +681,9 @@ textarea { resize: vertical; min-height: 72px; }
     width: 100vw;
     height: 100dvh;
   }
-
+.marker-tooltip {
+    display: none;
+}
     .modal-title {
   font-size: 20px; font-weight: 5px;
   letter-spacing: .1em;
@@ -730,3 +734,6 @@ textarea { resize: vertical; min-height: 72px; }
   html, body {
     height: 100dvh;
     touch-action: non
+     .marker-tooltip {
+    display: none;
+     }
