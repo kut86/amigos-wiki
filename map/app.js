@@ -502,19 +502,26 @@ function collectExtraFields(container) {
 /* ── Init ── */
 switchMap("woods");
 
+function waitAndOpen(id, m) {
+  if (pz) {
+    openModal(id, m);
+  } else {
+    setTimeout(() => waitAndOpen(id, m), 200);
+  }
+}
+
 function checkUrlHash() {
   const hash = location.hash;
   if (!hash.startsWith("#marker=")) return;
   const id = hash.slice(8);
 
-  // ждём пока маркеры загрузятся, потом открываем
   const unsub = onValue(ref(db, `maps/${currentMap}/markers`), snap => {
-    unsub(); // отписываемся сразу — нужен только первый ответ
+    unsub();
     snap.forEach(i => { allMarkers[i.key] = i.val(); });
     const m = allMarkers[id];
     if (m) {
-      render(); // рисуем маркеры на карте
-      setTimeout(() => openModal(id, m), 300); // небольшая задержка для panzoom
+      render();
+      waitAndOpen(id, m);
     } else {
       toast("Маркер не найден", true);
     }
