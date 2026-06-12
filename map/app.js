@@ -355,6 +355,7 @@ function esc(s) {
 
 /* ── Modal open ── */
 function openModal(id, m) {
+  history.replaceState(null, "", `#marker=${id}`);
   current = { id, ...m };
 
   modalTitle.textContent = m.name || "Маркер";
@@ -397,6 +398,7 @@ modalClose.onclick = closeModal;
 modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
 function closeModal() {
+  history.replaceState(null, "", location.pathname);
   modal.classList.remove("open");
   current = null;
   editForm.style.display = "none";
@@ -493,4 +495,16 @@ function collectExtraFields(container) {
 
 /* ── Init ── */
 switchMap("woods");
-    
+
+function checkUrlHash() {
+  const hash = location.hash;
+  if (!hash.startsWith("#marker=")) return;
+  const id = hash.slice(8);
+  const unsub = onValue(currentRef, snap => {
+    snap.forEach(i => { allMarkers[i.key] = i.val(); });
+    const m = allMarkers[id];
+    if (m) openModal(id, m);
+    unsub();
+  });
+}
+checkUrlHash();
