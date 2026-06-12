@@ -513,4 +513,8 @@ editQuill = new Quill("#editQuillEditor", {
   modules: { toolbar: "#editQuillToolbar" }
 });
 addIframeHandler(editQuill);
-          
+
+/* Фикс Quill в скрытых контейнерах */
+document.getElementById("addForm").addEventListener("transitionend", () => {
+  if (addQuill) addQuill.update();
+});
