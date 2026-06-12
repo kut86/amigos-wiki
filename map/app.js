@@ -407,6 +407,7 @@ cancelEdit.onclick = () => {
   saveBtn.style.display    = "none";
   cancelEdit.style.display = "none";
   editBtn.style.display    = isAdmin ? "" : "none";
+};
 
 };
 
