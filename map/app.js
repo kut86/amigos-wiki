@@ -370,7 +370,7 @@ function closeModal() {
   history.replaceState(null, "", location.pathname);
   modal.classList.remove("open");
   current = null;
-  editForm.style.display = "active";
+  editForm.classList.remove("active");
 }
 
 /* ── Edit ── */
@@ -393,12 +393,12 @@ editBtn.onclick = () => {
   });
   editExtraFields.innerHTML = "";
   (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
-  editForm.style.display = "active";
+  editForm.classList.add("active");
   editBtn.style.display  = "none";
 };
 
 cancelEdit.onclick = () => {
-  editForm.style.display = "active";
+  editForm.classList.remove("active");
   editBtn.style.display  = isAdmin ? "" : "none";
 };
 
