@@ -402,7 +402,7 @@ editBtn.onclick = () => {
 };
 
 cancelEdit.onclick = () => {
-  cancelEdit.onclick = () => {
+  
   editForm.style.display   = "none";
   saveBtn.style.display    = "none";
   cancelEdit.style.display = "none";
