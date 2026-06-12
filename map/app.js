@@ -514,7 +514,9 @@ editQuill = new Quill("#editQuillEditor", {
 });
 addIframeHandler(editQuill);
 
-/* Фикс Quill в скрытых контейнерах */
-document.getElementById("addForm").addEventListener("transitionend", () => {
-  if (addQuill) addQuill.update();
-});
+/* Фикс — пересчитываем Quill когда форма редактирования открывается */
+const _origEditBtnOnclick = editBtn.onclick;
+editBtn.onclick = () => {
+  if (_origEditBtnOnclick) _origEditBtnOnclick();
+  setTimeout(() => { if (editQuill) editQuill.update(); }, 50);
+};
