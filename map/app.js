@@ -43,52 +43,45 @@ const TYPE_LABEL = {
 const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
 
 /* ── DOM ── */
-const mapEl         = document.getElementById("map");
-const mapImg        = document.getElementById("mapImage");
-const loginBtn      = document.getElementById("loginBtn");
-const logoutBtn     = document.getElementById("logoutBtn");
-const adminBadge    = document.getElementById("adminBadge");
-const addModeBtn    = document.getElementById("addModeBtn");
-const filterSel     = document.getElementById("filter");
-const mapSelect     = document.getElementById("mapSelect");
-const mapWrapper    = document.getElementById("mapWrapper");
-
-/* ADD FORM */
-const addForm       = document.getElementById("addForm");
-const addName       = document.getElementById("addName");
-const addType       = document.getElementById("addType");
-const addImgUrl     = document.getElementById("addImgUrl");
-const addIconUrl    = document.getElementById("addIconUrl");
-const addEmojiInput = document.getElementById("addEmojiInput");
-const addEmojiPicker= document.getElementById("addEmojiPicker");
-const addExtraFields= document.getElementById("addExtraFields");
-const addConfirm    = document.getElementById("addConfirm");
-const addCancel     = document.getElementById("addCancel");
-
-/* MODAL */
-const modal         = document.getElementById("modal");
-const modalTitle    = document.getElementById("modalTitle");
-const modalBadge    = document.getElementById("modalBadge");
-const modalPhoto    = document.getElementById("modalPhoto");
-const modalDesc     = document.getElementById("modalDesc");
-const modalCoords   = document.getElementById("modalCoords");
-const modalExtras   = document.getElementById("modalExtras");
-const editForm      = document.getElementById("editForm");
-const editName      = document.getElementById("editName");
-const editType      = document.getElementById("editType");
-const editImgUrl    = document.getElementById("editImgUrl");
-const editIconUrl   = document.getElementById("editIconUrl");
-const editEmojiInput= document.getElementById("editEmojiInput");
-const editEmojiPicker=document.getElementById("editEmojiPicker");
-const editExtraFields=document.getElementById("editExtraFields");
-const saveBtn       = document.getElementById("saveBtn");
-const cancelEdit    = document.getElementById("cancelEdit");
-const editBtn       = document.getElementById("editBtn");
-const delBtn        = document.getElementById("delBtn");
-const modalClose    = document.getElementById("modalClose");
-let addQuill;
-let editQuill;
-
+const mapEl          = document.getElementById("map");
+const mapImg         = document.getElementById("mapImage");
+const loginBtn       = document.getElementById("loginBtn");
+const logoutBtn      = document.getElementById("logoutBtn");
+const adminBadge     = document.getElementById("adminBadge");
+const addModeBtn     = document.getElementById("addModeBtn");
+const filterSel      = document.getElementById("filter");
+const mapSelect      = document.getElementById("mapSelect");
+const mapWrapper     = document.getElementById("mapWrapper");
+const addForm        = document.getElementById("addForm");
+const addName        = document.getElementById("addName");
+const addType        = document.getElementById("addType");
+const addImgUrl      = document.getElementById("addImgUrl");
+const addIconUrl     = document.getElementById("addIconUrl");
+const addEmojiInput  = document.getElementById("addEmojiInput");
+const addEmojiPicker = document.getElementById("addEmojiPicker");
+const addExtraFields = document.getElementById("addExtraFields");
+const addConfirm     = document.getElementById("addConfirm");
+const addCancel      = document.getElementById("addCancel");
+const modal          = document.getElementById("modal");
+const modalTitle     = document.getElementById("modalTitle");
+const modalBadge     = document.getElementById("modalBadge");
+const modalPhoto     = document.getElementById("modalPhoto");
+const modalDesc      = document.getElementById("modalDesc");
+const modalCoords    = document.getElementById("modalCoords");
+const modalExtras    = document.getElementById("modalExtras");
+const editForm       = document.getElementById("editForm");
+const editName       = document.getElementById("editName");
+const editType       = document.getElementById("editType");
+const editImgUrl     = document.getElementById("editImgUrl");
+const editIconUrl    = document.getElementById("editIconUrl");
+const editEmojiInput = document.getElementById("editEmojiInput");
+const editEmojiPicker= document.getElementById("editEmojiPicker");
+const editExtraFields= document.getElementById("editExtraFields");
+const saveBtn        = document.getElementById("saveBtn");
+const cancelEdit     = document.getElementById("cancelEdit");
+const editBtn        = document.getElementById("editBtn");
+const delBtn         = document.getElementById("delBtn");
+const modalClose     = document.getElementById("modalClose");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -100,6 +93,11 @@ let pendingPos = null;
 let allMarkers = {};
 let currentRef = null;
 let offFn      = null;
+let pz         = null;
+
+/* Quill — объявляем заранее, инициализируем после DOMContentLoaded */
+let addQuill;
+let editQuill;
 
 const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
@@ -142,8 +140,6 @@ function switchMap(id) {
 }
 
 /* ── Panzoom ── */
-let pz = null;
-
 mapEl.parentElement.addEventListener("wheel", e => {
   e.preventDefault();
   if (pz) pz.zoomWithWheel(e);
@@ -248,10 +244,9 @@ mapEl.addEventListener("click", e => {
     y: ((e.clientY - r.top)  / r.height) * 100
   };
   addForm.style.display = "flex";
-  /* сброс формы */
   addName.value = addImgUrl.value = addIconUrl.value = addEmojiInput.value = "";
   addType.value = "loot";
-  addQuill.setContents([]);
+  if (addQuill) addQuill.setContents([]);
   addEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("active"));
   addExtraFields.innerHTML = "";
 });
@@ -260,11 +255,8 @@ addConfirm.onclick = () => {
   if (!pendingPos) return;
   const name = addName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
-
-  /* Получаем HTML из Quill, проверяем не пустой ли */
-  const textHTML = addQuill.root.innerHTML;
-  const textVal  = addQuill.getText().trim() ? textHTML : null;
-
+  const textHTML = addQuill ? addQuill.root.innerHTML : null;
+  const textVal  = (addQuill && addQuill.getText().trim()) ? textHTML : null;
   const extraFields = collectExtraFields(addExtraFields);
   push(currentRef, {
     x: pendingPos.x, y: pendingPos.y,
@@ -305,7 +297,6 @@ function createMarker(id, m) {
   if (isMobile()) div.classList.add("no-hover");
 
   const tooltipText = m.name || "";
-
   let iconHTML = "";
   if (m.iconUrl) {
     const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
@@ -314,13 +305,11 @@ function createMarker(id, m) {
     const displayEmoji = m.emoji || TYPE_EMOJI[m.type] || "📍";
     iconHTML = `<div class="marker-icon ${m.type}"><span>${displayEmoji}</span></div>`;
   }
-
   const previewHTML = (!isMobile() && m.imgUrl)
     ? `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false"></div>`
     : "";
 
   div.innerHTML = `${iconHTML}${previewHTML}<div class="marker-tooltip">${esc(tooltipText)}</div>`;
-
   div.addEventListener("click", e => {
     e.stopPropagation();
     if (addMode) return;
@@ -333,16 +322,13 @@ function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-/* ── Modal open ── */
+/* ── Modal ── */
 function openModal(id, m) {
   history.replaceState(null, "", `#marker=${id}`);
   current = { id, ...m };
-
   modalTitle.textContent = m.name || "Маркер";
   modalBadge.textContent = TYPE_LABEL[m.type] || m.type;
   modalBadge.className   = `modal-type-badge badge-${m.type}`;
-
-  /* Рендерим HTML описания (от Quill) через innerHTML */
   if (m.text) {
     modalDesc.innerHTML     = m.text;
     modalDesc.style.display = "";
@@ -350,12 +336,9 @@ function openModal(id, m) {
     modalDesc.innerHTML     = "";
     modalDesc.style.display = "none";
   }
-
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
-
   renderModalExtras(m.extraFields);
-
   editBtn.style.display  = isAdmin ? "" : "none";
   delBtn.style.display   = isAdmin ? "" : "none";
   editForm.style.display = "none";
@@ -393,26 +376,23 @@ function closeModal() {
 /* ── Edit ── */
 editBtn.onclick = () => {
   if (!current) return;
-  editName.value    = current.name    || "";
-  editType.value    = current.type    || "loot";
-  editImgUrl.value  = current.imgUrl  || "";
-  editIconUrl.value = current.iconUrl || "";
-  editEmojiInput.value = current.emoji || "";
-
-  /* Загружаем HTML описания в Quill */
-  if (current.text) {
-    editQuill.root.innerHTML = current.text;
-  } else {
-    editQuill.setContents([]);
+  editName.value       = current.name    || "";
+  editType.value       = current.type    || "loot";
+  editImgUrl.value     = current.imgUrl  || "";
+  editIconUrl.value    = current.iconUrl || "";
+  editEmojiInput.value = current.emoji   || "";
+  if (editQuill) {
+    if (current.text) {
+      editQuill.root.innerHTML = current.text;
+    } else {
+      editQuill.setContents([]);
+    }
   }
-
   editEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => {
     b.classList.toggle("active", b.textContent === current.emoji);
   });
-
   editExtraFields.innerHTML = "";
   (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
-
   editForm.style.display = "flex";
   editBtn.style.display  = "none";
 };
@@ -426,10 +406,8 @@ saveBtn.onclick = () => {
   if (!current) return;
   const name = editName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
-
-  const textHTML = editQuill.root.innerHTML;
-  const textVal  = editQuill.getText().trim() ? textHTML : null;
-
+  const textHTML = editQuill ? editQuill.root.innerHTML : null;
+  const textVal  = (editQuill && editQuill.getText().trim()) ? textHTML : null;
   const extraFields = collectExtraFields(editExtraFields);
   update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
     x: current.x, y: current.y,
@@ -479,9 +457,7 @@ function collectExtraFields(container) {
   return result;
 }
 
-/* ── Init ── */
-switchMap("woods");
-
+/* ── URL hash ── */
 function waitAndOpen(id, m) {
   if (pz) {
     openModal(id, m);
@@ -494,24 +470,24 @@ function checkUrlHash() {
   const hash = location.hash;
   if (!hash.startsWith("#marker=")) return;
   const id = hash.slice(8);
-
   const unsub = onValue(ref(db, `maps/${currentMap}/markers`), snap => {
     unsub();
     snap.forEach(i => { allMarkers[i.key] = i.val(); });
     const m = allMarkers[id];
-    if (m) {
-      render();
-      waitAndOpen(id, m);
-    } else {
-      toast("Маркер не найден", true);
-    }
+    if (m) { render(); waitAndOpen(id, m); }
+    else toast("Маркер не найден", true);
   });
 }
+
+/* ── Init ── */
+switchMap("woods");
 checkUrlHash();
 
-/* ── Quill editors ── */
+/* ── Quill — инициализируем последними ── */
 function addIframeHandler(quill) {
-  const btn = quill.container.previousSibling.querySelector(".ql-iframe");
+  const toolbar = quill.container.previousSibling;
+  if (!toolbar) return;
+  const btn = toolbar.querySelector(".ql-iframe");
   if (!btn) return;
   btn.onclick = () => {
     const code = prompt("Вставь iframe код:");
@@ -537,3 +513,4 @@ editQuill = new Quill("#editQuillEditor", {
   modules: { toolbar: "#editQuillToolbar" }
 });
 addIframeHandler(editQuill);
+  
