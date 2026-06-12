@@ -611,7 +611,11 @@ textarea { resize: vertical; min-height: 72px; }
     pointer-events: none;
   }
 }
-
+.marker img {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  user-select: none;
+}
 @media (max-width: 768px) {
   html, body {
     height: 100dvh;
