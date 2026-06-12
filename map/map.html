@@ -16,7 +16,11 @@
     #addQuillToolbar,
     #editQuillToolbar {
      display: block !important;
+      
       }
+     #editForm { display: none; }
+     #editForm.active { display: flex; }
+    
     /* ── Emoji picker ── */
     .emoji-picker { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
     .emoji-btn {
@@ -267,7 +271,7 @@
       <p id="modalCoords" class="modal-coords"></p>
 
       <!-- Форма редактирования -->
-      <div id="editForm" style="display:none;flex-direction:column;gap:10px">
+      <div id="editForm" style="flex-direction:column;gap:10px">
 
         <div class="form-group">
           <label class="form-label">Название маркера <span style="color:var(--accent)">*</span></label>
