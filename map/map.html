@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru"> 
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,20 +8,10 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="menu.css">
 
-  <!-- Quill WYSIWYG -->
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
   <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
   <style>
-    #addQuillToolbar,
-    #editQuillToolbar {
-     display: block !important;
-      
-      }
-     #editForm { display: none; }
-     #editForm.active { display: flex; }
-    
-    /* ── Emoji picker ── */
     .emoji-picker { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
     .emoji-btn {
       background:rgba(255,255,255,.06);
@@ -33,7 +23,6 @@
     .emoji-btn:hover  { background:rgba(255,255,255,.14); }
     .emoji-btn.active { border-color:var(--accent,#e6872e); background:rgba(230,135,46,.18); }
 
-    /* ── Quill editor тёмная тема ── */
     .ql-toolbar.ql-snow {
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.15) !important;
@@ -53,29 +42,19 @@
     }
     .ql-editor { min-height: 80px; padding: 8px 10px; }
     .ql-editor.ql-blank::before { color: rgba(255,255,255,.3); font-style: normal; }
-
-    /* иконки тулбара — светлые */
     .ql-toolbar .ql-stroke { stroke: rgba(255,255,255,.7) !important; }
     .ql-toolbar .ql-fill   { fill:   rgba(255,255,255,.7) !important; }
     .ql-toolbar .ql-picker-label { color: rgba(255,255,255,.7) !important; }
     .ql-toolbar button:hover .ql-stroke,
     .ql-toolbar button.ql-active .ql-stroke { stroke: var(--accent,#e6872e) !important; }
     .ql-toolbar button:hover .ql-fill,
-    .ql-toolbar button.ql-active .ql-fill   { fill:   var(--accent,#e6872e) !important; }
-    .ql-toolbar .ql-picker-options {
-      background: #1a1b1c;
-      border-color: rgba(255,255,255,.15) !important;
-    }
-    .ql-toolbar .ql-picker-item { color: #e0d8cc !important; }
+    .ql-toolbar button.ql-active .ql-fill   { fill: var(--accent,#e6872e) !important; }
+    .ql-toolbar .ql-picker-options { background:#1a1b1c; border-color:rgba(255,255,255,.15) !important; }
+    .ql-toolbar .ql-picker-item { color:#e0d8cc !important; }
 
-    /* ── Описание с прокруткой в модалке ── */
-    .modal-desc-wrap {
-      max-height: 200px; overflow-y: auto; padding-right: 4px;
-    }
+    .modal-desc-wrap { max-height:200px; overflow-y:auto; padding-right:4px; }
     .modal-desc-wrap::-webkit-scrollbar { width:4px; }
     .modal-desc-wrap::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:4px; }
-
-    /* Quill-контент в модалке */
     .modal-desc-wrap h1,.modal-desc-wrap h2 { font-size:1.1em; margin:.3em 0; }
     .modal-desc-wrap ul,.modal-desc-wrap ol  { padding-left:1.4em; margin:.3em 0; }
     .modal-desc-wrap strong { color:#fff; }
@@ -83,28 +62,28 @@
     .modal-desc-wrap u      { text-decoration:underline; }
     .modal-desc-wrap s      { text-decoration:line-through; }
 
-    /* ── Доп. поля (просмотр) ── */
     .modal-extras { display:flex; flex-direction:column; gap:6px; }
     .modal-extra-row { display:flex; gap:8px; align-items:baseline; font-size:13px; }
     .modal-extra-label { color:rgba(255,255,255,.5); white-space:nowrap; min-width:80px; }
     .modal-extra-value { color:#e0d8cc; }
 
-    /* ── Доп. поля (редактирование) ── */
     .extra-field-row { display:flex; gap:6px; align-items:center; }
     .extra-field-row input { flex:1; }
     .extra-field-row .extra-field-remove { flex-shrink:0; }
 
-    /* ── Секция иконки ── */
     .icon-section { display:flex; flex-direction:column; gap:6px; }
     .icon-section .form-label { margin-bottom:0; }
 
-    /* ── marker-icon для URL-иконок ── */
     .marker-icon.icon-img {
       width:36px; height:36px; border-radius:50%; overflow:hidden;
       border:2px solid var(--accent,#e6872e); background:#222;
       display:flex; align-items:center; justify-content:center;
     }
     .marker-icon.icon-img img { width:100%; height:100%; object-fit:cover; }
+
+    /* editForm управляется через класс .active */
+    #editForm { display:none; }
+    #editForm.active { display:flex; }
   </style>
 </head>
 <body>
@@ -152,7 +131,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ ADD FORM ═══════════════ -->
+<!-- ADD FORM -->
 <div id="addForm" style="
   display:none;
   position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
@@ -169,12 +148,10 @@
   overflow-y:auto;
 ">
   <div class="hud-label" style="color:var(--accent)">НОВЫЙ МАРКЕР</div>
-
   <div class="form-group">
     <label class="form-label">Название маркера <span style="color:var(--accent)">*</span></label>
     <input id="addName" type="text" placeholder="Например: ЛЕСОПИЛКА">
   </div>
-
   <div class="form-group">
     <label class="form-label">Тип</label>
     <select id="addType">
@@ -186,8 +163,6 @@
       <option value="structure">🧩 Точки интересов</option>
     </select>
   </div>
-
-  <!-- Quill редактор описания (форма добавления) -->
   <div class="form-group">
     <label class="form-label">Описание (видно в окне)</label>
     <div id="addQuillToolbar">
@@ -211,22 +186,18 @@
       <span class="ql-formats">
         <button class="ql-link"></button>
         <button class="ql-clean"></button>
-        <button class="ql-image"></button>        
+        <button class="ql-image"></button>
         <button class="ql-video"></button>
         <button class="ql-iframe">▶</button>
       </span>
     </div>
-    <div id="addQuillEditor" style="background:transparent"></div>
+    <div id="addQuillEditor"></div>
   </div>
-
-  <!-- Доп. поля -->
   <div class="form-group">
     <label class="form-label">Дополнительные поля</label>
     <div id="addExtraFields" style="display:flex;flex-direction:column;gap:6px;"></div>
     <button type="button" id="addExtraFieldBtn" class="btn btn-sm" style="margin-top:6px;align-self:flex-start">+ Добавить поле</button>
   </div>
-
-  <!-- Иконка -->
   <div class="icon-section">
     <label class="form-label">Иконка маркера</label>
     <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:2px;">Выбрать emoji:</div>
@@ -235,20 +206,17 @@
     <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:6px;margin-bottom:2px;">Или URL иконки (перекрывает emoji):</div>
     <input id="addIconUrl" type="url" placeholder="https://...icon.png">
   </div>
-
-  <!-- Фото -->
   <div class="form-group">
     <label class="form-label">URL фото (превью + модальное окно)</label>
     <input id="addImgUrl" type="url" placeholder="https://...">
   </div>
-
   <div style="display:flex;gap:8px;justify-content:flex-end">
     <button id="addCancel"  class="btn btn-sm">Отмена</button>
     <button id="addConfirm" class="btn btn-sm btn-primary">Добавить</button>
   </div>
 </div>
 
-<!-- ═══════════════ MODAL ═══════════════ -->
+<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <div class="modal-header">
@@ -261,23 +229,18 @@
 
     <div class="modal-body" style="display:flex;flex-direction:column;gap:10px">
       <img id="modalPhoto" class="modal-photo" src="" alt="" style="display:none">
-
-      <!-- Описание — рендерим HTML от Quill -->
       <div class="modal-desc-wrap">
         <div id="modalDesc" class="modal-desc"></div>
       </div>
-
       <div id="modalExtras" class="modal-extras"></div>
       <p id="modalCoords" class="modal-coords"></p>
 
-      <!-- Форма редактирования -->
+      <!-- editForm скрыт через CSS класс, не inline style -->
       <div id="editForm" style="flex-direction:column;gap:10px">
-
         <div class="form-group">
           <label class="form-label">Название маркера <span style="color:var(--accent)">*</span></label>
           <input id="editName" type="text" placeholder="Название на карте">
         </div>
-
         <div class="form-group">
           <label class="form-label">Тип</label>
           <select id="editType">
@@ -289,8 +252,6 @@
             <option value="structure">🧩 Точки интересов</option>
           </select>
         </div>
-
-        <!-- Quill редактор описания (форма редактирования) -->
         <div class="form-group">
           <label class="form-label">Описание</label>
           <div id="editQuillToolbar">
@@ -312,24 +273,20 @@
               </select>
             </span>
             <span class="ql-formats">
-            <button class="ql-link"></button>
-            <button class="ql-clean"></button>
-            <button class="ql-image"></button>        
-            <button class="ql-video"></button>
-            <button class="ql-iframe">▶</button> 
-           </span>
+              <button class="ql-link"></button>
+              <button class="ql-clean"></button>
+              <button class="ql-image"></button>
+              <button class="ql-video"></button>
+              <button class="ql-iframe">▶</button>
+            </span>
           </div>
           <div id="editQuillEditor"></div>
         </div>
-
-        <!-- Доп. поля -->
         <div class="form-group">
           <label class="form-label">Дополнительные поля</label>
           <div id="editExtraFields" style="display:flex;flex-direction:column;gap:6px;"></div>
           <button type="button" id="editExtraFieldBtn" class="btn btn-sm" style="margin-top:6px;align-self:flex-start">+ Добавить поле</button>
         </div>
-
-        <!-- Иконка -->
         <div class="icon-section">
           <label class="form-label">Иконка маркера</label>
           <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:2px;">Выбрать emoji:</div>
@@ -338,23 +295,20 @@
           <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:6px;margin-bottom:2px;">Или URL иконки (перекрывает emoji):</div>
           <input id="editIconUrl" type="url" placeholder="https://...icon.png">
         </div>
-
-        <!-- Фото -->
         <div class="form-group">
           <label class="form-label">URL фото (превью + модальное окно)</label>
           <input id="editImgUrl" type="url" placeholder="https://...">
         </div>
-
       </div><!-- /editForm -->
     </div><!-- /modal-body -->
 
     <div class="modal-footer">
-  <button id="copyLinkBtn" class="btn btn-sm" title="Скопировать ссылку">🔗</button>
-  <button id="cancelEdit" class="btn btn-sm" style="display:none">Отмена</button>
-  <button id="saveBtn"    class="btn btn-sm btn-primary" style="display:none">Сохранить</button>
-  <button id="editBtn"    class="btn btn-sm">Редактировать</button>
-  <button id="delBtn"     class="btn btn-sm btn-danger">Удалить</button>
-</div>
+      <button id="copyLinkBtn" class="btn btn-sm" title="Скопировать ссылку">🔗</button>
+      <button id="cancelEdit" class="btn btn-sm" style="display:none">Отмена</button>
+      <button id="saveBtn"    class="btn btn-sm btn-primary" style="display:none">Сохранить</button>
+      <button id="editBtn"    class="btn btn-sm">Редактировать</button>
+      <button id="delBtn"     class="btn btn-sm btn-danger">Удалить</button>
+    </div>
   </div>
 </div>
 
