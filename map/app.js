@@ -490,34 +490,16 @@ function checkUrlHash() {
 switchMap("woods");
 checkUrlHash();
 
-/* ── Quill — последними ── */
-function addIframeHandler(quill) {
-  const toolbar = quill.container.previousSibling;
-  if (!toolbar) return;
-  const btn = toolbar.querySelector(".ql-iframe");
-  if (!btn) return;
-  btn.onclick = () => {
-    const code = prompt("Вставь iframe код:");
-    if (!code) return;
-    const match = code.match(/src="([^"]+)"/);
-    if (!match) { toast("Не найден src в iframe", true); return; }
-    const src = match[1];
-    const range = quill.getSelection(true);
-    quill.insertEmbed(range.index, "video", src);
-  };
-}
 
+/* ── Quill — последними ── */
 addQuill = new Quill("#addQuillEditor", {
   theme: "snow",
   placeholder: "Подробное описание...",
   modules: { toolbar: "#addQuillToolbar" }
 });
-addIframeHandler(addQuill);
 
 editQuill = new Quill("#editQuillEditor", {
   theme: "snow",
   placeholder: "Описание...",
   modules: { toolbar: "#editQuillToolbar" }
 });
-addIframeHandler(editQuill);
-    
