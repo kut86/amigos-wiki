@@ -224,7 +224,7 @@ body::after {
   pointer-events: none;
   opacity: 0;
   transition: opacity .2s, transform .2s;
-  z-index: 300;
+  z-index: 500;
   background: var(--surface); /* фон под отступами */
   padding: 3px;
 }
@@ -234,11 +234,12 @@ body::after {
   height: 100%;
   object-fit: contain; /* вся картинка целиком */
   border-radius: calc(var(--radius) - 3px);
+  z-index: 500;
 }
-/*.marker:hover .marker-preview {
+.marker:hover .marker-preview {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-}*/
+}
 .marker-preview img { width: 100%; height: 100%; object-fit: cover; }
 .marker-photo img { width: 100%; height: 100%; object-fit: cover; }
 .marker:hover .marker-photo { box-shadow: 0 0 0 5px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
@@ -283,7 +284,7 @@ body::after {
   border: 1px solid var(--border2);
   border-top: 2px solid var(--accent);
   border-radius: var(--radius-lg);
-  width: 520px;
+  width: 800px;
   max-width: calc(100vw - 32px);
   display: flex;
   flex-direction: column;
@@ -327,7 +328,8 @@ body::after {
 .badge-custom    { background: rgba(155,89,182,.15);  color: var(--custom-color);    border: 1px solid rgba(155,89,182,.3); }
 .badge-bot       { background: rgba(230,126,34,.15);  color: var(--bot-color);       border: 1px solid rgba(230,126,34,.3); }
 .badge-exit      { background: rgba(39,174,96,.15);   color: var(--exit-color);      border: 1px solid rgba(39,174,96,.3); }
-.badge-structure { background: rgba(142,68,173,.15);  color: var(--structure-color); border: 1px solid rgba(142,68,173,.3); }
+.badge-structure { background: rgb(22 20 23);  color: var(--structure-color); border: 1px solid rgba(142,68,173,.3); }
+.badge-tain { background: rgb(37 23 43 / 22%);  color: var(--tain-color); border: 1px solid rgba(142,68,173,.3); }
 
 .modal-close {
   background: none; border: none;
@@ -347,7 +349,7 @@ body::after {
 }
 
 .modal-photo {
-  width: 100%; height: 180px;
+  width: 100%; height: 460px;
   object-fit: cover;
   border-radius: var(--radius);
   border: 1px solid var(--border);
