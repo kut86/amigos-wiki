@@ -524,14 +524,14 @@ function addIframeHandler(quill) {
   };
 }
 
-const addQuill = new Quill("#addQuillEditor", {
+addQuill = new Quill("#addQuillEditor", {
   theme: "snow",
   placeholder: "Подробное описание...",
   modules: { toolbar: "#addQuillToolbar" }
 });
 addIframeHandler(addQuill);
 
-const editQuill = new Quill("#editQuillEditor", {
+editQuill = new Quill("#editQuillEditor", {
   theme: "snow",
   placeholder: "Описание...",
   modules: { toolbar: "#editQuillToolbar" }
