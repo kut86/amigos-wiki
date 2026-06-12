@@ -506,11 +506,18 @@ function checkUrlHash() {
   const hash = location.hash;
   if (!hash.startsWith("#marker=")) return;
   const id = hash.slice(8);
-  const unsub = onValue(currentRef, snap => {
+
+  // ждём пока маркеры загрузятся, потом открываем
+  const unsub = onValue(ref(db, `maps/${currentMap}/markers`), snap => {
+    unsub(); // отписываемся сразу — нужен только первый ответ
     snap.forEach(i => { allMarkers[i.key] = i.val(); });
     const m = allMarkers[id];
-    if (m) openModal(id, m);
-    unsub();
+    if (m) {
+      render(); // рисуем маркеры на карте
+      setTimeout(() => openModal(id, m), 300); // небольшая задержка для panzoom
+    } else {
+      toast("Маркер не найден", true);
+    }
   });
 }
 checkUrlHash();
