@@ -339,11 +339,9 @@ function openModal(id, m) {
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
   renderModalExtras(m.extraFields);
-  saveBtn.style.display    = "none";
-  cancelEdit.style.display = "none";
-  editBtn.style.display    = isAdmin ? "" : "none";
-  delBtn.style.display     = isAdmin ? "" : "none";
-  editForm.style.display   = "none";
+  editBtn.style.display  = isAdmin ? "" : "none";
+  delBtn.style.display   = isAdmin ? "" : "none";
+  editForm.style.display = "none";
   modal.classList.add("open");
 }
 
@@ -395,20 +393,14 @@ editBtn.onclick = () => {
   });
   editExtraFields.innerHTML = "";
   (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
-  editForm.style.display   = "flex";
-  editBtn.style.display    = "none";
-  saveBtn.style.display    = "";
-  cancelEdit.style.display = "";
+  editForm.style.display = "flex";
+  editBtn.style.display  = "none";
 };
 
 cancelEdit.onclick = () => {
-  editForm.style.display   = "none";
-  saveBtn.style.display    = "none";
-  cancelEdit.style.display = "none";
-  editBtn.style.display    = isAdmin ? "" : "none";
+  editForm.style.display = "none";
+  editBtn.style.display  = isAdmin ? "" : "none";
 };
-
-
 
 saveBtn.onclick = () => {
   if (!current) return;
@@ -521,4 +513,4 @@ editQuill = new Quill("#editQuillEditor", {
   modules: { toolbar: "#editQuillToolbar" }
 });
 addIframeHandler(editQuill);
-  
+          
