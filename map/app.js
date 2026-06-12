@@ -395,6 +395,12 @@ function renderModalExtras(extraFields) {
 }
 
 modalClose.onclick = closeModal;
+document.getElementById("copyLinkBtn").onclick = () => {
+  const url = `${location.origin}${location.pathname}#marker=${current.id}`;
+  navigator.clipboard.writeText(url)
+    .then(() => toast("Ссылка скопирована"))
+    .catch(() => toast("Не удалось скопировать", true));
+};
 modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
 function closeModal() {
