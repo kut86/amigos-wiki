@@ -124,6 +124,7 @@ function hideEditForm() {
   saveBtn.style.display    = "none";
   cancelEdit.style.display = "none";
   editBtn.style.display    = isAdmin ? "" : "none";
+  delBtn.style.display     = isAdmin ? "" : "none";
 }
 
 /* ── Auth ── */
