@@ -86,35 +86,9 @@ const cancelEdit    = document.getElementById("cancelEdit");
 const editBtn       = document.getElementById("editBtn");
 const delBtn        = document.getElementById("delBtn");
 const modalClose    = document.getElementById("modalClose");
+let addQuill;
+let editQuill;
 
-/* ── Quill editors ── */
-function addIframeHandler(quill) {
-  const btn = quill.container.previousSibling.querySelector(".ql-iframe");
-  if (!btn) return;
-  btn.onclick = () => {
-    const code = prompt("Вставь iframe код:");
-    if (!code) return;
-    const match = code.match(/src="([^"]+)"/);
-    if (!match) { toast("Не найден src в iframe", true); return; }
-    const src = match[1];
-    const range = quill.getSelection(true);
-    quill.insertEmbed(range.index, "video", src);
-  };
-}
-
-const addQuill = new Quill("#addQuillEditor", {
-  theme: "snow",
-  placeholder: "Подробное описание...",
-  modules: { toolbar: "#addQuillToolbar" }
-});
-addIframeHandler(addQuill);
-
-const editQuill = new Quill("#editQuillEditor", {
-  theme: "snow",
-  placeholder: "Описание...",
-  modules: { toolbar: "#editQuillToolbar" }
-});
-addIframeHandler(editQuill);
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -534,3 +508,32 @@ function checkUrlHash() {
   });
 }
 checkUrlHash();
+
+/* ── Quill editors ── */
+function addIframeHandler(quill) {
+  const btn = quill.container.previousSibling.querySelector(".ql-iframe");
+  if (!btn) return;
+  btn.onclick = () => {
+    const code = prompt("Вставь iframe код:");
+    if (!code) return;
+    const match = code.match(/src="([^"]+)"/);
+    if (!match) { toast("Не найден src в iframe", true); return; }
+    const src = match[1];
+    const range = quill.getSelection(true);
+    quill.insertEmbed(range.index, "video", src);
+  };
+}
+
+const addQuill = new Quill("#addQuillEditor", {
+  theme: "snow",
+  placeholder: "Подробное описание...",
+  modules: { toolbar: "#addQuillToolbar" }
+});
+addIframeHandler(addQuill);
+
+const editQuill = new Quill("#editQuillEditor", {
+  theme: "snow",
+  placeholder: "Описание...",
+  modules: { toolbar: "#editQuillToolbar" }
+});
+addIframeHandler(editQuill);
