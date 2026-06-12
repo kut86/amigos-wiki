@@ -164,7 +164,7 @@ mapEl.parentElement.addEventListener("wheel", e => {
 function initPanzoom() {
   if (pz) { pz.destroy(); pz = null; }
   pz = Panzoom(mapEl, { maxScale: 8, minScale: 0.5, contain: "outside" });
-  setTimeout(() => { resetView(); pz.zoom(pz.getScale(), { animate: false }); }, 200);
+  setTimeout(() => { resetView(); pz.zoom(pz.getScale(), { animate: false }); }, 400);
 }
 
 function resetView() {
