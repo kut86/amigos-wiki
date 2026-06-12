@@ -94,8 +94,6 @@ let allMarkers = {};
 let currentRef = null;
 let offFn      = null;
 let pz         = null;
-
-/* Quill — объявляем заранее, инициализируем после DOMContentLoaded */
 let addQuill;
 let editQuill;
 
@@ -109,6 +107,23 @@ function toast(msg, err = false) {
   t.textContent = msg;
   tc.appendChild(t);
   setTimeout(() => t.remove(), 3200);
+}
+
+/* ── Показ/скрытие формы редактирования ── */
+function showEditForm() {
+  editForm.classList.add("active");
+  saveBtn.style.display    = "";
+  cancelEdit.style.display = "";
+  editBtn.style.display    = "none";
+  /* Даём браузеру отрисовать форму, потом обновляем Quill */
+  setTimeout(() => { if (editQuill) editQuill.update(); }, 60);
+}
+
+function hideEditForm() {
+  editForm.classList.remove("active");
+  saveBtn.style.display    = "none";
+  cancelEdit.style.display = "none";
+  editBtn.style.display    = isAdmin ? "" : "none";
 }
 
 /* ── Auth ── */
@@ -339,9 +354,8 @@ function openModal(id, m) {
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
   renderModalExtras(m.extraFields);
-  editBtn.style.display  = isAdmin ? "" : "none";
-  delBtn.style.display   = isAdmin ? "" : "none";
-  editForm.style.display = "none";
+  /* Сбрасываем состояние кнопок */
+  hideEditForm();
   modal.classList.add("open");
 }
 
@@ -370,7 +384,7 @@ function closeModal() {
   history.replaceState(null, "", location.pathname);
   modal.classList.remove("open");
   current = null;
-  editForm.classList.remove("active");
+  hideEditForm();
 }
 
 /* ── Edit ── */
@@ -393,14 +407,10 @@ editBtn.onclick = () => {
   });
   editExtraFields.innerHTML = "";
   (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
-  editForm.classList.add("active");
-  editBtn.style.display  = "none";
+  showEditForm();
 };
 
-cancelEdit.onclick = () => {
-  editForm.classList.remove("active");
-  editBtn.style.display  = isAdmin ? "" : "none";
-};
+cancelEdit.onclick = () => hideEditForm();
 
 saveBtn.onclick = () => {
   if (!current) return;
@@ -459,11 +469,8 @@ function collectExtraFields(container) {
 
 /* ── URL hash ── */
 function waitAndOpen(id, m) {
-  if (pz) {
-    openModal(id, m);
-  } else {
-    setTimeout(() => waitAndOpen(id, m), 200);
-  }
+  if (pz) { openModal(id, m); }
+  else setTimeout(() => waitAndOpen(id, m), 200);
 }
 
 function checkUrlHash() {
@@ -483,7 +490,7 @@ function checkUrlHash() {
 switchMap("woods");
 checkUrlHash();
 
-/* ── Quill — инициализируем последними ── */
+/* ── Quill — последними ── */
 function addIframeHandler(quill) {
   const toolbar = quill.container.previousSibling;
   if (!toolbar) return;
@@ -513,10 +520,4 @@ editQuill = new Quill("#editQuillEditor", {
   modules: { toolbar: "#editQuillToolbar" }
 });
 addIframeHandler(editQuill);
-
-/* Фикс — пересчитываем Quill когда форма редактирования открывается */
-const _origEditBtnOnclick = editBtn.onclick;
-editBtn.onclick = () => {
-  if (_origEditBtnOnclick) _origEditBtnOnclick();
-  setTimeout(() => { if (editQuill) editQuill.update(); }, 50);
-};
+    
