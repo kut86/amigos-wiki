@@ -159,6 +159,12 @@ body::after {
 .marker-icon.exit      { background: var(--exit-color); }
 .marker-icon.structure { background: var(--structure-color); }
 
+.modal-desc-wrap iframe {
+  width: 100%;
+  height: 200px;
+  border: none;
+  border-radius: 6px;
+}
 /* photo marker */
 .marker-photo {
   width: 25px; height: 25px;
