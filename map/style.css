@@ -285,7 +285,7 @@ body::after {
   border: 1px solid var(--border2);
   border-top: 2px solid var(--accent);
   border-radius: var(--radius-lg);
-  width: 800px;
+  width: 1000px;
   max-height: 80vh;
   background: #564a4a1a;
   max-width: calc(100vw - 32px);
@@ -604,7 +604,7 @@ textarea { resize: vertical; min-height: 72px; }
   /* modal — bottom sheet */
    
   .modal-box {
-    width: 90%; max-width: 90%;
+    width: 100%; max-width: 100%;
     border-radius: 2% 2% 2% 2%;
     max-height: 80dvh;
     overflow-y: auto;
@@ -641,7 +641,7 @@ textarea { resize: vertical; min-height: 72px; }
   user-select: none;
 }
 @media (max-width: 768px) {
-  @media (max-width: 1024px) {
+
   html, body {
     height: 100dvh;
     touch-action: none;
@@ -711,7 +711,7 @@ textarea { resize: vertical; min-height: 72px; }
   user-select: none;
 }
  @media (max-width: 425px) {
-  @media (max-width: 1024px) {
+ 
   html, body {
     height: 100dvh;
     touch-action: none;
