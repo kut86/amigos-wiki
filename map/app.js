@@ -25,7 +25,7 @@ const provider = new GoogleAuthProvider();
 
 /* ── Карты ── */
 const MAPS = {
-  woods:       { label: "Лес",      imgUrl: "images/woods.avif",       fallback: "" },
+  woods:       { label: "Лес",      imgUrl: "Woods_Interactive_Map_Base.webp",       fallback: "" },
   customs:     { label: "Таможня",  imgUrl: "images/customs.jpg",     fallback: "https://i.imgur.com/FKY4S2W.jpg" },
   interchange: { label: "Развязка", imgUrl: "images/woods1.avif", fallback: "https://i.imgur.com/FKY4S2W.jpg" }
 };
@@ -33,11 +33,11 @@ const MAPS = {
 /* ── Типы ── */
 const TYPE_EMOJI = {
   loot:"📦", boss:"💀", quest:"📋",
-  custom:"⭐", bot:"🎯", exit:"🚪", structure:"🧩"
+  info:"⭐", bot:"🎯", exit:"🚪", structure:"🧩",tain;"👁"
 };
 const TYPE_LABEL = {
-  loot:"Loot", boss:"Boss", quest:"Quest",
-  custom:"Custom", bot:"Снайпер", exit:"Выход", structure:"Точка интереса"
+  loot:"Лут", boss:"Босс", quest:"Квест",
+  info:"Инфо", bot:"бот", exit:"Выход", structure:"Точка интереса",tain;"Тайник"
 };
 
 const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
