@@ -30,44 +30,85 @@ const MAPS = {
   interchange: { label: "Развязка", imgUrl: "images/interchange.jpg", fallback: "https://i.imgur.com/FKY4S2W.jpg" }
 };
 
+/* ── Типы ── */
+const TYPE_EMOJI = {
+  loot:"📦", boss:"💀", quest:"📋",
+  custom:"⭐", bot:"🎯", exit:"🚪", structure:"🧩"
+};
+const TYPE_LABEL = {
+  loot:"Loot", boss:"Boss", quest:"Quest",
+  custom:"Custom", bot:"Снайпер", exit:"Выход", structure:"Точка интереса"
+};
+
+const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
+
 /* ── DOM ── */
-const mapEl        = document.getElementById("map");
-const mapImg       = document.getElementById("mapImage");
-const loginBtn     = document.getElementById("loginBtn");
-const logoutBtn    = document.getElementById("logoutBtn");
-const adminBadge   = document.getElementById("adminBadge");
-const addModeBtn   = document.getElementById("addModeBtn");
-const filterSel    = document.getElementById("filter");
-const mapSelect    = document.getElementById("mapSelect");
-const addForm      = document.getElementById("addForm");
-const addName      = document.getElementById("addName");
-const addText      = document.getElementById("addText");
-const addType      = document.getElementById("addType");
-const addImgUrl    = document.getElementById("addImgUrl");
-const addIcon      = document.getElementById("addIcon");
-const addConfirm   = document.getElementById("addConfirm");
-const addCancel    = document.getElementById("addCancel");
-const modal        = document.getElementById("modal");
-const modalTitle   = document.getElementById("modalTitle");
-const modalBadge   = document.getElementById("modalBadge");
-const modalPhoto   = document.getElementById("modalPhoto");
-const modalDesc    = document.getElementById("modalDesc");
-const modalCoords  = document.getElementById("modalCoords");
-const modalExtras  = document.getElementById("modalExtras");
-const editForm     = document.getElementById("editForm");
-const editName     = document.getElementById("editName");
-const editText     = document.getElementById("editText");
-const editType     = document.getElementById("editType");
-const editImgUrl   = document.getElementById("editImgUrl");
-const editIcon     = document.getElementById("editIcon");
-const editExtraFields = document.getElementById("editExtraFields");
-const addExtraFieldBtn = document.getElementById("addExtraFieldBtn");
-const saveBtn      = document.getElementById("saveBtn");
-const cancelEdit   = document.getElementById("cancelEdit");
-const editBtn      = document.getElementById("editBtn");
-const delBtn       = document.getElementById("delBtn");
-const modalClose   = document.getElementById("modalClose");
-const mapWrapper   = document.getElementById("mapWrapper");
+const mapEl         = document.getElementById("map");
+const mapImg        = document.getElementById("mapImage");
+const loginBtn      = document.getElementById("loginBtn");
+const logoutBtn     = document.getElementById("logoutBtn");
+const adminBadge    = document.getElementById("adminBadge");
+const addModeBtn    = document.getElementById("addModeBtn");
+const filterSel     = document.getElementById("filter");
+const mapSelect     = document.getElementById("mapSelect");
+const mapWrapper    = document.getElementById("mapWrapper");
+
+/* ADD FORM */
+const addForm       = document.getElementById("addForm");
+const addName       = document.getElementById("addName");
+const addType       = document.getElementById("addType");
+const addImgUrl     = document.getElementById("addImgUrl");
+const addIconUrl    = document.getElementById("addIconUrl");
+const addEmojiInput = document.getElementById("addEmojiInput");
+const addEmojiPicker= document.getElementById("addEmojiPicker");
+const addExtraFields= document.getElementById("addExtraFields");
+const addConfirm    = document.getElementById("addConfirm");
+const addCancel     = document.getElementById("addCancel");
+
+/* MODAL */
+const modal         = document.getElementById("modal");
+const modalTitle    = document.getElementById("modalTitle");
+const modalBadge    = document.getElementById("modalBadge");
+const modalPhoto    = document.getElementById("modalPhoto");
+const modalDesc     = document.getElementById("modalDesc");
+const modalCoords   = document.getElementById("modalCoords");
+const modalExtras   = document.getElementById("modalExtras");
+const editForm      = document.getElementById("editForm");
+const editName      = document.getElementById("editName");
+const editType      = document.getElementById("editType");
+const editImgUrl    = document.getElementById("editImgUrl");
+const editIconUrl   = document.getElementById("editIconUrl");
+const editEmojiInput= document.getElementById("editEmojiInput");
+const editEmojiPicker=document.getElementById("editEmojiPicker");
+const editExtraFields=document.getElementById("editExtraFields");
+const saveBtn       = document.getElementById("saveBtn");
+const cancelEdit    = document.getElementById("cancelEdit");
+const editBtn       = document.getElementById("editBtn");
+const delBtn        = document.getElementById("delBtn");
+const modalClose    = document.getElementById("modalClose");
+
+/* ── Quill editors ── */
+const quillOptions = {
+  theme: "snow",
+  placeholder: "Подробное описание...",
+  modules: {
+    toolbar: {
+      container: "#addQuillToolbar"
+    }
+  }
+};
+
+const addQuill = new Quill("#addQuillEditor", {
+  theme: "snow",
+  placeholder: "Подробное описание...",
+  modules: { toolbar: "#addQuillToolbar" }
+});
+
+const editQuill = new Quill("#editQuillEditor", {
+  theme: "snow",
+  placeholder: "Описание...",
+  modules: { toolbar: "#editQuillToolbar" }
+});
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -82,22 +123,13 @@ let offFn      = null;
 
 const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
-const TYPE_EMOJI = {
-  loot:"📦", boss:"💀", quest:"📋",
-  custom:"⭐", bot:"🎯", exit:"🚪", structure:"🧩"
-};
-const TYPE_LABEL = {
-  loot:"Loot", boss:"Boss", quest:"Quest",
-  custom:"Custom", bot:"Снайпер", exit:"Выход", structure:"Точка интереса"
-};
-
 /* ── Toast ── */
 function toast(msg, err = false) {
-  const toastCont = document.getElementById("toastContainer");
-  const t = document.createElement("div");
+  const tc = document.getElementById("toastContainer");
+  const t  = document.createElement("div");
   t.className   = "toast" + (err ? " err" : "");
   t.textContent = msg;
-  toastCont.appendChild(t);
+  tc.appendChild(t);
   setTimeout(() => t.remove(), 3200);
 }
 
@@ -119,28 +151,13 @@ mapSelect.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
   currentMap = id;
-
   if (offFn) offFn();
-
   allMarkers = {};
   document.querySelectorAll(".marker").forEach(m => m.remove());
-
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
-
-  mapImg.onload = null;
-
-  mapImg.onload = () => {
-    subscribe();
-    initPanzoom();
-  };
-
-  mapImg.onerror = () => {
-    mapImg.onerror = null;
-    mapImg.src = MAPS[id].fallback;
-  };
+  if (pz) { pz.destroy(); pz = null; }
+  mapImg.onload  = null;
+  mapImg.onload  = () => { subscribe(); initPanzoom(); };
+  mapImg.onerror = () => { mapImg.onerror = null; mapImg.src = MAPS[id].fallback; };
   mapImg.src = MAPS[id].imgUrl;
 }
 
@@ -153,85 +170,42 @@ mapEl.parentElement.addEventListener("wheel", e => {
 }, { passive: false });
 
 function initPanzoom() {
-  if (pz) {
-    pz.destroy();
-    pz = null;
-  }
-
-  pz = Panzoom(mapEl, {
-    maxScale: 8,
-    minScale: 0.5,
-    contain: "outside",
-  });
-
-  setTimeout(() => {
-    resetView();
-    const scale = pz.getScale();
-    pz.zoom(scale, { animate: false });
-  }, 200);
+  if (pz) { pz.destroy(); pz = null; }
+  pz = Panzoom(mapEl, { maxScale: 8, minScale: 0.5, contain: "outside" });
+  setTimeout(() => { resetView(); pz.zoom(pz.getScale(), { animate: false }); }, 200);
 }
 
-/* ── RESET VIEW ── */
 function resetView() {
   if (!pz) return;
-
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
+  const iw = mapImg.naturalWidth, ih = mapImg.naturalHeight;
   if (!iw || !ih) return;
-
-  const vw = mapEl.clientWidth;
-  const vh = mapEl.clientHeight;
-
+  const vw = mapEl.clientWidth, vh = mapEl.clientHeight;
   const scale = Math.min(vw / iw, vh / ih);
-
-  const x = (vw - iw * scale) / 2;
-  const y = (vh - ih * scale) / 2;
-
   pz.zoom(scale, { animate: false });
-  pz.pan(x, y, { animate: false });
+  pz.pan((vw - iw * scale) / 2, (vh - ih * scale) / 2, { animate: false });
 }
 
-/* ── Zoom buttons ── */
 document.getElementById("zoomIn").onclick = () => {
   if (!pz) return;
-  const cx = window.innerWidth  / 2;
-  const cy = window.innerHeight / 2;
-  const scale = pz.getScale() * 1.3;
-  pz.zoomToPoint(scale, { clientX: cx, clientY: cy });
+  pz.zoomToPoint(pz.getScale() * 1.3, { clientX: window.innerWidth/2, clientY: window.innerHeight/2 });
 };
-
 document.getElementById("zoomOut").onclick = () => {
   if (!pz) return;
-  const cx = window.innerWidth  / 2;
-  const cy = window.innerHeight / 2;
-  const scale = pz.getScale() / 1.3;
-  pz.zoomToPoint(scale, { clientX: cx, clientY: cy });
+  pz.zoomToPoint(pz.getScale() / 1.3, { clientX: window.innerWidth/2, clientY: window.innerHeight/2 });
 };
-
 document.getElementById("zoomReset").onclick = () => {
   if (!pz) return;
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih) * 0.8;
+  const iw = mapImg.naturalWidth, ih = mapImg.naturalHeight;
+  const s = Math.min(window.innerWidth/iw, window.innerHeight/ih) * 0.8;
   pz.zoom(s, { animate: true });
-  pz.pan(
-    (window.innerWidth  - iw * s) / 2,
-    (window.innerHeight - ih * s) / 2,
-    { animate: true }
-  );
+  pz.pan((window.innerWidth - iw*s)/2, (window.innerHeight - ih*s)/2, { animate: true });
 };
-
 window.addEventListener("resize", () => {
   if (!pz) return;
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
-  const s  = Math.min(window.innerWidth / iw, window.innerHeight / ih) * 0.8;
+  const iw = mapImg.naturalWidth, ih = mapImg.naturalHeight;
+  const s = Math.min(window.innerWidth/iw, window.innerHeight/ih) * 0.8;
   pz.zoom(s, { animate: false });
-  pz.pan(
-    (window.innerWidth  - iw * s) / 2,
-    (window.innerHeight - ih * s) / 2,
-    { animate: false }
-  );
+  pz.pan((window.innerWidth - iw*s)/2, (window.innerHeight - ih*s)/2, { animate: false });
 });
 
 /* ── Firebase subscribe ── */
@@ -244,6 +218,26 @@ function subscribe() {
   });
 }
 
+/* ── Emoji picker ── */
+function buildEmojiPicker(pickerEl, inputEl) {
+  pickerEl.innerHTML = "";
+  QUICK_EMOJI.forEach(em => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "emoji-btn";
+    btn.textContent = em;
+    btn.onclick = () => {
+      inputEl.value = em;
+      pickerEl.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    };
+    pickerEl.appendChild(btn);
+  });
+}
+
+buildEmojiPicker(addEmojiPicker, addEmojiInput);
+buildEmojiPicker(editEmojiPicker, editEmojiInput);
+
 /* ── Add mode ── */
 addModeBtn.onclick = () => addMode ? exitAddMode() : enterAddMode();
 
@@ -252,7 +246,7 @@ function enterAddMode() {
   addMode = true;
   addModeBtn.textContent = "✕ Отмена";
   addModeBtn.classList.add("btn-danger");
-  mapWrapper.style.cursor = 'grabbing';
+  mapWrapper.style.cursor = "crosshair";
   toast("Нажмите на карту для добавления маркера");
 }
 
@@ -262,7 +256,7 @@ function exitAddMode() {
   addModeBtn.textContent = "+ Маркер";
   addModeBtn.classList.remove("btn-danger");
   addForm.style.display  = "none";
-  mapWrapper.style.cursor = 'crosshair';
+  mapWrapper.style.cursor = "";
 }
 
 mapEl.addEventListener("click", e => {
@@ -274,37 +268,41 @@ mapEl.addEventListener("click", e => {
     y: ((e.clientY - r.top)  / r.height) * 100
   };
   addForm.style.display = "flex";
-  addName.value = addText.value = addImgUrl.value = addIcon.value = "";
+  /* сброс формы */
+  addName.value = addImgUrl.value = addIconUrl.value = addEmojiInput.value = "";
   addType.value = "loot";
-  // Очищаем доп. поля формы добавления
-  document.getElementById("addExtraFields").innerHTML = "";
+  addQuill.setContents([]);
+  addEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("active"));
+  addExtraFields.innerHTML = "";
 });
 
-/* ── Доп. поля в форме добавления ── */
-document.getElementById("addExtraFieldBtn").addEventListener("click", () => {
-  addExtraFieldRow(document.getElementById("addExtraFields"));
-});
-
-/* ── Confirm add ── */
 addConfirm.onclick = () => {
   if (!pendingPos) return;
   const name = addName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
 
-  const extraFields = collectExtraFields(document.getElementById("addExtraFields"));
+  /* Получаем HTML из Quill, проверяем не пустой ли */
+  const textHTML = addQuill.root.innerHTML;
+  const textVal  = addQuill.getText().trim() ? textHTML : null;
 
+  const extraFields = collectExtraFields(addExtraFields);
   push(currentRef, {
     x: pendingPos.x, y: pendingPos.y,
     name,
-    text:      addText.value.trim() || null,
-    type:      addType.value,
-    imgUrl:    addImgUrl.value.trim()  || null,
-    iconUrl:   addIcon.value.trim()    || null,
+    text:        textVal,
+    type:        addType.value,
+    emoji:       addEmojiInput.value.trim()  || null,
+    imgUrl:      addImgUrl.value.trim()      || null,
+    iconUrl:     addIconUrl.value.trim()     || null,
     extraFields: extraFields.length ? extraFields : null,
   }).then(() => { toast("Маркер добавлен"); exitAddMode(); })
     .catch(e => toast(e.message, true));
 };
 addCancel.onclick = exitAddMode;
+
+document.getElementById("addExtraFieldBtn").addEventListener("click", () => {
+  addExtraFieldRow(addExtraFields);
+});
 
 /* ── Render ── */
 function render() {
@@ -317,6 +315,7 @@ function render() {
 }
 filterSel.addEventListener("change", render);
 
+/* ── Create marker DOM ── */
 function createMarker(id, m) {
   const div      = document.createElement("div");
   div.className  = "marker";
@@ -325,27 +324,22 @@ function createMarker(id, m) {
   div.style.top  = m.y + "%";
   if (isMobile()) div.classList.add("no-hover");
 
-  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
+  const tooltipText = m.name || "";
 
-  // Тултип показывает name (или text для старых маркеров без name)
-  const tooltipText = m.name || m.text || "";
-
-  if (m.imgUrl) {
-    div.innerHTML = `
-      <div class="marker-photo"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false" onerror="this.src='${fallback}'"></div>
-      ${isMobile() ? "" : `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false"></div>`}
-      <div class="marker-tooltip">${esc(tooltipText)}</div>`;
-  } else if (m.iconUrl) {
-    div.innerHTML = `
-      <div class="marker-photo" style="border-color:var(--${m.type}-color,var(--accent))">
-        <img src="${esc(m.iconUrl)}" alt="" draggable="false" oncontextmenu="return false" onerror="this.src='${fallback}'">
-      </div>
-      <div class="marker-tooltip">${esc(tooltipText)}</div>`;
+  let iconHTML = "";
+  if (m.iconUrl) {
+    const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
+    iconHTML = `<div class="marker-icon icon-img"><img src="${esc(m.iconUrl)}" alt="" draggable="false" oncontextmenu="return false" onerror="this.src='${fallback}'"></div>`;
   } else {
-    div.innerHTML = `
-      <div class="marker-icon ${m.type}"><span>${TYPE_EMOJI[m.type] || "📍"}</span></div>
-      <div class="marker-tooltip">${esc(tooltipText)}</div>`;
+    const displayEmoji = m.emoji || TYPE_EMOJI[m.type] || "📍";
+    iconHTML = `<div class="marker-icon ${m.type}"><span>${displayEmoji}</span></div>`;
   }
+
+  const previewHTML = (!isMobile() && m.imgUrl)
+    ? `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false"></div>`
+    : "";
+
+  div.innerHTML = `${iconHTML}${previewHTML}<div class="marker-tooltip">${esc(tooltipText)}</div>`;
 
   div.addEventListener("click", e => {
     e.stopPropagation();
@@ -359,43 +353,42 @@ function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-/* ── Modal ── */
+/* ── Modal open ── */
 function openModal(id, m) {
   current = { id, ...m };
 
-  // Заголовок: название маркера слева, тип-бейдж справа
-  modalTitle.textContent = m.name || m.text || "Маркер";
+  modalTitle.textContent = m.name || "Маркер";
   modalBadge.textContent = TYPE_LABEL[m.type] || m.type;
   modalBadge.className   = `modal-type-badge badge-${m.type}`;
 
-  // Описание со скроллом
-  modalDesc.textContent    = m.text || "";
-  modalDesc.style.display  = m.text ? "" : "none";
+  /* Рендерим HTML описания (от Quill) через innerHTML */
+  if (m.text) {
+    modalDesc.innerHTML     = m.text;
+    modalDesc.style.display = "";
+  } else {
+    modalDesc.innerHTML     = "";
+    modalDesc.style.display = "none";
+  }
 
-  // Фото
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
 
-  // Доп. поля (только просмотр)
   renderModalExtras(m.extraFields);
 
-  editBtn.style.display    = isAdmin ? "" : "none";
-  delBtn.style.display     = isAdmin ? "" : "none";
-  editForm.style.display   = "none";
+  editBtn.style.display  = isAdmin ? "" : "none";
+  delBtn.style.display   = isAdmin ? "" : "none";
+  editForm.style.display = "none";
   modal.classList.add("open");
 }
 
 function renderModalExtras(extraFields) {
   modalExtras.innerHTML = "";
   if (!extraFields || !extraFields.length) return;
-
-  extraFields.forEach(field => {
-    if (!field.label && !field.value) return;
+  extraFields.forEach(f => {
+    if (!f.label && !f.value) return;
     const row = document.createElement("div");
     row.className = "modal-extra-row";
-    row.innerHTML = `
-      <span class="modal-extra-label">${esc(field.label)}</span>
-      <span class="modal-extra-value">${esc(field.value)}</span>`;
+    row.innerHTML = `<span class="modal-extra-label">${esc(f.label)}</span><span class="modal-extra-value">${esc(f.value)}</span>`;
     modalExtras.appendChild(row);
   });
 }
@@ -412,19 +405,25 @@ function closeModal() {
 /* ── Edit ── */
 editBtn.onclick = () => {
   if (!current) return;
-  editName.value   = current.name    || "";
-  editText.value   = current.text    || "";
-  editType.value   = current.type    || "loot";
-  editImgUrl.value = current.imgUrl  || "";
-  editIcon.value   = current.iconUrl || "";
+  editName.value    = current.name    || "";
+  editType.value    = current.type    || "loot";
+  editImgUrl.value  = current.imgUrl  || "";
+  editIconUrl.value = current.iconUrl || "";
+  editEmojiInput.value = current.emoji || "";
 
-  // Восстанавливаем доп. поля
-  editExtraFields.innerHTML = "";
-  if (current.extraFields && current.extraFields.length) {
-    current.extraFields.forEach(f => {
-      addExtraFieldRow(editExtraFields, f.label, f.value);
-    });
+  /* Загружаем HTML описания в Quill */
+  if (current.text) {
+    editQuill.root.innerHTML = current.text;
+  } else {
+    editQuill.setContents([]);
   }
+
+  editEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent === current.emoji);
+  });
+
+  editExtraFields.innerHTML = "";
+  (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
 
   editForm.style.display = "flex";
   editBtn.style.display  = "none";
@@ -440,19 +439,26 @@ saveBtn.onclick = () => {
   const name = editName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
 
-  const extraFields = collectExtraFields(editExtraFields);
+  const textHTML = editQuill.root.innerHTML;
+  const textVal  = editQuill.getText().trim() ? textHTML : null;
 
+  const extraFields = collectExtraFields(editExtraFields);
   update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
     x: current.x, y: current.y,
     name,
-    text:        editText.value.trim()   || null,
+    text:        textVal,
     type:        editType.value,
-    imgUrl:      editImgUrl.value.trim() || null,
-    iconUrl:     editIcon.value.trim()   || null,
+    emoji:       editEmojiInput.value.trim()  || null,
+    imgUrl:      editImgUrl.value.trim()      || null,
+    iconUrl:     editIconUrl.value.trim()     || null,
     extraFields: extraFields.length ? extraFields : null,
   }).then(() => { toast("Сохранено"); closeModal(); })
     .catch(e => toast(e.message, true));
 };
+
+document.getElementById("editExtraFieldBtn").addEventListener("click", () => {
+  addExtraFieldRow(editExtraFields);
+});
 
 /* ── Delete ── */
 delBtn.onclick = () => {
@@ -464,24 +470,20 @@ delBtn.onclick = () => {
 };
 
 /* ── Extra fields helpers ── */
-
-// Добавляет строку с полями label+value в контейнер
 function addExtraFieldRow(container, label = "", value = "") {
   const row = document.createElement("div");
   row.className = "extra-field-row";
   row.innerHTML = `
     <input type="text" class="extra-field-label" placeholder="Название поля" value="${esc(label)}">
-    <input type="text" class="extra-field-value" placeholder="Значение" value="${esc(value)}">
+    <input type="text" class="extra-field-value" placeholder="Значение"       value="${esc(value)}">
     <button type="button" class="extra-field-remove btn btn-sm btn-danger">✕</button>`;
-  row.querySelector(".extra-field-remove").addEventListener("click", () => row.remove());
+  row.querySelector(".extra-field-remove").onclick = () => row.remove();
   container.appendChild(row);
 }
 
-// Собирает заполненные доп. поля из контейнера
 function collectExtraFields(container) {
-  const rows = container.querySelectorAll(".extra-field-row");
   const result = [];
-  rows.forEach(row => {
+  container.querySelectorAll(".extra-field-row").forEach(row => {
     const label = row.querySelector(".extra-field-label").value.trim();
     const value = row.querySelector(".extra-field-value").value.trim();
     if (label || value) result.push({ label, value });
@@ -489,11 +491,6 @@ function collectExtraFields(container) {
   return result;
 }
 
-/* ── Кнопка добавления доп. поля в форме редактирования ── */
-addExtraFieldBtn.addEventListener("click", () => {
-  addExtraFieldRow(editExtraFields);
-});
-
 /* ── Init ── */
 switchMap("woods");
-                             
+    
