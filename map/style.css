@@ -236,10 +236,10 @@ body::after {
   border-radius: calc(var(--radius) - 3px);
   z-index: 500;
 }
-.marker:hover .marker-preview {
+/*.marker:hover .marker-preview {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-}
+}*/
 .marker-preview img { width: 100%; height: 100%; object-fit: cover; }
 .marker-photo img { width: 100%; height: 100%; object-fit: cover; }
 .marker:hover .marker-photo { box-shadow: 0 0 0 5px var(--accent), 0 4px 16px rgba(0,0,0,.8); }
@@ -260,6 +260,7 @@ body::after {
   width: 310px;
   max-width: calc(100vw - 28px);
   flex-direction: column;
+  overflow-y: auto;
   gap: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,.8), 0 0 0 1px rgba(255,102,0,.08);
   backdrop-filter: blur(16px);
@@ -285,12 +286,14 @@ body::after {
   border-top: 2px solid var(--accent);
   border-radius: var(--radius-lg);
   width: 800px;
+  max-height: 80vh;
+  background: #564a4a1a;
   max-width: calc(100vw - 32px);
   display: flex;
   flex-direction: column;
   gap: 0;
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0,0,0,.8), 0 0 40px rgba(255,102,0,.05);
+  box-shadow: 0 24px 70px rgba(0,0,0,.8), 0 0 40px rgba(255,102,0,.05);
   animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
 }
 
@@ -309,7 +312,7 @@ body::after {
 }
 
 .modal-title {
-  font-size: 18px; font-weight: 700;
+  font-size: 28px; font-weight: 7px;
   letter-spacing: .06em;
   display: flex; align-items: center; gap: 10px;
   color: var(--text-bright);
@@ -346,10 +349,13 @@ body::after {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px
 }
 
 .modal-photo {
-  width: 100%; height: 460px;
+  width: 100%; height: 550px;
   object-fit: cover;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -570,7 +576,15 @@ textarea { resize: vertical; min-height: 72px; }
     height: 100dvh;
     touch-action: none;
   }
-
+  .modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px
+}
   #mapWrapper {
     width: 100vw;
     height: 100dvh;
@@ -627,11 +641,20 @@ textarea { resize: vertical; min-height: 72px; }
   user-select: none;
 }
 @media (max-width: 768px) {
+  @media (max-width: 1024px) {
   html, body {
     height: 100dvh;
     touch-action: none;
   }
-
+  .modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px
+}
   #mapWrapper {
     width: 100vw;
     height: 100dvh;
@@ -675,30 +698,39 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
 
-  .marker-tooltip {
-    display: none;
-  }
+  
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
     pointer-events: none;
   }
 }
-  
+.marker img {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  user-select: none;
+}
  @media (max-width: 425px) {
+  @media (max-width: 1024px) {
   html, body {
     height: 100dvh;
     touch-action: none;
   }
-
+  .modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px
+}
   #mapWrapper {
     width: 100vw;
     height: 100dvh;
   }
-.marker-tooltip {
-    display: none;
-}
-    .modal-title {
+
+   .modal-title {
   font-size: 20px; font-weight: 5px;
   letter-spacing: .1em;
   display: flex; align-items: center; gap: 5px;
@@ -735,15 +767,19 @@ textarea { resize: vertical; min-height: 72px; }
   .marker-icon  { width: 0.9dvh; height: 0.9dvh; font-size: 0.5dvh; }
   .marker-photo { width: 0.9dvh; height: 0.9dvh; }
   .marker-preview { display: none; } /* hover на touch не работает */
+
   
-   
   .marker-photo img,
   .marker-icon {
     -webkit-touch-callout: none;
     pointer-events: none;
   }
 }
-
+.marker img {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  user-select: none;
+}
 @media (max-width: 375px) {
   html, body {
     height: 100dvh;
