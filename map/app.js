@@ -37,7 +37,7 @@ const TYPE_EMOJI = {
 };
 const TYPE_LABEL = {
   loot:"Лут", boss:"Босс", quest:"Квест",
-  info:"Инфо", bot:"бот", exit:"Выход", structure:"Точка интереса",tain;"Тайник"
+  info:"Инфо", bot:"бот", exit:"Выход", structure:"Точка интереса",tain:"Тайник"
 };
 
 const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
