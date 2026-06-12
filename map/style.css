@@ -42,6 +42,7 @@
   --bot-color:       #e67e22;
   --exit-color:      #27ae60;
   --structure-color: #8e44ad;
+  --tain-color: #6f8313;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -158,6 +159,7 @@ body::after {
 .marker-icon.bot       { background: var(--bot-color); }
 .marker-icon.exit      { background: var(--exit-color); }
 .marker-icon.structure { background: var(--structure-color); }
+.marker-icon.tain { background: var(--tain-color); }
 
 .modal-desc-wrap iframe {
   width: 100%;
