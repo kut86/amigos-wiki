@@ -40,55 +40,75 @@ const TYPE_LABEL = {
   custom:"Custom", bot:"Снайпер", exit:"Выход", structure:"Точка интереса"
 };
 
-/* Быстрые emoji для пикера */
 const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
 
 /* ── DOM ── */
-const mapEl        = document.getElementById("map");
-const mapImg       = document.getElementById("mapImage");
-const loginBtn     = document.getElementById("loginBtn");
-const logoutBtn    = document.getElementById("logoutBtn");
-const adminBadge   = document.getElementById("adminBadge");
-const addModeBtn   = document.getElementById("addModeBtn");
-const filterSel    = document.getElementById("filter");
-const mapSelect    = document.getElementById("mapSelect");
-const mapWrapper   = document.getElementById("mapWrapper");
+const mapEl         = document.getElementById("map");
+const mapImg        = document.getElementById("mapImage");
+const loginBtn      = document.getElementById("loginBtn");
+const logoutBtn     = document.getElementById("logoutBtn");
+const adminBadge    = document.getElementById("adminBadge");
+const addModeBtn    = document.getElementById("addModeBtn");
+const filterSel     = document.getElementById("filter");
+const mapSelect     = document.getElementById("mapSelect");
+const mapWrapper    = document.getElementById("mapWrapper");
 
 /* ADD FORM */
-const addForm      = document.getElementById("addForm");
-const addName      = document.getElementById("addName");
-const addText      = document.getElementById("addText");
-const addType      = document.getElementById("addType");
-const addImgUrl    = document.getElementById("addImgUrl");
-const addIconUrl   = document.getElementById("addIconUrl");
-const addEmojiInput= document.getElementById("addEmojiInput");
-const addEmojiPicker=document.getElementById("addEmojiPicker");
-const addExtraFields=document.getElementById("addExtraFields");
-const addConfirm   = document.getElementById("addConfirm");
-const addCancel    = document.getElementById("addCancel");
+const addForm       = document.getElementById("addForm");
+const addName       = document.getElementById("addName");
+const addType       = document.getElementById("addType");
+const addImgUrl     = document.getElementById("addImgUrl");
+const addIconUrl    = document.getElementById("addIconUrl");
+const addEmojiInput = document.getElementById("addEmojiInput");
+const addEmojiPicker= document.getElementById("addEmojiPicker");
+const addExtraFields= document.getElementById("addExtraFields");
+const addConfirm    = document.getElementById("addConfirm");
+const addCancel     = document.getElementById("addCancel");
 
 /* MODAL */
-const modal        = document.getElementById("modal");
-const modalTitle   = document.getElementById("modalTitle");
-const modalBadge   = document.getElementById("modalBadge");
-const modalPhoto   = document.getElementById("modalPhoto");
-const modalDesc    = document.getElementById("modalDesc");
-const modalCoords  = document.getElementById("modalCoords");
-const modalExtras  = document.getElementById("modalExtras");
-const editForm     = document.getElementById("editForm");
-const editName     = document.getElementById("editName");
-const editText     = document.getElementById("editText");
-const editType     = document.getElementById("editType");
-const editImgUrl   = document.getElementById("editImgUrl");
-const editIconUrl  = document.getElementById("editIconUrl");
-const editEmojiInput=document.getElementById("editEmojiInput");
+const modal         = document.getElementById("modal");
+const modalTitle    = document.getElementById("modalTitle");
+const modalBadge    = document.getElementById("modalBadge");
+const modalPhoto    = document.getElementById("modalPhoto");
+const modalDesc     = document.getElementById("modalDesc");
+const modalCoords   = document.getElementById("modalCoords");
+const modalExtras   = document.getElementById("modalExtras");
+const editForm      = document.getElementById("editForm");
+const editName      = document.getElementById("editName");
+const editType      = document.getElementById("editType");
+const editImgUrl    = document.getElementById("editImgUrl");
+const editIconUrl   = document.getElementById("editIconUrl");
+const editEmojiInput= document.getElementById("editEmojiInput");
 const editEmojiPicker=document.getElementById("editEmojiPicker");
 const editExtraFields=document.getElementById("editExtraFields");
-const saveBtn      = document.getElementById("saveBtn");
-const cancelEdit   = document.getElementById("cancelEdit");
-const editBtn      = document.getElementById("editBtn");
-const delBtn       = document.getElementById("delBtn");
-const modalClose   = document.getElementById("modalClose");
+const saveBtn       = document.getElementById("saveBtn");
+const cancelEdit    = document.getElementById("cancelEdit");
+const editBtn       = document.getElementById("editBtn");
+const delBtn        = document.getElementById("delBtn");
+const modalClose    = document.getElementById("modalClose");
+
+/* ── Quill editors ── */
+const quillOptions = {
+  theme: "snow",
+  placeholder: "Подробное описание...",
+  modules: {
+    toolbar: {
+      container: "#addQuillToolbar"
+    }
+  }
+};
+
+const addQuill = new Quill("#addQuillEditor", {
+  theme: "snow",
+  placeholder: "Подробное описание...",
+  modules: { toolbar: "#addQuillToolbar" }
+});
+
+const editQuill = new Quill("#editQuillEditor", {
+  theme: "snow",
+  placeholder: "Описание...",
+  modules: { toolbar: "#editQuillToolbar" }
+});
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
@@ -135,8 +155,8 @@ function switchMap(id) {
   allMarkers = {};
   document.querySelectorAll(".marker").forEach(m => m.remove());
   if (pz) { pz.destroy(); pz = null; }
-  mapImg.onload = null;
-  mapImg.onload = () => { subscribe(); initPanzoom(); };
+  mapImg.onload  = null;
+  mapImg.onload  = () => { subscribe(); initPanzoom(); };
   mapImg.onerror = () => { mapImg.onerror = null; mapImg.src = MAPS[id].fallback; };
   mapImg.src = MAPS[id].imgUrl;
 }
@@ -198,7 +218,7 @@ function subscribe() {
   });
 }
 
-/* ── Emoji picker builder ── */
+/* ── Emoji picker ── */
 function buildEmojiPicker(pickerEl, inputEl) {
   pickerEl.innerHTML = "";
   QUICK_EMOJI.forEach(em => {
@@ -249,8 +269,9 @@ mapEl.addEventListener("click", e => {
   };
   addForm.style.display = "flex";
   /* сброс формы */
-  addName.value = addText.value = addImgUrl.value = addIconUrl.value = addEmojiInput.value = "";
+  addName.value = addImgUrl.value = addIconUrl.value = addEmojiInput.value = "";
   addType.value = "loot";
+  addQuill.setContents([]);
   addEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("active"));
   addExtraFields.innerHTML = "";
 });
@@ -259,22 +280,26 @@ addConfirm.onclick = () => {
   if (!pendingPos) return;
   const name = addName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
+
+  /* Получаем HTML из Quill, проверяем не пустой ли */
+  const textHTML = addQuill.root.innerHTML;
+  const textVal  = addQuill.getText().trim() ? textHTML : null;
+
   const extraFields = collectExtraFields(addExtraFields);
   push(currentRef, {
     x: pendingPos.x, y: pendingPos.y,
     name,
-    text:        addText.value.trim()    || null,
+    text:        textVal,
     type:        addType.value,
-    emoji:       addEmojiInput.value.trim() || null,
-    imgUrl:      addImgUrl.value.trim()  || null,
-    iconUrl:     addIconUrl.value.trim() || null,
+    emoji:       addEmojiInput.value.trim()  || null,
+    imgUrl:      addImgUrl.value.trim()      || null,
+    iconUrl:     addIconUrl.value.trim()     || null,
     extraFields: extraFields.length ? extraFields : null,
   }).then(() => { toast("Маркер добавлен"); exitAddMode(); })
     .catch(e => toast(e.message, true));
 };
 addCancel.onclick = exitAddMode;
 
-/* Кнопка доп. поля в форме добавления */
 document.getElementById("addExtraFieldBtn").addEventListener("click", () => {
   addExtraFieldRow(addExtraFields);
 });
@@ -299,16 +324,8 @@ function createMarker(id, m) {
   div.style.top  = m.y + "%";
   if (isMobile()) div.classList.add("no-hover");
 
-  const tooltipText = m.name || m.text || "";
+  const tooltipText = m.name || "";
 
-  /*
-   * Иконка маркера — приоритет:
-   * 1. URL иконки (своя картинка)
-   * 2. Кастомный emoji
-   * 3. Дефолтный emoji типа
-   *
-   * Фото (imgUrl) — НЕ влияет на иконку, только превью + модалка
-   */
   let iconHTML = "";
   if (m.iconUrl) {
     const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23444'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='18'%3E%3F%3C/text%3E%3C/svg%3E";
@@ -318,15 +335,11 @@ function createMarker(id, m) {
     iconHTML = `<div class="marker-icon ${m.type}"><span>${displayEmoji}</span></div>`;
   }
 
-  /* Превью фото при наведении (только десктоп) */
   const previewHTML = (!isMobile() && m.imgUrl)
     ? `<div class="marker-preview"><img src="${esc(m.imgUrl)}" alt="" draggable="false" oncontextmenu="return false"></div>`
     : "";
 
-  div.innerHTML = `
-    ${iconHTML}
-    ${previewHTML}
-    <div class="marker-tooltip">${esc(tooltipText)}</div>`;
+  div.innerHTML = `${iconHTML}${previewHTML}<div class="marker-tooltip">${esc(tooltipText)}</div>`;
 
   div.addEventListener("click", e => {
     e.stopPropagation();
@@ -344,20 +357,22 @@ function esc(s) {
 function openModal(id, m) {
   current = { id, ...m };
 
-  /* Заголовок: название слева, тип-бейдж справа */
-  modalTitle.textContent = m.name || m.text || "Маркер";
+  modalTitle.textContent = m.name || "Маркер";
   modalBadge.textContent = TYPE_LABEL[m.type] || m.type;
   modalBadge.className   = `modal-type-badge badge-${m.type}`;
 
-  /* Описание со скроллом */
-  modalDesc.textContent   = m.text || "";
-  modalDesc.style.display = m.text ? "" : "none";
+  /* Рендерим HTML описания (от Quill) через innerHTML */
+  if (m.text) {
+    modalDesc.innerHTML     = m.text;
+    modalDesc.style.display = "";
+  } else {
+    modalDesc.innerHTML     = "";
+    modalDesc.style.display = "none";
+  }
 
-  /* Фото */
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
 
-  /* Доп. поля */
   renderModalExtras(m.extraFields);
 
   editBtn.style.display  = isAdmin ? "" : "none";
@@ -391,18 +406,22 @@ function closeModal() {
 editBtn.onclick = () => {
   if (!current) return;
   editName.value    = current.name    || "";
-  editText.value    = current.text    || "";
   editType.value    = current.type    || "loot";
   editImgUrl.value  = current.imgUrl  || "";
   editIconUrl.value = current.iconUrl || "";
   editEmojiInput.value = current.emoji || "";
 
-  /* Подсветить текущий emoji в пикере */
+  /* Загружаем HTML описания в Quill */
+  if (current.text) {
+    editQuill.root.innerHTML = current.text;
+  } else {
+    editQuill.setContents([]);
+  }
+
   editEmojiPicker.querySelectorAll(".emoji-btn").forEach(b => {
     b.classList.toggle("active", b.textContent === current.emoji);
   });
 
-  /* Доп. поля */
   editExtraFields.innerHTML = "";
   (current.extraFields || []).forEach(f => addExtraFieldRow(editExtraFields, f.label, f.value));
 
@@ -419,21 +438,24 @@ saveBtn.onclick = () => {
   if (!current) return;
   const name = editName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
+
+  const textHTML = editQuill.root.innerHTML;
+  const textVal  = editQuill.getText().trim() ? textHTML : null;
+
   const extraFields = collectExtraFields(editExtraFields);
   update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
     x: current.x, y: current.y,
     name,
-    text:        editText.value.trim()    || null,
+    text:        textVal,
     type:        editType.value,
-    emoji:       editEmojiInput.value.trim() || null,
-    imgUrl:      editImgUrl.value.trim()  || null,
-    iconUrl:     editIconUrl.value.trim() || null,
+    emoji:       editEmojiInput.value.trim()  || null,
+    imgUrl:      editImgUrl.value.trim()      || null,
+    iconUrl:     editIconUrl.value.trim()     || null,
     extraFields: extraFields.length ? extraFields : null,
   }).then(() => { toast("Сохранено"); closeModal(); })
     .catch(e => toast(e.message, true));
 };
 
-/* Кнопка доп. поля в форме редактирования */
 document.getElementById("editExtraFieldBtn").addEventListener("click", () => {
   addExtraFieldRow(editExtraFields);
 });
@@ -471,4 +493,4 @@ function collectExtraFields(container) {
 
 /* ── Init ── */
 switchMap("woods");
-  
+    
