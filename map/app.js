@@ -33,7 +33,7 @@ const MAPS = {
 /* ── Типы ── */
 const TYPE_EMOJI = {
   loot:"📦", boss:"💀", quest:"📋",
-  info:"⭐", bot:"🎯", exit:"🚪", structure:"🧩",tain;"👁"
+  info:"⭐", bot:"🎯", exit:"🚪", structure:"🧩",tain:"👁"
 };
 const TYPE_LABEL = {
   loot:"Лут", boss:"Босс", quest:"Квест",
