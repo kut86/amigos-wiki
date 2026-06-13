@@ -25,7 +25,7 @@ const provider = new GoogleAuthProvider();
 
 /* ── Карты ── */
 const MAPS = {
-  woods:       { label: "Лес",      imgUrl: "images/woods/Woods.jepg",       fallback: "" },
+  woods:       { label: "Лес",      imgUrl: "images/woods/Woods.jpg",       fallback: "" },
   customs:     { label: "Таможня",  imgUrl: "images/customs.jpg",     fallback: "https://i.imgur.com/FKY4S2W.jpg" },
   interchange: { label: "Развязка", imgUrl: "images/woods1.avif", fallback: "https://i.imgur.com/FKY4S2W.jpg" }
 };
