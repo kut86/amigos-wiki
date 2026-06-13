@@ -467,7 +467,7 @@ textarea { resize: vertical; min-height: 72px; }
 #zoomControls {
   position: fixed;
   bottom: 24px; right: 18px;
-  z-index: 9000;
+  z-index: 1900;
   display: flex; flex-direction: column; gap: 5px;
 }
 
@@ -579,7 +579,6 @@ textarea { resize: vertical; min-height: 72px; }
   /* modal — bottom sheet на мобиле */
   .modal-box {
     position: fixed;
-    bottom: 0; left: 0; right: 0;
     width: 100%;
     max-width: 100%;
     max-height: 88dvh;
@@ -596,8 +595,6 @@ textarea { resize: vertical; min-height: 72px; }
   .modal-body  { padding: 12px 14px; }
 
   #addForm {
-    bottom: 0;
-    left: 0; right: 0;
     transform: none;
     width: 100%;
     max-width: 100%;
@@ -618,4 +615,26 @@ textarea { resize: vertical; min-height: 72px; }
   .modal-title { font-size: 16px; }
   .modal-footer { gap: 6px; padding: 8px 12px; }
   .modal-footer .btn { font-size: 12px; padding: 6px 10px; }
+  .modal-box {
+     
+    width: 100%;
+    max-width: 100%;
+    max-height: 80dvh;
+    border-radius: 12px 12px 0 0;
+     
+  }
+ 
+  
+  @media(hover:none) and (pointer: coarse) {
+ .marker-icon{
+      width:8px;
+      height:8px;
+      font-size:4px;}
+ .marker-photo{
+      width:10px;
+      height:10px;}
+ .marker-icon.icon-img{
+      width:10px;
+      height:10px;} 
+    } 
 }
