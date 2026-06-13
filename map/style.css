@@ -191,18 +191,21 @@ body::before {
   pointer-events: none;
   opacity: 0;
   transition: opacity .2s, transform .2s;
-  z-index: 500;
+  z-index: 9999;
   background: var(--surface);
   padding: 3px;
+   
 }
 .marker-preview img {
   width: 100%; height: 100%;
   object-fit: contain;
   border-radius: calc(var(--radius) - 3px);
+  
 }
 .marker:hover .marker-preview {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  z-index:10000;
 }
 
 /* блокировка системного меню на изображениях маркеров */
@@ -211,6 +214,7 @@ body::before {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+  z-index:10001;
 }
 
 /* ═══════════════════════════════════════════════════════════════
