@@ -34,7 +34,8 @@ const MAPS = {
   woods:           { label: "Лес",           imgUrl: "images/woods/woods.jpg",                     fallback: "" },
   reserve:         { label: "Резерв",        imgUrl: "images/reserve/reserve.jpg",                 fallback: "" },
   lighthouse:      { label: "Маяк",          imgUrl: "images/lighthouse/lighthouse.jpg",           fallback: "" },
-  shoreline:       { label: "Берег",         imgUrl: "images/shoreline/shoreline.jpg",             fallback: "" }
+  shoreline:       { label: "Берег",         imgUrl: "images/shoreline/shoreline.jpg",             fallback: "" },
+  labyrinth:       { label: "Лаберинт",      imgUrl: "images/labyrinth/labyrinth.svg",             fallback: "" }
 };
 
 /* ── Типы ── */
