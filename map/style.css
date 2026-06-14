@@ -113,6 +113,7 @@ body::before {
 }
 .marker:hover .marker-icon {
   box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 4px 16px rgba(0,0,0,.8);
+  filter: invert(1)
 }
 .marker-icon span { rotate: 45deg; line-height: 1; }
 
