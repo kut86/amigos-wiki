@@ -26,15 +26,15 @@ const provider = new GoogleAuthProvider();
 /* ── Карты ── */
 const MAPS = {
   groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.png",           fallback: "" },
-  streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.jpg", fallback: "" },
-  labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.jpg",                       fallback: "" },
+  streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.svg", fallback: "" },
+  labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.svg",                       fallback: "" },
   interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.avif",         fallback: "" },
   customs:         { label: "Таможня",       imgUrl: "images/customs/customs.jpg",                 fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/customs/customs.jpg?raw=true" },
-  factory:         { label: "Завод",         imgUrl: "images/factory/factory.jpg",                 fallback: "" },
+  factory:         { label: "Завод",         imgUrl: "images/factory/factory.svg",                 fallback: "" },
   woods:           { label: "Лес",           imgUrl: "images/woods/woods.jpg",                     fallback: "" },
-  reserve:         { label: "Резерв",        imgUrl: "images/reserve/reserve.jpg",                 fallback: "" },
-  lighthouse:      { label: "Маяк",          imgUrl: "images/lighthouse/lighthouse.avif",           fallback: "" },
-  shoreline:       { label: "Берег",         imgUrl: "images/shoreline/shoreline.jpg",             fallback: "" },
+  reserve:         { label: "Резерв",        imgUrl: "images/reserve/reserve.svg",                 fallback: "" },
+  lighthouse:      { label: "Маяк",          imgUrl: "images/lighthouse/lighthouse.svg",           fallback: "" },
+  shoreline:       { label: "Берег",         imgUrl: "images/shoreline/shoreline.svg",             fallback: "" },
   labyrinth:       { label: "Лаберинт",      imgUrl: "images/labyrinth/labyrinth.svg",             fallback: "" }
 };
 
