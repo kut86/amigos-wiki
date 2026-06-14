@@ -152,6 +152,8 @@ onAuthStateChanged(auth, user => {
 mapSelect.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
+  localStorage.setItem("lastMap", id); // сохраняем
+  currentMap = id;
   currentMap = id;
   if (offFn) offFn();
   allMarkers = {};
@@ -496,7 +498,10 @@ function checkUrlHash() {
 }
 
 /* ── Init ── */
-switchMap("groundzero");
+const savedMap = localStorage.getItem("lastMap");
+const startMap = (savedMap && MAPS[savedMap]) ? savedMap : "groundzero";
+mapSelect.value = startMap;
+switchMap(startMap);
 checkUrlHash();
 
 
