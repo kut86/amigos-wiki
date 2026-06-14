@@ -27,7 +27,7 @@ const provider = new GoogleAuthProvider();
 const MAPS = {
   groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.png",           fallback: "" },
   streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.svg", fallback: "" },
-  labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.svg",                       fallback: "" },
+  labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.svg",                       fallback: "https://raw.githubusercontent.com/kut86/amigos-wiki/3b703c6b42941e6fc08ebaaf27ea7ef54d328452/map/images/labs/labs.svg" },
   interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.avif",         fallback: "" },
   customs:         { label: "Таможня",       imgUrl: "images/customs/customs.jpg",                 fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/customs/customs.jpg?raw=true" },
   factory:         { label: "Завод",         imgUrl: "images/factory/factory.svg",                 fallback: "" },
