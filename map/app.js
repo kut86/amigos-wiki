@@ -28,7 +28,7 @@ const MAPS = {
   groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.png",           fallback: "" },
   streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.jpg", fallback: "" },
   labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.jpg",                       fallback: "" },
-  interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.jpg",         fallback: "" },
+  interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.avif",         fallback: "" },
   customs:         { label: "Таможня",       imgUrl: "images/customs/customs.jpg",                 fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/customs/customs.jpg?raw=true" },
   factory:         { label: "Завод",         imgUrl: "images/factory/factory.jpg",                 fallback: "" },
   woods:           { label: "Лес",           imgUrl: "images/woods/woods.jpg",                     fallback: "" },
