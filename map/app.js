@@ -25,9 +25,19 @@ const provider = new GoogleAuthProvider();
 
 /* ── Карты ── */
 const MAPS = {
-  woods:       { label: "Лес",      imgUrl: "images/woods/Woods.jpg",       fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/woods/Woods.jpg?raw=true" },
-  customs:     { label: "Таможня",  imgUrl: "images/Сustoms.jpg",     fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/Customs.jpg?raw=true" },
-  interchange: { label: "Развязка", imgUrl: "images/interchange.jpg", fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/interchange.jpg?raw=true" }
+  
+  groundzero: { label: "Эпицентр", imgUrl: "images/groundzero/groundzero.jpg", fallback: "" },
+  streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.jpg", fallback: "" },
+  labs: { label: "Лаборатория", imgUrl: "images/labs/labs.jpg", fallback: "" },
+  interchange: { label: "Развязка", imgUrl: "images/interchange/interchange.jpg", fallback: "" },
+  customs:     { label: "Таможня",  imgUrl: "images/customs/customs.jpg",  fallback: "" },
+  factory: { label: "Завод", imgUrl: "images/factory/factory.jpg", fallback: "" },
+  woods:       { label: "Лес", imgUrl: "images/woods/woods.jpg", fallback: "" },
+  reserve: { label: "Резерв", imgUrl: "images/reserve/reserve.jpg", fallback: "" },
+  lighthouse: { label: "Маяк", imgUrl: "images/lighthouse/lighthouse.jpg", fallback: "" },
+  shoreline: { label: "Берег", imgUrl: "images/shoreline/shoreline.jpg", fallback: "" }
+ 
+  
 };
 
 /* ── Типы ── */
@@ -40,7 +50,7 @@ const TYPE_LABEL = {
   info:"Инфо", bot:"бот", exit:"Выход", structure:"Точка интереса",tain:"Тайник"
 };
 
-const QUICK_EMOJI = ["📍","⭐","🔥","💎","🛡","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
+const QUICK_EMOJI = ["📍","⭐","🔥","💎","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
 
 /* ── DOM ── */
 const mapEl          = document.getElementById("map");
@@ -86,7 +96,7 @@ const modalClose     = document.getElementById("modalClose");
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 let isAdmin    = false;
-let currentMap = "woods";
+let currentMap = "groundzero";
 let current    = null;
 let addMode    = false;
 let pendingPos = null;
@@ -488,7 +498,7 @@ function checkUrlHash() {
 }
 
 /* ── Init ── */
-switchMap("woods");
+switchMap("groundzero");
 checkUrlHash();
 
 
