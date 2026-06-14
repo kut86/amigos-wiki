@@ -25,7 +25,7 @@ const provider = new GoogleAuthProvider();
 
 /* ── Карты ── */
 const MAPS = {
-  groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.jpg",           fallback: "" },
+  groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.png",           fallback: "" },
   streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.jpg", fallback: "" },
   labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.jpg",                       fallback: "" },
   interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.jpg",         fallback: "" },
