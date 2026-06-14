@@ -32,7 +32,7 @@ const MAPS = {
       "1": { label: "1 этаж", imgUrl: "images/groundzero/level1.png" },
       "2": { label: "2 этаж", imgUrl: "images/groundzero/level2.png" },
     },
-    fallback: ""
+    fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/groundzero/groundzero.png?raw=true"
   },
   streetsoftarkov: {
     label: "Улицы Таркова",
