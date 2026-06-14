@@ -23,29 +23,103 @@ const db       = getDatabase(app);
 const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ── Карты ── */
+/* ── Карты с уровнями ── */
 const MAPS = {
-  groundzero:      { label: "Эпицентр",      imgUrl: "images/groundzero/groundzero.png",           fallback: "" },
-  streetsoftarkov: { label: "Улицы Таркова", imgUrl: "images/streetsoftarkov/streetsoftarkov.svg", fallback: "" },
-  labs:            { label: "Лаборатория",   imgUrl: "images/labs/labs.svg",                       fallback: "https://raw.githubusercontent.com/kut86/amigos-wiki/3b703c6b42941e6fc08ebaaf27ea7ef54d328452/map/images/labs/labs.svg" },
-  interchange:     { label: "Развязка",      imgUrl: "images/interchange/interchange.avif",         fallback: "" },
-  customs:         { label: "Таможня",       imgUrl: "images/customs/customs.jpg",                 fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/customs/customs.jpg?raw=true" },
-  factory:         { label: "Завод",         imgUrl: "images/factory/factory.svg",                 fallback: "" },
-  woods:           { label: "Лес",           imgUrl: "images/woods/woods.jpg",                     fallback: "" },
-  reserve:         { label: "Резерв",        imgUrl: "images/reserve/reserve.svg",                 fallback: "" },
-  lighthouse:      { label: "Маяк",          imgUrl: "images/lighthouse/lighthouse.svg",           fallback: "" },
-  shoreline:       { label: "Берег",         imgUrl: "images/shoreline/shoreline.svg",             fallback: "" },
-  labyrinth:       { label: "Лаберинт",      imgUrl: "images/labyrinth/labyrinth.svg",             fallback: "" }
+  groundzero: {
+    label: "Эпицентр",
+    levels: {
+      "0": { label: "Улица",  imgUrl: "images/groundzero/groundzero.png" },
+      "1": { label: "1 этаж", imgUrl: "images/groundzero/level1.png" },
+      "2": { label: "2 этаж", imgUrl: "images/groundzero/level2.png" },
+    },
+    fallback: ""
+  },
+  streetsoftarkov: {
+    label: "Улицы Таркова",
+    levels: {
+      "0": { label: "Улица",  imgUrl: "images/streetsoftarkov/streetsoftarkov.svg" },
+      "1": { label: "1 этаж", imgUrl: "images/streetsoftarkov/level1.svg" },
+    },
+    fallback: ""
+  },
+  labs: {
+    label: "Лаборатория",
+    levels: {
+      "0":  { label: "Б1",     imgUrl: "images/labs/labs.svg" },
+      "-1": { label: "Б2",     imgUrl: "images/labs/labsB2.svg" },
+    },
+    fallback: "https://raw.githubusercontent.com/kut86/amigos-wiki/3b703c6b42941e6fc08ebaaf27ea7ef54d328452/map/images/labs/labs.svg"
+  },
+  interchange: {
+    label: "Развязка",
+    levels: {
+      "0": { label: "Улица",  imgUrl: "images/interchange/interchange.avif" },
+      "1": { label: "1 этаж", imgUrl: "images/interchange/level1.avif" },
+      "2": { label: "2 этаж", imgUrl: "images/interchange/level2.avif" },
+    },
+    fallback: ""
+  },
+  customs: {
+    label: "Таможня",
+    levels: {
+      "0": { label: "Основной", imgUrl: "images/customs/customs.jpg" },
+    },
+    fallback: "https://github.com/kut86/amigos-wiki/blob/main/map/images/customs/customs.jpg?raw=true"
+  },
+  factory: {
+    label: "Завод",
+    levels: {
+      "0":  { label: "Основной", imgUrl: "images/factory/factory.svg" },
+      "-1": { label: "Подвал",   imgUrl: "images/factory/basement.svg" },
+    },
+    fallback: ""
+  },
+  woods: {
+    label: "Лес",
+    levels: {
+      "0": { label: "Основной", imgUrl: "images/woods/woods.jpg" },
+    },
+    fallback: ""
+  },
+  reserve: {
+    label: "Резерв",
+    levels: {
+      "0":  { label: "Поверхность", imgUrl: "images/reserve/reserve.svg" },
+      "-1": { label: "Подземный",   imgUrl: "images/reserve/underground.svg" },
+    },
+    fallback: ""
+  },
+  lighthouse: {
+    label: "Маяк",
+    levels: {
+      "0": { label: "Основной", imgUrl: "images/lighthouse/lighthouse.svg" },
+    },
+    fallback: ""
+  },
+  shoreline: {
+    label: "Берег",
+    levels: {
+      "0": { label: "Основной", imgUrl: "images/shoreline/shoreline.svg" },
+    },
+    fallback: ""
+  },
+  labyrinth: {
+    label: "Лабиринт",
+    levels: {
+      "0": { label: "Основной", imgUrl: "images/labyrinth/labyrinth.svg" },
+    },
+    fallback: ""
+  }
 };
 
 /* ── Типы ── */
 const TYPE_EMOJI = {
   loot:"📦", boss:"💀", quest:"📋",
-  info:"⭐", bot:"🎯", exit:"🚪", structure:"🧩",tain:"👁"
+  info:"⭐", bot:"🎯", exit:"🚪", structure:"🧩", tain:"👁"
 };
 const TYPE_LABEL = {
   loot:"Лут", boss:"Босс", quest:"Квест",
-  info:"Инфо", bot:"бот", exit:"Выход", structure:"Точка интереса",tain:"Тайник"
+  info:"Инфо", bot:"Бот", exit:"Выход", structure:"Точка интереса", tain:"Тайник"
 };
 
 const QUICK_EMOJI = ["📍","⭐","🔥","💎","⚔️","🧨","💊","🗺","🏴","🔑","☠️","🎯","👁","🔒","📻","🚁","🪖","🧰","⚡"];
@@ -90,11 +164,16 @@ const cancelEdit     = document.getElementById("cancelEdit");
 const editBtn        = document.getElementById("editBtn");
 const delBtn         = document.getElementById("delBtn");
 const modalClose     = document.getElementById("modalClose");
+const levelUp        = document.getElementById("levelUp");
+const levelDown      = document.getElementById("levelDown");
+const levelLabel     = document.getElementById("levelLabel");
+const levelControls  = document.getElementById("levelControls");
 
 /* ── State ── */
 const ADMIN_UID = "7AvuSzEGvwQYPLowdsI5mKUZEFG2";
 let isAdmin    = false;
 let currentMap = "groundzero";
+let currentLevel = 0;       // текущий уровень (число)
 let current    = null;
 let addMode    = false;
 let pendingPos = null;
@@ -117,13 +196,62 @@ function toast(msg, err = false) {
   setTimeout(() => t.remove(), 3200);
 }
 
+/* ── Уровни ── */
+function getLevels() {
+  return MAPS[currentMap]?.levels || { "0": { label: "Основной", imgUrl: MAPS[currentMap]?.imgUrl || "" } };
+}
+
+function getLevelKeys() {
+  return Object.keys(getLevels()).map(Number).sort((a, b) => a - b);
+}
+
+function updateLevelUI() {
+  const keys = getLevelKeys();
+  const levels = getLevels();
+  const hasMultiple = keys.length > 1;
+
+  levelControls.style.display = hasMultiple ? "flex" : "none";
+  if (!hasMultiple) return;
+
+  const idx = keys.indexOf(currentLevel);
+  levelUp.disabled   = idx >= keys.length - 1;
+  levelDown.disabled = idx <= 0;
+  levelLabel.textContent = levels[String(currentLevel)]?.label || String(currentLevel);
+}
+
+function setLevel(lvl) {
+  currentLevel = lvl;
+  const levels = getLevels();
+  const levelData = levels[String(lvl)];
+  if (levelData) {
+    mapImg.style.opacity = "0.4";
+    setTimeout(() => {
+      mapImg.src = levelData.imgUrl;
+      mapImg.onload = () => { mapImg.style.opacity = "1"; };
+    }, 150);
+  }
+  updateLevelUI();
+  render();
+}
+
+levelUp.onclick = () => {
+  const keys = getLevelKeys();
+  const idx  = keys.indexOf(currentLevel);
+  if (idx < keys.length - 1) setLevel(keys[idx + 1]);
+};
+
+levelDown.onclick = () => {
+  const keys = getLevelKeys();
+  const idx  = keys.indexOf(currentLevel);
+  if (idx > 0) setLevel(keys[idx - 1]);
+};
+
 /* ── Показ/скрытие формы редактирования ── */
 function showEditForm() {
   editForm.classList.add("active");
   saveBtn.style.display    = "";
   cancelEdit.style.display = "";
   editBtn.style.display    = "none";
-  /* Даём браузеру отрисовать форму, потом обновляем Quill */
   setTimeout(() => { if (editQuill) editQuill.update(); }, 60);
 }
 
@@ -152,17 +280,27 @@ onAuthStateChanged(auth, user => {
 mapSelect.addEventListener("change", e => switchMap(e.target.value));
 
 function switchMap(id) {
-  localStorage.setItem("lastMap", id); // сохраняем
-  currentMap = id;
-  currentMap = id;
+  localStorage.setItem("lastMap", id);
+  currentMap   = id;
+  currentLevel = 0;
+
   if (offFn) offFn();
   allMarkers = {};
   document.querySelectorAll(".marker").forEach(m => m.remove());
   if (pz) { pz.destroy(); pz = null; }
+
+  const levels   = getLevels();
+  const level0   = levels["0"];
+  const firstImg = level0?.imgUrl || "";
+  const fallback = MAPS[id]?.fallback || "";
+
+  mapImg.style.opacity = "1";
   mapImg.onload  = null;
-  mapImg.onload  = () => { subscribe(); initPanzoom(); };
-  mapImg.onerror = () => { mapImg.onerror = null; mapImg.src = MAPS[id].fallback; };
-  mapImg.src = MAPS[id].imgUrl;
+  mapImg.onload  = () => { subscribe(); initPanzoom(); updateLevelUI(); };
+  mapImg.onerror = () => { mapImg.onerror = null; if (fallback) mapImg.src = fallback; };
+  mapImg.src = firstImg;
+
+  updateLevelUI();
 }
 
 /* ── Panzoom ── */
@@ -249,7 +387,7 @@ function enterAddMode() {
   addModeBtn.textContent = "✕ Отмена";
   addModeBtn.classList.add("btn-danger");
   mapWrapper.style.cursor = "crosshair";
-  toast("Нажмите на карту для добавления маркера");
+  toast(`Нажмите на карту для добавления маркера (уровень: ${currentLevel})`);
 }
 
 function exitAddMode() {
@@ -286,6 +424,7 @@ addConfirm.onclick = () => {
   const extraFields = collectExtraFields(addExtraFields);
   push(currentRef, {
     x: pendingPos.x, y: pendingPos.y,
+    level: currentLevel,          // ← записываем текущий уровень
     name,
     text:        textVal,
     type:        addType.value,
@@ -302,12 +441,15 @@ document.getElementById("addExtraFieldBtn").addEventListener("click", () => {
   addExtraFieldRow(addExtraFields);
 });
 
-/* ── Render ── */
+/* ── Render — показываем только маркеры текущего уровня ── */
 function render() {
   document.querySelectorAll(".marker").forEach(m => m.remove());
   const f = filterSel.value;
   Object.entries(allMarkers).forEach(([id, m]) => {
     if (f !== "all" && m.type !== f) return;
+    /* level: null/undefined = старые маркеры без уровня → показываем на уровне 0 */
+    const markerLevel = m.level ?? 0;
+    if (markerLevel !== currentLevel) return;
     createMarker(id, m);
   });
 }
@@ -365,7 +507,6 @@ function openModal(id, m) {
   modalPhoto.style.display = m.imgUrl ? "" : "none";
   if (m.imgUrl) modalPhoto.src = m.imgUrl;
   renderModalExtras(m.extraFields);
-  /* Сбрасываем состояние кнопок */
   hideEditForm();
   modal.classList.add("open");
 }
@@ -428,92 +569,4 @@ saveBtn.onclick = () => {
   const name = editName.value.trim();
   if (!name) { toast("Введите название маркера", true); return; }
   const textHTML = editQuill ? editQuill.root.innerHTML : null;
-  const textVal  = (editQuill && editQuill.getText().trim()) ? textHTML : null;
-  const extraFields = collectExtraFields(editExtraFields);
-  update(ref(db, `maps/${currentMap}/markers/${current.id}`), {
-    x: current.x, y: current.y,
-    name,
-    text:        textVal,
-    type:        editType.value,
-    emoji:       editEmojiInput.value.trim()  || null,
-    imgUrl:      editImgUrl.value.trim()      || null,
-    iconUrl:     editIconUrl.value.trim()     || null,
-    extraFields: extraFields.length ? extraFields : null,
-  }).then(() => { toast("Сохранено"); closeModal(); })
-    .catch(e => toast(e.message, true));
-};
-
-document.getElementById("editExtraFieldBtn").addEventListener("click", () => {
-  addExtraFieldRow(editExtraFields);
-});
-
-/* ── Delete ── */
-delBtn.onclick = () => {
-  if (!current) return;
-  if (!confirm("Удалить маркер?")) return;
-  remove(ref(db, `maps/${currentMap}/markers/${current.id}`))
-    .then(() => { toast("Удалено"); closeModal(); })
-    .catch(e => toast(e.message, true));
-};
-
-/* ── Extra fields helpers ── */
-function addExtraFieldRow(container, label = "", value = "") {
-  const row = document.createElement("div");
-  row.className = "extra-field-row";
-  row.innerHTML = `
-    <input type="text" class="extra-field-label" placeholder="Название поля" value="${esc(label)}">
-    <input type="text" class="extra-field-value" placeholder="Значение"       value="${esc(value)}">
-    <button type="button" class="extra-field-remove btn btn-sm btn-danger">✕</button>`;
-  row.querySelector(".extra-field-remove").onclick = () => row.remove();
-  container.appendChild(row);
-}
-
-function collectExtraFields(container) {
-  const result = [];
-  container.querySelectorAll(".extra-field-row").forEach(row => {
-    const label = row.querySelector(".extra-field-label").value.trim();
-    const value = row.querySelector(".extra-field-value").value.trim();
-    if (label || value) result.push({ label, value });
-  });
-  return result;
-}
-
-/* ── URL hash ── */
-function waitAndOpen(id, m) {
-  if (pz) { openModal(id, m); }
-  else setTimeout(() => waitAndOpen(id, m), 200);
-}
-
-function checkUrlHash() {
-  const hash = location.hash;
-  if (!hash.startsWith("#marker=")) return;
-  const id = hash.slice(8);
-  const unsub = onValue(ref(db, `maps/${currentMap}/markers`), snap => {
-    unsub();
-    snap.forEach(i => { allMarkers[i.key] = i.val(); });
-    const m = allMarkers[id];
-    if (m) { render(); waitAndOpen(id, m); }
-    else toast("Маркер не найден", true);
-  });
-}
-
-/* ── Init ── */
-const savedMap = localStorage.getItem("lastMap");
-const startMap = (savedMap && MAPS[savedMap]) ? savedMap : "groundzero";
-mapSelect.value = startMap;
-switchMap(startMap);
-checkUrlHash();
-
-
-/* ── Quill — последними ── */
-addQuill = new Quill("#addQuillEditor", {
-  theme: "snow",
-  placeholder: "Подробное описание...",
-  modules: { toolbar: "#addQuillToolbar" }
-});
-
-editQuill = new Quill("#editQuillEditor", {
-  theme: "snow",
-  placeholder: "Описание...",
-  modules: { toolbar: "#editQuillToolbar" }
-});
+  const textVal  = (editQuill && editQuill.getText().trim()) ? textHTML : null
