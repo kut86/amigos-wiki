@@ -70,8 +70,8 @@ const MAPS = {
     label: "Завод",
     levels: {
       "0":  { label: "0", imgUrl: "images/factory/level0.svg" },
-      "1": { label: "1", imgUrl: "images/factory/level1.avif" },
-      "2": { label: "2", imgUrl: "images/factory/level2.avif" },
+      "1": { label: "1", imgUrl: "images/factory/level1.svg" },
+      "2": { label: "2", imgUrl: "images/factory/level2.svg" },
       "-1": { label: "Подвал",   imgUrl: "images/factory/level-1.svg" },
     },
     fallback: ""
