@@ -589,6 +589,13 @@ textarea { resize: vertical; min-height: 72px; }
   .modal-title { font-size: 18px; gap: 6px; }
   .modal-photo { max-height: 200px; }
   .modal-body  { padding: 12px 14px; }
+  
+  .marker-icon,
+  .marker-photo {
+    width: 6px;
+    height: 6px;
+    font-size: 4px;
+  }
 
   #addForm {
     bottom: 0;
@@ -607,73 +614,19 @@ textarea { resize: vertical; min-height: 72px; }
   textarea, select { font-size: 16px !important; }
 
   .zoom-btn { width: 44px; height: 44px; font-size: 30px; }
-
-   @media (hover: none) and (pointer: coarse) {
-  /* увеличиваем размер маркеров для удобного тапа */
-  .marker-icon,
-  .marker-photo {
-    width: 6px;
-    height: 6px;
-    font-size: 4px;
-  }
-
-  /* делаем отступы чуть больше, чтобы палец не перекрывал */
-  .marker {
-    transform: translate(-50%, -100%);
-  }
-
-  /* убираем rotate для фото-иконок — проще воспринимать */
-  .marker-photo {
-    rotate: 0deg;
-    border-width: 2px;
-  }
-  .marker-photo img {
-    rotate: 0deg;
-  }
-
-  /* добавляем лёгкую подсветку при тапе */
-  .marker:active .marker-icon,
-  .marker:active .marker-photo {
-    box-shadow: 0 0 0 6px var(--accent-glow), 0 4px 16px rgba(0,0,0,.8);
-  }
-  
 }
 
 @media (max-width: 430px) {
   .modal-title { font-size: 16px; }
-  .modal-footer { gap: 6px; padding: 8px 12px; }
-  .modal-footer .btn { font-size: 12px; padding: 6px 10px; }
-
-  @media (hover: none) and (pointer: coarse) {
-  /* увеличиваем размер маркеров для удобного тапа */
+  .modal-footer { gap: 5px; padding: 5px 8px; }
+  .modal-footer .btn { font-size: 12px; padding: 5px 8px; }
+  
   .marker-icon,
   .marker-photo {
     width: 6px;
     height: 6px;
     font-size: 4px;
   }
-
-  /* делаем отступы чуть больше, чтобы палец не перекрывал */
-  .marker {
-    transform: translate(-50%, -100%);
-  }
-
-  /* убираем rotate для фото-иконок — проще воспринимать */
-  .marker-photo {
-    rotate: 0deg;
-    border-width: 2px;
-  }
-  .marker-photo img {
-    rotate: 0deg;
-  }
-
-  /* добавляем лёгкую подсветку при тапе */
-  .marker:active .marker-icon,
-  .marker:active .marker-photo {
-    box-shadow: 0 0 0 6px var(--accent-glow), 0 4px 16px rgba(0,0,0,.8);
-  }
-}
-
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -681,7 +634,7 @@ textarea { resize: vertical; min-height: 72px; }
 ═══════════════════════════════════════════════════════════════ */
 #levelControls {
   position: fixed;
-  bottom: 24px; left: 10px;
+  bottom: 20px; left: 10px;
   z-index: 9000;
   display: none;
   flex-direction: column;
@@ -703,7 +656,7 @@ textarea { resize: vertical; min-height: 72px; }
 }
 
 #levelUp, #levelDown {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
   background: rgba(8,10,8,.9);
   border: 1px solid var(--border2);
   border-radius: var(--radius);
