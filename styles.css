@@ -387,3 +387,1852 @@ button#calcBtn:hover {
         margin-right: 1px;
     }
 }
+/*--------------------------------------------*/
+/* ================================================
+   БЛОК 1 — ШРИФТЫ И ПЕРЕМЕННЫЕ
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Oswald:wght@300;400;600;700&display=swap');
+
+/* ТЁМНАЯ ТЕМА (по умолчанию) */
+:root,
+[data-theme="dark"] {
+  --bg:           #0a0c0e;
+  --bg2:          #111518;
+  --bg3:          #181d22;
+  --panel:        #1a2028;
+  --border:       #2a3540;
+  --accent:       #e8a020;
+  --accent-dark:  #b07010;
+  --red:          #ef5350;
+  --green:        #4caf50;
+  --blue:         #42a5f5;
+  --purple:       #ab47bc;
+  --text:         #d0d8e0;
+  --muted:        #667788;
+  --white:        #eef2f7;
+  --shadow:       rgba(0,0,0,0.5);
+  --overlay:      rgba(0,0,0,0.85);
+
+  /* Цвета цен */
+  --price-free:      #4caf50;
+  --price-cheap:     #64b5f6;
+  --price-medium:    #e8a020;
+  --price-expensive: #ef5350;
+  --price-none:      #667788;
+}
+
+/* СВЕТЛАЯ ТЕМА */
+[data-theme="light"] {
+  --bg:           #f0f2f5;
+  --bg2:          #e4e8ed;
+  --bg3:          #d8dde4;
+  --panel:        #ffffff;
+  --border:       #c0c8d0;
+  --accent:       #c07010;
+  --accent-dark:  #904808;
+  --red:          #d32f2f;
+  --green:        #388e3c;
+  --blue:         #1565c0;
+  --purple:       #7b1fa2;
+  --text:         #1a2028;
+  --muted:        #5a6878;
+  --white:        #0a0c0e;
+  --shadow:       rgba(0,0,0,0.15);
+  --overlay:      rgba(0,0,0,0.6);
+}
+
+/* ================================================
+   БЛОК 2 — СБРОС И БАЗОВЫЕ СТИЛИ
+   ================================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 15px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+button {
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  transition: all 0.15s;
+  border: none;
+  outline: none;
+}
+
+input, select, textarea {
+  font-family: 'Rajdhani', sans-serif;
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ================================================
+   БЛОК 3 — ФОН САЙТА
+   ================================================ */
+
+#bg-media {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+#bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.15;
+  display: none;
+}
+
+#bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.15;
+  display: none;
+}
+
+#bg-video.active,
+#bg-image.active {
+  display: block;
+}
+
+/* Затемнение поверх фона */
+#bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0,0,0,0.4);
+  display: none;
+}
+
+#bg-overlay.active {
+  display: block;
+}
+
+/* ================================================
+   БЛОК 4 — ШАПКА
+   ================================================ */
+
+#header {
+  background: linear-gradient(135deg, var(--bg2), var(--bg3));
+  border-bottom: 2px solid var(--accent);
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px var(--shadow);
+}
+
+#header-brand {
+  cursor: pointer;
+  user-select: none;
+}
+
+#header-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(232,160,32,0.4);
+  transition: opacity 0.15s;
+}
+
+#header-brand:active #header-logo {
+  opacity: 0.7;
+}
+
+#header-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+#header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Бейджи */
+.hbadge {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.hbadge.admin {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Кнопки шапки */
+.hbtn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 6px 14px;
+  color: var(--text);
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.hbtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.hbtn.raid {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.hbtn.raid:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.hbtn.theme {
+  font-size: 16px;
+  padding: 5px 10px;
+}
+
+/* Индикатор логина (двойной клик) */
+#login-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+#login-hint.show {
+  opacity: 1;
+}
+
+/* ================================================
+   БЛОК 5 — ПАНЕЛЬ АДМИНИСТРАТОРА
+   ================================================ */
+
+#admin-panel {
+  background: linear-gradient(90deg, #071007, #0e1f0e);
+  border-bottom: 1px solid #2a5a2a;
+  display: none;
+}
+
+#admin-panel.visible {
+  display: block;
+}
+
+#admin-panel-inner {
+  padding: 10px 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Кнопки админ панели */
+.abtn {
+  background: rgba(76,175,80,0.1);
+  border: 1px solid #3a6a3a;
+  border-radius: 5px;
+  padding: 7px 14px;
+  color: #81c784;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.abtn:hover {
+  background: rgba(76,175,80,0.25);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.abtn.orange {
+  background: rgba(255,152,0,0.1);
+  border-color: #8a5a1a;
+  color: #ffcc80;
+}
+
+.abtn.orange:hover {
+  background: rgba(255,152,0,0.2);
+  border-color: #ff9800;
+}
+
+.abtn.red {
+  background: rgba(239,83,80,0.1);
+  border-color: #6a2a2a;
+  color: #ef9a9a;
+}
+
+.abtn.red:hover {
+  background: rgba(239,83,80,0.25);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.abtn.blue {
+  background: rgba(66,165,245,0.1);
+  border-color: #1a4a6a;
+  color: #90caf9;
+}
+
+.abtn.blue:hover {
+  background: rgba(66,165,245,0.25);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* Разделитель в панели */
+.admin-divider {
+  width: 1px;
+  height: 24px;
+  background: #2a5a2a;
+  margin: 0 4px;
+}
+
+/* Редактор курса / настройки */
+.admin-field-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid #2a5a2a;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+.admin-field-group label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: #4caf50;
+  white-space: nowrap;
+}
+
+.admin-field-group input {
+  background: transparent;
+  border: none;
+  color: #a5d6a7;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  width: 80px;
+  text-align: center;
+}
+
+/* Кнопка сохранить */
+#btn-save {
+  margin-left: auto;
+  background: rgba(232,160,32,0.1);
+  border: 1px solid var(--accent-dark);
+  border-radius: 5px;
+  padding: 7px 18px;
+  color: var(--accent);
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+#btn-save:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+/* Статус сохранения */
+#save-status {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+#save-status.ok {
+  color: var(--green);
+}
+
+#save-status.error {
+  color: var(--red);
+}
+
+/* ================================================
+   БЛОК 6 — ФИЛЬТРЫ И ПОИСК
+   ================================================ */
+
+#controls {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Поиск */
+#search-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-size: 13px;
+  width: 240px;
+}
+
+#search-input:focus {
+  border-color: var(--accent);
+}
+
+#search-input::placeholder {
+  color: var(--muted);
+}
+
+/* Фильтры категорий */
+#category-filters {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.cat-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.cat-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cat-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+
+/* Фильтры типа */
+#type-filters {
+  display: flex;
+  gap: 5px;
+}
+
+.type-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--muted);
+}
+
+.type-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.type-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(232,160,32,0.1);
+}
+
+/* Фильтр валюты */
+#currency-filter {
+  display: flex;
+  gap: 5px;
+}
+
+.currency-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--muted);
+}
+
+.currency-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.currency-btn.active {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(66,165,245,0.1);
+}
+
+/* Переключатель вида */
+#view-toggle {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.view-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.view-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.view-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+
+/* ================================================
+   БЛОК 7 — СТАТИСТИКА
+   ================================================ */
+
+#stats-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 22px;
+  display: flex;
+  gap: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+#stats-bar strong {
+  color: var(--accent);
+}
+
+/* ================================================
+   БЛОК 7 — ТАБЛИЦА
+   ================================================ */
+
+#table-wrap {
+  overflow-x: auto;
+  padding: 0 22px 20px;
+}
+
+#items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#items-table thead th {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+#items-table thead th:hover {
+  color: var(--accent);
+  background: var(--panel);
+}
+
+#items-table thead th.sorted-asc::after {
+  content: ' ▲';
+  color: var(--accent);
+}
+
+#items-table thead th.sorted-desc::after {
+  content: ' ▼';
+  color: var(--accent);
+}
+
+#items-table tbody tr {
+  border-bottom: 1px solid rgba(42,53,64,0.5);
+  transition: background 0.1s;
+  cursor: pointer;
+}
+
+#items-table tbody tr:hover {
+  background: rgba(232,160,32,0.04);
+}
+
+/* Скрытый товар */
+#items-table tbody tr.item-hidden {
+  opacity: 0.35;
+}
+
+#items-table tbody td {
+  padding: 8px 12px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+ #resources-admin-wrap {
+  display: none;
+  padding: 0 22px 20px;
+}
+
+#resources-admin-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin: 18px 0 8px;
+}
+
+#resources-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#resources-table thead th {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+#resources-table tbody tr {
+  border-bottom: 1px solid rgba(42,53,64,0.5);
+  cursor: pointer;
+}
+
+#resources-table tbody tr:hover {
+  background: rgba(232,160,32,0.04);
+}
+
+#resources-table tbody td {
+  padding: 8px 12px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+/* Название */
+.td-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+.td-name-ru {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Теги */
+.tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.tag-craft {
+  background: rgba(66,165,245,0.15);
+  color: #42a5f5;
+  border: 1px solid rgba(66,165,245,0.3);
+}
+
+.tag-loot {
+  background: rgba(171,71,188,0.15);
+  color: #ab47bc;
+  border: 1px solid rgba(171,71,188,0.3);
+}
+
+.tag-hidden {
+  background: rgba(102,102,102,0.15);
+  color: #666;
+  border: 1px solid rgba(102,102,102,0.3);
+}
+
+/* Цена */
+.price-cell {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.price-free     { color: var(--price-free); }
+.price-cheap    { color: var(--price-cheap); }
+.price-medium   { color: var(--price-medium); }
+.price-expensive{ color: var(--price-expensive); }
+.price-none     { color: var(--price-none); }
+
+.price-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Стак */
+.stack-badge {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+}
+
+/* Кнопки действий */
+.btn-action {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.btn-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-action.danger:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Нет результатов */
+#no-results {
+  display: none;
+  text-align: center;
+  padding: 60px;
+  color: var(--muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+}
+
+/* ================================================
+   БЛОК 8 — КАРТОЧКИ (МОБИЛЬ)
+   ================================================ */
+
+#cards-grid {
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 14px;
+}
+
+#cards-grid.visible {
+  display: grid;
+}
+
+/* Карточка */
+.item-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--shadow);
+  border-color: var(--accent);
+}
+
+/* Фон карточки */
+.card-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08;
+  z-index: 0;
+}
+
+/* Цветная полоска сверху */
+.item-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1;
+  background: var(--accent);
+}
+
+/* Содержимое */
+.card-content {
+  position: relative;
+  z-index: 1;
+  padding: 12px;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.card-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--white);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.card-name-ru {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.card-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* Цены на карточке */
+.card-prices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.card-price-block {
+  background: var(--bg3);
+  border-radius: 5px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.card-currency-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Share Tech Mono', monospace;
+  margin-bottom: 2px;
+}
+
+.card-price-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card-price-stack {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* Футер карточки */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Кнопка калькулятора */
+.btn-card-calc {
+  background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+  border: none;
+  border-radius: 5px;
+  padding: 5px 14px;
+  color: #000;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Кнопки админа на карточке */
+.card-admin-btns {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-card-edit {
+  flex: 1;
+  background: rgba(66,165,245,0.15);
+  border: 1px solid rgba(66,165,245,0.3);
+  border-radius: 5px;
+  padding: 5px;
+  color: #42a5f5;
+  font-size: 11px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+}
+
+.btn-card-edit:hover {
+  background: rgba(66,165,245,0.3);
+}
+
+.btn-card-delete {
+  flex: 1;
+  background: rgba(239,83,80,0.15);
+  border: 1px solid rgba(239,83,80,0.3);
+  border-radius: 5px;
+  padding: 5px;
+  color: var(--red);
+  font-size: 11px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+}
+
+.btn-card-delete:hover {
+  background: rgba(239,83,80,0.3);
+}
+
+/* Скрытая карточка */
+.item-card.hidden-item {
+  opacity: 0.35;
+}
+
+/* ================================================
+   БЛОК 9 — МОДАЛЬНЫЕ ОКНА
+   ================================================ */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 900;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+.modal-box {
+  background: linear-gradient(135deg, var(--bg2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 60px var(--shadow);
+}
+
+.modal-box.wide {
+  max-width: 700px;
+}
+
+.modal-box.narrow {
+  max-width: 380px;
+}
+
+/* Шапка модалки */
+.modal-header {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+}
+
+.modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  color: var(--muted);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Тело модалки */
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Футер модалки */
+.modal-footer {
+  background: var(--bg3);
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Подсказка */
+.modal-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 12px;
+}
+
+/* Кнопки модалки */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+  border: none;
+  border-radius: 5px;
+  padding: 8px 20px;
+  color: #000;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 20px;
+  color: var(--muted);
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-danger {
+  background: rgba(239,83,80,0.1);
+  border: 1px solid rgba(239,83,80,0.3);
+  border-radius: 5px;
+  padding: 8px 20px;
+  color: var(--red);
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-right: auto;
+}
+
+.btn-danger:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+/* ── ФОРМА ── */
+.form-row {
+  margin-bottom: 14px;
+}
+
+.form-row label {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="url"],
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: var(--accent);
+}
+
+.form-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.form-row select {
+  cursor: pointer;
+}
+
+.form-row textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-hint {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.form-row-inline {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.form-row-inline .form-row {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Секция в форме */
+.form-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-section-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Поиск в модалке */
+.modal-search {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.modal-search:focus {
+  border-color: var(--accent);
+}
+
+.modal-search::placeholder {
+  color: var(--muted);
+}
+
+/* Результаты поиска */
+.search-results {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.search-results.visible {
+  display: block;
+}
+
+.search-result-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: rgba(232,160,32,0.08);
+  color: var(--accent);
+}
+
+.search-result-meta {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Строка рецепта */
+.recipe-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 10px;
+}
+
+.recipe-row-name {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.recipe-row-amount {
+  width: 70px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.recipe-row-delete {
+  background: none;
+  border: 1px solid rgba(239,83,80,0.3);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  color: var(--red);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.recipe-row-delete:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-add-row {
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.btn-add-row:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Строка валюты */
+.currency-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 10px;
+}
+
+.currency-row-name {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.currency-row-price {
+  width: 100px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.currency-row-delete {
+  background: none;
+  border: 1px solid rgba(239,83,80,0.3);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  color: var(--red);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.currency-row-delete:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+/* Автоцена */
+.auto-price-preview {
+  background: rgba(232,160,32,0.06);
+  border: 1px solid rgba(232,160,32,0.2);
+  border-radius: 5px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auto-price-preview strong {
+  color: var(--accent);
+  font-size: 14px;
+}
+
+/* ================================================
+   БЛОК 10 — КАЛЬКУЛЯТОР
+   ================================================ */
+
+#modal-calc .modal-box {
+  border-color: var(--accent);
+  box-shadow: 0 0 60px rgba(232,160,32,0.2);
+}
+
+/* Строка количества */
+#calc-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+#calc-qty-row span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+#calc-qty {
+  flex: 1;
+  background: var(--bg2);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  padding: 8px 12px;
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+#calc-qty-btns {
+  display: flex;
+  gap: 5px;
+}
+
+#calc-qty-btns button {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+#calc-qty-btns button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Секции */
+.calc-section {
+  margin-bottom: 14px;
+}
+
+.calc-section-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Строка ингредиента */
+.calc-ingredient-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(42,53,64,0.5);
+}
+
+.calc-ingredient-row:hover {
+  background: rgba(232,160,32,0.04);
+}
+
+.calc-ing-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.calc-ing-name small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.calc-ing-qty {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--blue);
+  font-weight: 700;
+  text-align: right;
+}
+
+.calc-ing-cost {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  text-align: right;
+  min-width: 80px;
+}
+
+/* Итог */
+.calc-total-box {
+  background: rgba(232,160,32,0.06);
+  border: 1px solid rgba(232,160,32,0.25);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 8px;
+}
+
+.calc-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(42,53,64,0.3);
+}
+
+.calc-total-row:last-child {
+  border-bottom: none;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.calc-total-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.calc-total-currency {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--blue);
+  margin-bottom: 2px;
+}
+
+.calc-total-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+
+.calc-total-val small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Сравнение купить vs крафт */
+.calc-compare {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+
+.calc-compare-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.calc-compare-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+}
+
+.calc-compare-better {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.calc-compare-worse {
+  color: var(--red);
+}
+
+.calc-note {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 6px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ================================================
+   БЛОК 11 — TOAST УВЕДОМЛЕНИЕ
+   ================================================ */
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  box-shadow: 0 4px 20px var(--shadow);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+#toast.success {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+#toast.error {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+#toast.info {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* ================================================
+   БЛОК 11 — СКРОЛЛБАР
+   ================================================ */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* ================================================
+   БЛОК 11 — АДАПТИВНОСТЬ
+   ================================================ */
+
+/* Планшет */
+@media (max-width: 900px) {
+  #header-logo {
+    font-size: 16px;
+  }
+
+  #header-subtitle {
+    display: none;
+  }
+
+  #search-input {
+    width: 180px;
+  }
+
+  #category-filters {
+    display: none;
+  }
+
+  .modal-box.wide {
+    max-width: 100%;
+  }
+}
+
+/* Мобиль */
+@media (max-width: 700px) {
+  /* Шапка */
+  #header {
+    padding: 10px 14px;
+  }
+
+  #header-logo {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  /* Таблица скрыта на мобиле */
+  #table-wrap {
+    display: none !important;
+  }
+
+  /* Карточки всегда видны */
+  #cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Переключатель вида скрыт */
+  #view-toggle {
+    display: none;
+  }
+
+  /* Контролы */
+  #controls {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  #search-input {
+    width: 100%;
+  }
+
+  #type-filters {
+    display: none;
+  }
+
+  /* Статистика */
+  #stats-bar {
+    padding: 5px 14px;
+    gap: 12px;
+  }
+
+  #stats-bar span:nth-child(n+3) {
+    display: none;
+  }
+
+  /* Админ панель */
+  #admin-panel-inner {
+    padding: 8px 10px;
+  }
+
+  #admin-panel-inner .admin-divider {
+    display: none;
+  }
+
+  /* Модалки — полный экран снизу */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* Калькулятор */
+  #calc-qty-row {
+    flex-wrap: wrap;
+  }
+
+  #calc-qty-btns {
+    flex-wrap: wrap;
+  }
+}
+
+/* Очень маленький экран */
+@media (max-width: 380px) {
+  #cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
