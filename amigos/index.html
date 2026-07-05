@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUST AMIGOS ECONOMY</title>
+  <meta name="description" content="Экономика сервера Rust Amigos — цены, крафт, калькулятор">
+
+  <!-- Open Graph — превью ссылки в мессенджерах (Telegram, WhatsApp и т.д.) -->
+  <meta property="og:title" content="RUST AMIGOS ECONOMY">
+  <meta property="og:description" content="Экономика сервера Rust Amigos — цены, крафт, калькулятор">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://amigos-wiki.rust-pve.workers.dev/index.html">
+  <meta property="og:image" content="ЗАМЕНИ_НА_ССЫЛКУ_НА_КАРТИНКУ.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+  <!-- ФОН САЙТА -->
+  <div id="bg-media">
+    <video id="bg-video" autoplay muted loop playsinline>
+      <source id="bg-video-src" src="" type="video/mp4">
+    </video>
+    <img id="bg-image" src="" alt="">
+  </div>
+  <div id="bg-overlay"></div>
+
+  <!-- ШАПКА -->
+  <header id="header">
+    <div id="header-brand" title="Двойной клик — вход для администратора">
+      <div id="header-logo">⚙ RUST AMIGOS ECONOMY</div>
+      <div id="header-subtitle"> ТУГРИК МАРКЕТ </div>
+    </div>
+    <div id="header-controls">
+      <div id="user-badge" class="hbadge">👁 Гость</div>
+      <button id="btn-theme" class="hbtn theme" title="Сменить тему">🌙</button>
+        <a href="raid.html" class="hbtn raid">💣 Калькулятор</a>
+      <button id="btn-logout" class="hbtn" style="display:none">ВЫЙТИ</button>
+    </div>
+  </header>
+
+  <!-- ПАНЕЛЬ АДМИНИСТРАТОРА -->
+  <div id="admin-panel">
+    <div id="admin-panel-inner">
+      <button id="btn-add-item" class="abtn">+ Товар</button>
+     <!-- <button id="btn-add-category" class="abtn">+ Категория</button> -->
+      <button id="btn-add-resource" class="abtn">+ Ресурс</button>
+      <button id="btn-add-currency" class="abtn blue">+ Валюта</button>
+      <div class="admin-divider"></div>
+      <button id="btn-bg-settings" class="abtn orange">🖼 Фон</button>
+      <div class="admin-divider"></div>
+      
+    </div>
+  </div>
+
+  <!-- ФИЛЬТРЫ И ПОИСК -->
+  <div id="controls">
+    <input id="search-input" type="text" placeholder="🔍 Поиск...">
+    <div id="category-filters"></div>
+    <div id="type-filters"></div>
+    <div id="currency-filter"></div>
+    <div id="view-toggle">
+      <button class="view-btn active" data-view="table">☰ Таблица</button>
+      <button class="view-btn" data-view="cards">⊞ Карточки</button>
+    </div>
+  </div>
+
+  <!-- СТАТИСТИКА -->
+  <div id="stats-bar">
+    <span>Показано: <strong id="stat-shown">0</strong></span>
+    <span>Всего: <strong id="stat-total">0</strong></span>
+    <span>Категорий: <strong id="stat-cats">0</strong></span>
+    <span>Валют: <strong id="stat-currencies">0</strong></span>
+  </div>
+
+  <!-- ТАБЛИЦА -->
+  <div id="table-wrap">
+    <table id="items-table">
+      <thead>
+         
+         <tr>
+          <th data-sort="name">Название</th>
+         <th data-sort="category">Категория</th>
+          <th data-sort="stack">Стак</th>
+          <th data-sort="type">Тип</th>
+          <th id="price-headers-anchor" style="display:none;padding:0;border:none"></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div id="no-results">Ничего не найдено</div>
+  </div>
+    
+ <!-- ТАБЛИЦА РЕСУРСОВ (ТОЛЬКО АДМИН) -->
+  <div id="resources-admin-wrap">
+    <div id="resources-admin-title">📦 Ресурсы (видно только администратору)</div> 
+    <table id="resources-table">
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Категория</th>
+          <th>Стак</th>
+          <th>Цена за стак</th>
+          <th>Цена за ед.</th>
+          <th></th>
+        </tr>
+      </thead> 
+      <tbody id="resources-table-body"></tbody>
+    </table>
+  </div>
+    
+  <!-- КАРТОЧКИ -->
+  <div id="cards-grid"></div>
+
+  <!-- ПОДСКАЗКА ЛОГИНА -->
+  <div id="login-hint">🔐 Открывается окно входа...</div>
+
+
+  <!-- ================================================
+       МОДАЛЬНЫЕ ОКНА
+       ================================================ -->
+
+  <!-- АВТОРИЗАЦИЯ GOOGLE -->
+  <div id="modal-auth" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">🔐 Вход администратора</div>
+        <button class="modal-close" data-modal="modal-auth">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:30px 20px">
+        <div style="font-family:Share Tech Mono,monospace;font-size:12px;color:var(--muted);margin-bottom:24px">
+          Вход только для администратора сервера
+        </div>
+        <button id="btn-google-login" class="btn-primary" style="width:100%;padding:12px;font-size:14px">
+          🔑 Войти через Google
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДОБАВИТЬ / РЕДАКТИРОВАТЬ ТОВАР -->
+  <div id="modal-item" class="modal-overlay">
+    <div class="modal-box wide">
+      <div class="modal-header">
+        <div id="modal-item-title" class="modal-title">Добавить товар</div>
+        <button class="modal-close" data-modal="modal-item">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Название -->
+        <div class="form-section">
+          <div class="form-section-title">Основное</div>
+          <div class="form-row-inline">
+            <div class="form-row">
+              <label>Название (eng)</label>
+              <input id="item-name" type="text" placeholder="Item Name">
+            </div>
+            <div class="form-row">
+              <label>Название (рус)</label>
+              <input id="item-name-ru" type="text" placeholder="Русское название">
+            </div>
+          </div>
+          <div class="form-row-inline">
+            <div class="form-row">
+              <label>Категория</label>
+              <select id="item-category">
+                <option value="">— Выбрать —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Стак</label>
+              <input id="item-stack" type="number" placeholder="1" min="1">
+            </div>
+          </div>
+          <div class="form-row-inline">
+            <div class="form-row">
+              <label>Тип</label>
+              <select id="item-type">
+                <option value="loot">Лут (некрафтовый)</option>
+                <option value="craft">Крафт</option>
+              </select>
+            </div>
+            <div class="form-row" id="item-yield-row">
+              <label>Выход с одного крафта (шт.)</label>
+              <input id="item-yield" type="number" placeholder="1" min="1" value="1">
+            </div>
+          </div>
+          <div class="form-row-inline">
+            <div class="form-row">
+              <label>Картинка (URL)</label>
+              <input id="item-image" type="url" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>
+              <input id="item-hidden" type="checkbox">
+              &nbsp;Скрыть от гостей
+            </label>
+          </div>
+        </div>
+
+        <!-- Рецепт крафта -->
+        <div class="form-section" id="recipe-section">
+          <div class="form-section-title">Рецепт крафта</div>
+          <div id="recipe-rows"></div>
+          <button id="btn-add-recipe-row" class="btn-add-row">+ Добавить ресурс</button>
+          <!-- Поиск ресурса -->
+          <div id="recipe-resource-search" style="margin-top:8px;display:none">
+            <input class="modal-search" id="recipe-res-input" type="text" placeholder="Поиск ресурса...">
+            <div class="search-results" id="recipe-res-results"></div>
+          </div>
+          <div class="auto-price-preview" id="auto-price-preview" style="display:none">
+            Автоцена: <strong id="auto-price-value">—</strong>
+          </div>
+        </div>
+
+        <!-- Цены по валютам -->
+        <div class="form-section">
+          <div class="form-section-title">Цены по валютам</div>
+          <div class="modal-hint">
+            Для крафтовых предметов оставь пустым — цена считается автоматически по рецепту.
+            Заполни для ручной цены.
+          </div>
+          <div id="item-currency-prices"></div>
+        </div>
+
+        <!-- Урон по структурам (делает товар "оружием" для калькулятора рейда) -->
+        <div class="form-section">
+          <div class="form-section-title">💣 Урон по структурам (рейд)</div>
+          <div class="modal-hint">
+            Заполни, если это оружие/взрывчатка для рейда. Список подтягивается автоматически —
+            по одной строке на каждую структуру, созданную на странице «Калькулятор» (даже если
+            у двух структур одинаковый тип — урон по ним настраивается независимо). Пусто или 0 —
+            товар не наносит урон этой структуре и не будет предложен калькулятором.
+          </div>
+          <div id="item-damage-rows"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button id="btn-item-delete" class="btn-danger" style="display:none">Удалить</button>
+        <button class="btn-secondary" data-modal="modal-item">Отмена</button>
+        <button id="btn-item-save" class="btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДОБАВИТЬ КАТЕГОРИЮ -->
+  <div id="modal-category" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">+ Категория</div> 
+        <button class="modal-close" data-modal="modal-category">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>Название категории</label>
+          <input id="category-name" type="text" placeholder="Например: Weapon">
+        </div>
+        <div class="form-row">
+          <label>Цвет (HEX)</label>
+          <input id="category-color" type="text" placeholder="#e8a020">
+        </div>
+       <div class="form-row">
+          <label>Иконка (эмодзи)</label>
+          <input id="category-icon" type="text" placeholder="⚔️">
+        </div>
+        <div class="form-row">
+          <label>
+            <input id="category-hidden" type="checkbox">
+            &nbsp;Скрыть от гостей
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cat-delete" class="btn-danger" style="display:none">Удалить</button>
+        <button class="btn-secondary" data-modal="modal-category">Отмена</button>
+        <button id="btn-cat-save" class="btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДОБАВИТЬ РЕСУРС -->
+  <div id="modal-resource" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">+ Ресурс</div>
+        <button class="modal-close" data-modal="modal-resource">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label>Название (eng)</label>
+            <input id="resource-name" type="text" placeholder="Gun Powder">
+          </div>
+          <div class="form-row">
+            <label>Название (рус)</label>
+            <input id="resource-name-ru" type="text" placeholder="Порох">
+          </div>
+        </div>
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label>Категория</label>
+            <select id="resource-category">
+              <option value="">— Выбрать —</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Стак ресурса</label>
+            <input id="resource-stack" type="number" placeholder="5000" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Картинка (URL)</label>
+          <input id="resource-image" type="url" placeholder="https://...">
+        </div>
+        <div class="form-section-title" style="margin:14px 0 10px">Цена за весь стак по валютам</div>
+        <div id="resource-currency-prices"></div>
+        <div class="form-hint" style="margin-top:8px">
+          Укажи цену за весь стак (например 5000 пороха = 10 тугриков). Цена за 1 единицу посчитается автоматически: цена ÷ стак.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-res-delete" class="btn-danger" style="display:none">Удалить</button>
+        <button class="btn-secondary" data-modal="modal-resource">Отмена</button>
+        <button id="btn-res-save" class="btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДОБАВИТЬ ВАЛЮТУ -->
+  <div id="modal-currency" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">+ Валюта</div>
+        <button class="modal-close" data-modal="modal-currency">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>Название валюты</label>
+          <input id="currency-name" type="text" placeholder="Тугрик">
+        </div>
+        <div class="form-row">
+          <label>Цвет (HEX)</label>
+          <input id="currency-color" type="text" placeholder="#e8a020">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cur-delete" class="btn-danger" style="display:none">Удалить</button>
+        <button class="btn-secondary" data-modal="modal-currency">Отмена</button>
+        <button id="btn-cur-save" class="btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- НАСТРОЙКИ ФОНА -->
+  <div id="modal-bg" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">🖼 Фон сайта</div>
+        <button class="modal-close" data-modal="modal-bg">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-hint">
+          Вставь ссылку на картинку, GIF или MP4 видео
+        </div>
+        <div class="form-row">
+          <label>URL фона</label>
+          <input id="bg-url" type="url" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>Прозрачность (0.05 — 0.5)</label>
+          <input id="bg-opacity" type="number" placeholder="0.15" min="0.05" max="0.5" step="0.05">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-bg-clear" class="btn-danger">Убрать фон</button>
+        <button class="btn-secondary" data-modal="modal-bg">Отмена</button>
+        <button id="btn-bg-save" class="btn-primary">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- КАЛЬКУЛЯТОР -->
+  <div id="modal-calc" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div id="calc-title" class="modal-title">—</div>
+          <div id="calc-subtitle" style="font-family:Share Tech Mono,monospace;font-size:11px;color:var(--muted);margin-top:2px">—</div>
+        </div>
+        <button class="modal-close" data-modal="modal-calc">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="calc-qty-row">
+          <span>Количество:</span>
+          <input id="calc-qty" type="number" value="1" min="1">
+          <div id="calc-qty-btns">
+            <button data-qty="1">1</button>
+            <button data-qty="10">10</button>
+            <button data-qty="100">100</button>
+            <button id="calc-btn-stack">Стак</button>
+          </div>
+        </div>
+        <div id="calc-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- FIREBASE SDK -->
+  <script type="module" src="index.js?v=14"></script>
+
+</body>
+</html>

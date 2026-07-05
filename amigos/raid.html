@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Амигос Вики</title>
+    <link rel="icon" href="favicon.ico">
+
+    <!-- Open Graph — превью ссылки в мессенджерах (Telegram, WhatsApp и т.д.) -->
+    <meta property="og:title" content="Amigos Калькулятор рейда">
+    <meta property="og:description" content="Расчёт оружия и взрывчатки для рейда — сервер Rust Amigos">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://amigos-wiki.rust-pve.workers.dev/raid.html">
+    <meta property="og:image" content="ЗАМЕНИ_НА_ССЫЛКУ_НА_КАРТИНКУ.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="stylesheet" href="styles.css?v=1">
+</head>
+
+<body>
+    
+  
+<!-- ФОН САЙТА -->
+  <div id="bg-media">
+    <video id="bg-video" autoplay muted loop playsinline>
+      <source id="bg-video-src" src="" type="video/mp4">
+    </video>
+    <img id="bg-image" src="" alt="">
+  </div>
+  <div id="bg-overlay"></div>
+    
+<!-- ШАПКА -->
+  <header id="header">
+    <div id="header-brand" title="Двойной клик — вход для администратора">
+      <div id="header-logo">⚙ RUST AMIGOS </div>
+      <div id="header-subtitle"> Калькулятор </div>
+    </div>
+    <div id="header-controls">
+      <div id="user-badge" class="hbadge">👁 Гость</div>
+      <button id="btn-theme" class="hbtn theme" title="Сменить тему">🌙</button>
+       <a href="index.html" class="economy-btn">Экономика</a>
+   
+    
+      <button id="btn-logout" class="hbtn" style="display:none">ВЫЙТИ</button>
+    </div>
+  </header> 
+
+  <!-- АДМИН-ПАНЕЛЬ (видна только администратору) -->
+  <div id="admin-panel">
+    <div id="admin-panel-inner">
+      <button id="btn-add-structure" class="abtn">+ Структура</button>
+      <div class="admin-divider"></div>
+      <button id="btn-bg-settings" class="abtn orange">🖼 Фон</button>
+      <div class="admin-divider"></div>
+    </div>
+  </div>
+   
+    
+    
+
+  <!-- АВТОРИЗАЦИЯ GOOGLE -->
+  <div id="modal-auth" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">🔐 Вход администратора</div>
+        <button class="modal-close" data-modal="modal-auth">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:30px 20px">
+        <div style="font-family:Share Tech Mono,monospace;font-size:12px;color:var(--muted);margin-bottom:24px">
+          Вход только для администратора сервера
+        </div>
+        <button id="btn-google-login" class="btn-primary" style="width:100%;padding:12px;font-size:14px">
+          🔑 Войти через Google
+        </button>
+      </div>
+    </div>
+  </div>
+  
+
+<div class="container">
+
+    <h1>🔥 Amigos калькулятор</h1>
+
+    <p class="subtitle">
+        все данные расчитаны на основе рейдов сейчас еще не готовы 
+    </p>
+    <div class="connectcode">
+    <code id="code">
+        connect 37.230.137.97:20700
+    </code>
+
+    <button id="copyBtn">
+         📋
+    </button>
+</div>
+
+<!-- TOPBAR -->
+    <div class="topbar">
+
+        <!-- Категория -->
+        <div class="select-wrapper">
+
+            <label>📂 Категория</label>
+
+            <select id="category" class="select-box">
+
+                <option value="all">Все</option>
+
+                <option value="wall">
+                    🧱 Стены
+                </option>
+
+                <option value="door">
+                    🚪 Двери
+                </option>
+
+                <option value="window">
+                    🪟 Окна
+                </option>
+
+                <option value="deployable">
+                    🏠 Объекты
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Структура -->
+        <div class="select-wrapper">
+
+            <label>🧱 Структура</label>
+
+            <!-- Поиск -->
+            <input
+                type="text"
+                id="search"
+                class="select-box"
+                placeholder="🔍 Поиск структуры..."
+            >
+
+            <!-- Выбор структуры -->
+            <select
+                id="target"
+                class="select-box"
+            ></select>
+
+        </div>
+
+        <!-- Валюта -->
+        <div class="select-wrapper">
+
+            <label>💰 Валюта</label>
+
+            <select id="raid-currency" class="select-box"></select>
+
+        </div>
+
+    </div>
+
+    <!-- Результаты расчёта -->
+    <div id="calc-results">
+      <div class="calc-empty-hint">Выбери структуру — расчёт обновится автоматически</div>
+    </div>
+ 
+    <!-- СПИСОК СТРУКТУР (только для админа) -->
+    <div id="structures-admin-wrap">
+      <div id="structures-admin-title">🏗 Структуры (видно только администратору)</div>
+      <table id="structures-table">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>HP</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="structures-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ДОБАВИТЬ / РЕДАКТИРОВАТЬ СТРУКТУРУ -->
+    <div id="modal-structure" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-structure-title">+ Структура</div>
+          <button class="modal-close" data-modal="modal-structure">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row-inline">
+            <div class="form-row">
+              <label>Название</label>
+              <input id="structure-name" type="text" placeholder="Каменная стена">
+            </div>
+            <div class="form-row">
+              <label>HP</label>
+              <input id="structure-hp" type="number" placeholder="500" min="0">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Тип структуры (для фильтра «Категория» на этой странице)</label>
+            <input id="structure-cat" type="text" placeholder="stone_wall" list="structure-cat-suggestions">
+            <datalist id="structure-cat-suggestions">
+              <option value="wood_wall">
+              <option value="wood_door">
+              <option value="sheet_door">
+              <option value="garage_door">
+              <option value="armored_door">
+              <option value="metal_wall">
+              <option value="stone_wall">
+              <option value="armored_wall">
+              <option value="window_bars">
+              <option value="ladder_hatch">
+              <option value="tool_cupboard">
+            </datalist>
+            <div class="form-hint">
+              Влияет только на фильтр категории (стены/двери/окна/деплойблы) в списке структур.
+              Урон оружия задаётся отдельно для каждой структуры — даже если у двух структур
+              одинаковый тип, урон по ним настраивается независимо.
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Картинка (URL)</label>
+            <input id="structure-image" type="url" placeholder="https://...">
+          </div>
+          <div class="form-row">
+            <label>Заметка</label>
+            <input id="structure-note" type="text" placeholder="необязательно">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-structure-delete" class="btn-danger" style="display:none">Удалить</button>
+          <button class="btn-secondary" data-modal="modal-structure">Отмена</button>
+          <button id="btn-structure-save" class="btn-primary">Сохранить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- НАСТРОЙКИ ФОНА -->
+  <div id="modal-bg" class="modal-overlay">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <div class="modal-title">🖼 Фон сайта</div>
+        <button class="modal-close" data-modal="modal-bg">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-hint">
+          Вставь ссылку на картинку, GIF или MP4 видео
+        </div>
+        <div class="form-row">
+          <label>URL фона</label>
+          <input id="bg-url" type="url" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>Прозрачность (0.05 — 0.5)</label>
+          <input id="bg-opacity" type="number" placeholder="0.15" min="0.05" max="0.5" step="0.05">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-bg-clear" class="btn-danger">Убрать фон</button>
+        <button class="btn-secondary" data-modal="modal-bg">Отмена</button>
+        <button id="btn-bg-save" class="btn-primary">Применить</button>
+      </div>
+    </div>
+  </div>
+    
+</div>
+<!-- TOAST -->
+  <div id="toast"></div>
+    <!-- FIREBASE SDK -->
+ 
+ <script type="module" src="index.js?v=14"></script>
+ 
+</body>
+      </html>
